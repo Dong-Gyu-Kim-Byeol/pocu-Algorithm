@@ -129,34 +129,13 @@ public final class LinkedList {
     }
 
     public static Node reverse(final Node rootOrNull) {
-        if (rootOrNull == null) {
-            return null;
-        }
-
+        Node newRoot = null;
         Node oldNode = rootOrNull;
-        int lastIndex = -1;
         while (oldNode != null) {
-            ++lastIndex;
-            oldNode = oldNode.getNextOrNull();
-        }
-
-        Node[] oldNodes = new Node[lastIndex + 1];
-        int index = -1;
-        oldNode = rootOrNull;
-        while (oldNode != null) {
-            ++index;
-            oldNodes[index] = oldNode;
+            LinkedList.prepend(newRoot, oldNode.getData());
 
             oldNode = oldNode.getNextOrNull();
         }
-
-        Node newRoot = oldNodes[lastIndex--];
-        Node node = newRoot;
-        for (; lastIndex >= 0; lastIndex--) {
-            node.setNext(oldNodes[lastIndex]);
-            node = node.getNextOrNull();
-        }
-        node.setNext(null);
 
         return newRoot;
     }

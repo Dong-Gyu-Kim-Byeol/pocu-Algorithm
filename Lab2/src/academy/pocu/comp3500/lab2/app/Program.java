@@ -208,7 +208,7 @@ public class Program {
         }
 
         {
-            Stack stack  = new Stack();
+            Stack stack = new Stack();
 
             stack.push(20);
             stack.push(21);
