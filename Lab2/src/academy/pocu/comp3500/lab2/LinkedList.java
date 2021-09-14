@@ -32,6 +32,10 @@ public final class LinkedList {
     }
 
     public static Node insertAt(final Node rootOrNull, final int index, final int data) {
+        if (index < 0) {
+            return rootOrNull;
+        }
+
         if (rootOrNull == null) {
             return new Node(data);
         }
@@ -148,15 +152,28 @@ public final class LinkedList {
     }
 
     public static Node interleaveOrNull(final Node root0OrNull, final Node root1OrNull) {
-        if (root0OrNull == null) {
+        if (root0OrNull == null && root1OrNull == null) {
             return null;
         }
 
-        final Node newRoot = root0OrNull;
+        Node newRoot;
+        Node node0;
+        Node node1;
+
+        if (root0OrNull == null) {
+            newRoot = root1OrNull;
+
+            node0 = root0OrNull;
+            node1 = root1OrNull.getNextOrNull();
+        } else {
+            newRoot = root0OrNull;
+
+            node0 = root0OrNull.getNextOrNull();
+            node1 = root1OrNull;
+        }
 
         Node newLastNode = newRoot;
-        Node node0 = root0OrNull.getNextOrNull();
-        Node node1 = root1OrNull;
+
         while (node0 != null || node1 != null) {
 
             if (node1 != null) {
