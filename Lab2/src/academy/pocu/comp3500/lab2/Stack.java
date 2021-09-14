@@ -4,31 +4,30 @@ import academy.pocu.comp3500.lab2.datastructure.Node;
 
 public final class Stack {
     private Node root;
-    private int topIndex;
+    private int size;
 
     public Stack() {
-        topIndex = -1;
     }
 
     public void push(final int data) {
-        root = LinkedList.append(root, data);
-        ++topIndex;
+        root = LinkedList.prepend(root, data);
+        size++;
     }
 
     public int peek() {
-        Node lastNode = LinkedList.getOrNull(root, topIndex);
+        Node lastNode = LinkedList.getOrNull(root, 0);
         return lastNode.getData();
     }
 
     public int pop() {
-        Node popNode = LinkedList.getOrNull(root, topIndex);
-        LinkedList.removeAt(root, topIndex);
-        --topIndex;
+        Node popNode = LinkedList.getOrNull(root, 0);
+        LinkedList.removeAt(root, 0);
+        size--;
 
         return popNode.getData();
     }
 
     public int getSize() {
-        return topIndex + 1;
+        return size;
     }
 }

@@ -129,24 +129,34 @@ public final class LinkedList {
     }
 
     public static Node reverse(final Node rootOrNull) {
-        Node node = rootOrNull;
+        if (rootOrNull == null) {
+            return null;
+        }
+
+        Node oldNode = rootOrNull;
         int lastIndex = -1;
-        while (node != null) {
+        while (oldNode != null) {
             ++lastIndex;
-            node = node.getNextOrNull();
+            oldNode = oldNode.getNextOrNull();
         }
 
-        final Node newRoot = getOrNull(rootOrNull, lastIndex);
-        node = newRoot;
-        --lastIndex;
-        while (lastIndex >= 0) {
-            Node newLastNode = getOrNull(rootOrNull, lastIndex);
-            newLastNode.setNext(null);
-            node.setNext(newLastNode);
+        Node[] oldNodes = new Node[lastIndex + 1];
+        int index = -1;
+        oldNode = rootOrNull;
+        while (oldNode != null) {
+            ++index;
+            oldNodes[index] = oldNode;
 
-            --lastIndex;
+            oldNode = oldNode.getNextOrNull();
+        }
+
+        Node newRoot = oldNodes[lastIndex--];
+        Node node = newRoot;
+        for (; lastIndex >= 0; lastIndex--) {
+            node.setNext(oldNodes[lastIndex]);
             node = node.getNextOrNull();
         }
+        node.setNext(null);
 
         return newRoot;
     }
