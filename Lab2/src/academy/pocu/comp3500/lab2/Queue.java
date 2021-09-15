@@ -12,17 +12,15 @@ public final class Queue {
     }
 
     public void enqueue(final int data) {
-        Node newNode = new Node(data);
-
         if (front == null) {
-            front = newNode;
+            front = new Node(data);
             back = front;
         } else if (front == back) {
-            back.setNext(newNode);
+            back.setNext(new Node(data));
             back = back.getNextOrNull();
         } else {
             preBack = back;
-            back.setNext(newNode);
+            back.setNext(new Node(data));
             back = back.getNextOrNull();
         }
 
