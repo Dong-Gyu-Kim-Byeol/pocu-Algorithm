@@ -21,10 +21,6 @@ public final class LinkedList {
     }
 
     public static Node prepend(final Node rootOrNull, final int data) {
-        if (rootOrNull == null) {
-            return new Node(data);
-        }
-
         Node preNode = new Node(data);
         preNode.setNext(rootOrNull);
 
@@ -34,10 +30,6 @@ public final class LinkedList {
     public static Node insertAt(final Node rootOrNull, final int index, final int data) {
         if (index < 0) {
             return rootOrNull;
-        }
-
-        if (rootOrNull == null) {
-            return new Node(data);
         }
 
         if (index == 0) {
@@ -129,12 +121,21 @@ public final class LinkedList {
     }
 
     public static Node reverse(final Node rootOrNull) {
-        Node newRoot = null;
-        Node oldNode = rootOrNull;
-        while (oldNode != null) {
-            LinkedList.prepend(newRoot, oldNode.getData());
+        if (rootOrNull == null) {
+            return null;
+        }
 
+        Node newRoot = rootOrNull;
+        Node oldNode = rootOrNull.getNextOrNull();
+
+        newRoot.setNext(null);
+
+        while (oldNode != null) {
+            Node newNode = oldNode;
             oldNode = oldNode.getNextOrNull();
+
+            newNode.setNext(newRoot);
+            newRoot = newNode;
         }
 
         return newRoot;
