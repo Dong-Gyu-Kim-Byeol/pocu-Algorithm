@@ -7,7 +7,8 @@ public final class Player {
     private int passesPerGame;
     private int shootingPercentage;
 
-    public Player() { }
+    public Player() {
+    }
 
     public Player(final String name,
                   final int pointsPerGame,
