@@ -137,16 +137,116 @@ public class PocuBasketballAssociation {
     }
 
     public static long find3ManDreamTeam(final Player[] players, final Player[] outPlayers, final Player[] scratch) {
-        return -1;
+        assert (players.length >= 3);
+        assert (outPlayers.length == 3);
+
+        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
+        final int maxAssistsPerGame = players[2].getAssistsPerGame();
+
+        quickSortPlayerTeamwork(players, maxAssistsPerGame, true);
+
+        for (int i = 0; i < 3; ++i) {
+            outPlayers[i] = players[i];
+        }
+
+        return calculateTeamwork(outPlayers);
     }
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
-        return -1;
+        assert (players.length >= k);
+        assert (outPlayers.length >= k);
+
+        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
+        final int maxAssistsPerGame = players[k - 1].getAssistsPerGame();
+
+        quickSortPlayerTeamwork(players, maxAssistsPerGame, true);
+
+        for (int i = 0; i < k; ++i) {
+            outPlayers[i] = players[i];
+        }
+
+        final long teamwork = calculateTeamwork(outPlayers);
+        return teamwork;
     }
 
     public static int findDreamTeamSize(final Player[] players, final Player[] scratch) {
-        return -1;
+        long maxTeamwork = -1;
+        int maxTeamworkTeamSize = -1;
+
+        for (int i = 1; i < players.length; ++i) {
+            final long teamwork = findDreamTeam(players, i, scratch, players);
+            if (maxTeamwork < teamwork) {
+                maxTeamwork = teamwork;
+                maxTeamworkTeamSize = i;
+            }
+        }
+
+        return maxTeamworkTeamSize;
     }
 
+    private static long calculateTeamwork(final Player... players) {
+        // 팀워크 = [팀에 속한 모든 선수의 경기당 패스수를 합한 결과] * [팀에 속한 각 선수의 경기당 어시스트수 중 최솟값]
 
+        long sumPassesPerGame = 0;
+        long minAssistsPerGame = Long.MAX_VALUE;
+
+        for (final Player player : players) {
+            if (player == null) {
+                continue;
+            }
+            sumPassesPerGame += player.getPassesPerGame();
+            minAssistsPerGame = Math.min(minAssistsPerGame, player.getAssistsPerGame());
+        }
+
+        return sumPassesPerGame * minAssistsPerGame;
+    }
+
+    public static void quickSortPlayerTeamwork(final Player[] players, final int maxAssistsPerGame, final boolean isDescending) {
+        quickSortPlayerTeamworkRecursive(players, maxAssistsPerGame, isDescending, 0, players.length - 1);
+    }
+
+    private static void swap(final Player[] players, final int p1, final int p2) {
+        final Player temp = players[p1];
+        players[p1] = players[p2];
+        players[p2] = temp;
+    }
+
+    private static void quickSortPlayerTeamworkRecursive(final Player[] players, final int maxAssistsPerGame, final boolean isDescending, final int left, final int right) {
+        if (left >= right) {
+            return;
+        }
+
+        final int pivotPos = partitionPlayerTeamwork(players, maxAssistsPerGame, isDescending, left, right);
+
+        quickSortPlayerTeamworkRecursive(players, maxAssistsPerGame, isDescending, left, pivotPos - 1);
+        quickSortPlayerTeamworkRecursive(players, maxAssistsPerGame, isDescending, pivotPos + 1, right);
+    }
+
+    private static int partitionPlayerTeamwork(final Player[] players, final int maxAssistsPerGame, final boolean isDescending, final int left, final int right) {
+        assert (left < right);
+
+        int pivot = right;
+        final int pivotMaxTeamwork = players[pivot].getPassesPerGame() * Math.min(players[pivot].getAssistsPerGame(), maxAssistsPerGame);
+
+        int pointer = left - 1;
+        for (int i = left; i < right; ++i) {
+            final int p1MaxTeamwork = players[i].getPassesPerGame() * Math.min(players[i].getAssistsPerGame(), maxAssistsPerGame);
+            if (isDescending) {
+                if (p1MaxTeamwork > pivotMaxTeamwork) {
+                    ++pointer;
+                    swap(players, pointer, i);
+                }
+            } else {
+                if (p1MaxTeamwork < pivotMaxTeamwork) {
+                    ++pointer;
+                    swap(players, pointer, i);
+                }
+            }
+        }
+
+        pivot = pointer + 1;
+        swap(players, pivot, right);
+
+        return pivot;
+    }
 }
