@@ -137,31 +137,24 @@ public class PocuBasketballAssociation {
     }
 
     public static long find3ManDreamTeam(final Player[] players, final Player[] outPlayers, final Player[] scratch) {
-        assert (players.length >= 3);
-        assert (outPlayers.length == 3);
+        final int TEAM_SIZE = 3;
+        assert (players.length >= TEAM_SIZE);
+        assert (outPlayers.length == TEAM_SIZE);
 
-        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
-        final int maxAssistsPerGame = players[2].getAssistsPerGame();
-
-        quickSortPlayerTeamwork(players, maxAssistsPerGame, true);
-
-        for (int i = 0; i < 3; ++i) {
-            outPlayers[i] = players[i];
-        }
-
-        return calculateTeamwork(outPlayers);
+        return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
-        assert (players.length >= k);
-        assert (outPlayers.length >= k);
+        final int teamSize = k;
+        assert (players.length >= teamSize);
+        assert (outPlayers.length >= teamSize);
 
         Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
-        final int maxAssistsPerGame = players[k - 1].getAssistsPerGame();
+        final int maxAssistsPerGame = players[teamSize - 1].getAssistsPerGame();
 
         quickSortPlayerTeamwork(players, maxAssistsPerGame, true);
 
-        for (int i = 0; i < k; ++i) {
+        for (int i = 0; i < teamSize; ++i) {
             outPlayers[i] = players[i];
         }
 
