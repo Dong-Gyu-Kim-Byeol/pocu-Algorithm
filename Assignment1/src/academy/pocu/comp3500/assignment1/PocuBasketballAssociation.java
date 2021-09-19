@@ -151,7 +151,7 @@ public class PocuBasketballAssociation {
 
         Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame));
 //        Sort.quickSort(players, Comparator.comparing(Player::getPassesPerGame));
-//        quickSortPlayerTeamwork(players, false);
+//        quickSortPlayerTeamwork(players, false);aaa
 
         int playerIndex = players.length - 1;
         for (int i = 0; i < teamSize; ++i) {
