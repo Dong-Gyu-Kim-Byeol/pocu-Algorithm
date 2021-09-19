@@ -160,21 +160,17 @@ public class PocuBasketballAssociation {
             long maxTempTeamwork = 0;
             int maxTempTeamworkChangeIndex = -1;
 
-            for (int outPlayerChangeIndex = 0; outPlayerChangeIndex < teamSize; ++outPlayerChangeIndex) {
+            for (int scratchChangeIndex = 0; scratchChangeIndex < teamSize; ++scratchChangeIndex) {
+                final Player changedPlayer = outPlayers[scratchChangeIndex];
+                outPlayers[scratchChangeIndex] = players[playerIndex];
 
-                for (int scratchIndex = 0; scratchIndex < teamSize; ++scratchIndex) {
-                    if (outPlayerChangeIndex == scratchIndex) {
-                        scratch[scratchIndex] = players[playerIndex];
-                    } else {
-                        scratch[scratchIndex] = outPlayers[scratchIndex];
-                    }
-                }
-
-                long tempTeamwork = calculateTeamwork(scratch);
+                long tempTeamwork = calculateTeamwork(outPlayers);
                 if (maxTempTeamwork < tempTeamwork) {
                     maxTempTeamwork = tempTeamwork;
-                    maxTempTeamworkChangeIndex = outPlayerChangeIndex;
+                    maxTempTeamworkChangeIndex = scratchChangeIndex;
                 }
+
+                outPlayers[scratchChangeIndex] = changedPlayer;
             }
 
             if (dreamTeamTeamwork < maxTempTeamwork) {
@@ -190,10 +186,8 @@ public class PocuBasketballAssociation {
         long maxTeamwork = -1;
         int maxTeamworkTeamSize = -1;
 
-        final Player[] outPlayers = new Player[players.length];
-
         for (int i = 1; i < players.length; ++i) {
-            final long teamwork = findDreamTeam(players, i, outPlayers, scratch);
+            final long teamwork = findDreamTeam(players, i, scratch, scratch);
 
             if (maxTeamwork < teamwork) {
                 maxTeamwork = teamwork;

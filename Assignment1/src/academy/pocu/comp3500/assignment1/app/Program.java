@@ -116,17 +116,17 @@ players: [
         }
 
         Player[] players = new Player[] {
-                new Player("Player 1", 2, 5, 10, 78),
-                new Player("Player 2", 10, 4, 5, 66),
-                new Player("Player 3", 3, 3, 2, 22),
-                new Player("Player 4", 1, 9, 8, 12),
-                new Player("Player 5", 11, 1, 12, 26),
-                new Player("Player 6", 7, 2, 10, 15),
-                new Player("Player 7", 8, 15, 3, 11),
-                new Player("Player 8", 5, 7, 13, 5),
-                new Player("Player 9", 8, 2, 7, 67),
-                new Player("Player 10", 1, 11, 1, 29),
-                new Player("Player 11", 2, 6, 9, 88)
+                new Player("Player 1", 2, 5, 10, 78), // 50
+                new Player("Player 2", 10, 4, 5, 66), // 20
+                new Player("Player 3", 3, 3, 2, 22), // 6
+                new Player("Player 4", 1, 9, 8, 12), // 72
+                new Player("Player 5", 11, 1, 12, 26), // 12
+                new Player("Player 6", 7, 2, 10, 15), // 20
+                new Player("Player 7", 8, 15, 3, 11), // 45
+                new Player("Player 8", 5, 7, 13, 5), // 91
+                new Player("Player 9", 8, 2, 7, 67), // 14
+                new Player("Player 10", 1, 11, 1, 29), // 11
+                new Player("Player 11", 2, 6, 9, 88) // 54
         };
 
         Player[] scratch = new Player[players.length];
