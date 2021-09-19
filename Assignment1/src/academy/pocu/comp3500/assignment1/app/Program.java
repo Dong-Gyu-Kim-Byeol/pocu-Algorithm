@@ -81,13 +81,13 @@ players: [
 
         {
             Player[] players = new Player[]{
-                    new Player("Player 2", 5, 12, 14, 50),
-                    new Player("Player 6", 15, 2, 5, 40),
-                    new Player("Player 5", 11, 1, 11, 54),
-                    new Player("Player 4", 10, 3, 51, 88),
-                    new Player("Player 7", 16, 8, 5, 77),
-                    new Player("Player 1", 1, 15, 2, 22),
-                    new Player("Player 3", 7, 5, 8, 66)
+                    new Player("Player 2", 5, 12, 14, 50), // 168
+                    new Player("Player 6", 15, 2, 5, 40), // 10
+                    new Player("Player 5", 11, 1, 11, 54), // 11
+                    new Player("Player 4", 10, 3, 51, 88), // 153
+                    new Player("Player 7", 16, 8, 5, 77), // 40
+                    new Player("Player 1", 1, 15, 2, 22), // 30
+                    new Player("Player 3", 7, 5, 8, 66) // 40
             };
 
             Player[] outPlayers = new Player[3];

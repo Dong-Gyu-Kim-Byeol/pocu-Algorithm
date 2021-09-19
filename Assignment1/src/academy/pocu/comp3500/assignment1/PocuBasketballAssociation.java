@@ -149,25 +149,52 @@ public class PocuBasketballAssociation {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
-        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
-        final int maxAssistsPerGame = players[teamSize - 1].getAssistsPerGame();
-
-        quickSortPlayerTeamwork(players, maxAssistsPerGame, true);
-
+        quickSortPlayerTeamwork(players, true);
         for (int i = 0; i < teamSize; ++i) {
             outPlayers[i] = players[i];
         }
 
-        final long teamwork = calculateTeamwork(outPlayers);
-        return teamwork;
+        long dreamTeamTeamwork = calculateTeamwork(outPlayers);
+
+        for (int playerIndex = teamSize; playerIndex < players.length; ++playerIndex) {
+            long maxTempTeamwork = 0;
+            int maxTempTeamworkChangeIndex = -1;
+
+            for (int outPlayerChangeIndex = 0; outPlayerChangeIndex < teamSize; ++outPlayerChangeIndex) {
+
+                for (int scratchIndex = 0; scratchIndex < teamSize; ++scratchIndex) {
+                    if (outPlayerChangeIndex == scratchIndex) {
+                        scratch[scratchIndex] = players[playerIndex];
+                    } else {
+                        scratch[scratchIndex] = outPlayers[scratchIndex];
+                    }
+                }
+
+                long tempTeamwork = calculateTeamwork(scratch);
+                if (maxTempTeamwork < tempTeamwork) {
+                    maxTempTeamwork = tempTeamwork;
+                    maxTempTeamworkChangeIndex = outPlayerChangeIndex;
+                }
+            }
+
+            if (dreamTeamTeamwork < maxTempTeamwork) {
+                dreamTeamTeamwork = maxTempTeamwork;
+                outPlayers[maxTempTeamworkChangeIndex] = players[playerIndex];
+            }
+        }
+
+        return dreamTeamTeamwork;
     }
 
     public static int findDreamTeamSize(final Player[] players, final Player[] scratch) {
         long maxTeamwork = -1;
         int maxTeamworkTeamSize = -1;
 
+        final Player[] outPlayers = new Player[players.length];
+
         for (int i = 1; i < players.length; ++i) {
-            final long teamwork = findDreamTeam(players, i, scratch, players);
+            final long teamwork = findDreamTeam(players, i, outPlayers, scratch);
+
             if (maxTeamwork < teamwork) {
                 maxTeamwork = teamwork;
                 maxTeamworkTeamSize = i;
@@ -194,8 +221,8 @@ public class PocuBasketballAssociation {
         return sumPassesPerGame * minAssistsPerGame;
     }
 
-    public static void quickSortPlayerTeamwork(final Player[] players, final int maxAssistsPerGame, final boolean isDescending) {
-        quickSortPlayerTeamworkRecursive(players, maxAssistsPerGame, isDescending, 0, players.length - 1);
+    public static void quickSortPlayerTeamwork(final Player[] players, final boolean isDescending) {
+        quickSortPlayerTeamworkRecursive(players, isDescending, 0, players.length - 1);
     }
 
     private static void swap(final Player[] players, final int p1, final int p2) {
@@ -204,26 +231,26 @@ public class PocuBasketballAssociation {
         players[p2] = temp;
     }
 
-    private static void quickSortPlayerTeamworkRecursive(final Player[] players, final int maxAssistsPerGame, final boolean isDescending, final int left, final int right) {
+    private static void quickSortPlayerTeamworkRecursive(final Player[] players, final boolean isDescending, final int left, final int right) {
         if (left >= right) {
             return;
         }
 
-        final int pivotPos = partitionPlayerTeamwork(players, maxAssistsPerGame, isDescending, left, right);
+        final int pivotPos = partitionPlayerTeamwork(players, isDescending, left, right);
 
-        quickSortPlayerTeamworkRecursive(players, maxAssistsPerGame, isDescending, left, pivotPos - 1);
-        quickSortPlayerTeamworkRecursive(players, maxAssistsPerGame, isDescending, pivotPos + 1, right);
+        quickSortPlayerTeamworkRecursive(players, isDescending, left, pivotPos - 1);
+        quickSortPlayerTeamworkRecursive(players, isDescending, pivotPos + 1, right);
     }
 
-    private static int partitionPlayerTeamwork(final Player[] players, final int maxAssistsPerGame, final boolean isDescending, final int left, final int right) {
+    private static int partitionPlayerTeamwork(final Player[] players, final boolean isDescending, final int left, final int right) {
         assert (left < right);
 
         int pivot = right;
-        final int pivotMaxTeamwork = players[pivot].getPassesPerGame() * Math.min(players[pivot].getAssistsPerGame(), maxAssistsPerGame);
+        final int pivotMaxTeamwork = players[pivot].getPassesPerGame() * players[pivot].getAssistsPerGame();
 
         int pointer = left - 1;
         for (int i = left; i < right; ++i) {
-            final int p1MaxTeamwork = players[i].getPassesPerGame() * Math.min(players[i].getAssistsPerGame(), maxAssistsPerGame);
+            final int p1MaxTeamwork = players[i].getPassesPerGame() * players[i].getAssistsPerGame();
             if (isDescending) {
                 if (p1MaxTeamwork > pivotMaxTeamwork) {
                     ++pointer;
