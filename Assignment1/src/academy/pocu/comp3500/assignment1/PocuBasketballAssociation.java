@@ -141,6 +141,40 @@ public class PocuBasketballAssociation {
         assert (players.length >= TEAM_SIZE);
         assert (outPlayers.length == TEAM_SIZE);
 
+//        quickSortPlayerTeamwork(players, false);
+//
+//        int playerIndex = players.length - 1;
+//        for (int i = 0; i < TEAM_SIZE; ++i) {
+//            outPlayers[i] = players[playerIndex];
+//            --playerIndex;
+//        }
+//
+//        long dreamTeamTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
+//        for (playerIndex = 0; playerIndex < players.length - TEAM_SIZE; ++playerIndex) {
+//            long maxTempTeamwork = 0;
+//            int maxTempTeamworkChangeIndex = -1;
+//
+//            for (int scratchChangeIndex = 0; scratchChangeIndex < TEAM_SIZE; ++scratchChangeIndex) {
+//                final Player changedPlayer = outPlayers[scratchChangeIndex];
+//                outPlayers[scratchChangeIndex] = players[playerIndex];
+//
+//                long tempTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
+//                if (maxTempTeamwork < tempTeamwork) {
+//                    maxTempTeamwork = tempTeamwork;
+//                    maxTempTeamworkChangeIndex = scratchChangeIndex;
+//                }
+//
+//                outPlayers[scratchChangeIndex] = changedPlayer;
+//            }
+//
+//            if (dreamTeamTeamwork < maxTempTeamwork) {
+//                dreamTeamTeamwork = maxTempTeamwork;
+//                outPlayers[maxTempTeamworkChangeIndex] = players[playerIndex];
+//            }
+//        }
+//
+//        return dreamTeamTeamwork;
+
         return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
 
@@ -150,34 +184,78 @@ public class PocuBasketballAssociation {
         assert (outPlayers.length >= teamSize);
 
         quickSortPlayerTeamwork(players, false);
+//        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame));
+
+        long sumPassesPerGame = 0;
 
         int playerIndex = players.length - 1;
         for (int i = 0; i < teamSize; ++i) {
             outPlayers[i] = players[playerIndex];
+            sumPassesPerGame += outPlayers[i].getPassesPerGame();
+
             --playerIndex;
         }
+        Sort.quickSortRecursive(outPlayers, Comparator.comparing(Player::getAssistsPerGame), 0, teamSize - 1);
 
-        long dreamTeamTeamwork = calculateTeamwork(outPlayers);
-        for (playerIndex = 0; playerIndex < players.length - teamSize; ++playerIndex) {
+        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame));
+
+        long dreamTeamTeamwork = sumPassesPerGame * outPlayers[0].getAssistsPerGame();
+
+        hasPlayer:
+        for (playerIndex = 0; playerIndex < players.length; ++playerIndex) {
+
+            for (int i = 0; i < teamSize; ++i) {
+                if (outPlayers[0].getAssistsPerGame() > players[playerIndex].getAssistsPerGame()) {
+                    continue hasPlayer;
+                }
+
+                if (outPlayers[i].getName().equals(players[playerIndex].getName())) {
+                    continue hasPlayer;
+                }
+            }
+
+
             long maxTempTeamwork = 0;
             int maxTempTeamworkChangeIndex = -1;
 
-            for (int scratchChangeIndex = 0; scratchChangeIndex < teamSize; ++scratchChangeIndex) {
-                final Player changedPlayer = outPlayers[scratchChangeIndex];
-                outPlayers[scratchChangeIndex] = players[playerIndex];
+            for (int changeIndex = 0; changeIndex < teamSize; ++changeIndex) {
 
-                long tempTeamwork = calculateTeamwork(outPlayers);
-                if (maxTempTeamwork < tempTeamwork) {
-                    maxTempTeamwork = tempTeamwork;
-                    maxTempTeamworkChangeIndex = scratchChangeIndex;
+                long tempSumPassesPerGame = sumPassesPerGame;
+
+                long tempMinAssistsPerGame;
+                if (teamSize == 1) {
+                    tempMinAssistsPerGame = players[playerIndex].getAssistsPerGame();
+                } else {
+                    if (changeIndex == 0) {
+                        tempMinAssistsPerGame = Math.min(outPlayers[1].getAssistsPerGame(), players[playerIndex].getAssistsPerGame());
+                    } else {
+                        tempMinAssistsPerGame = Math.min(outPlayers[0].getAssistsPerGame(), players[playerIndex].getAssistsPerGame());
+                    }
                 }
 
-                outPlayers[scratchChangeIndex] = changedPlayer;
+                final Player changedPlayer = outPlayers[changeIndex];
+                tempSumPassesPerGame -= changedPlayer.getPassesPerGame();
+
+                outPlayers[changeIndex] = players[playerIndex];
+                tempSumPassesPerGame += players[playerIndex].getPassesPerGame();
+
+                long tempTeamwork = tempSumPassesPerGame * tempMinAssistsPerGame;
+                if (maxTempTeamwork < tempTeamwork) {
+                    maxTempTeamwork = tempTeamwork;
+                    maxTempTeamworkChangeIndex = changeIndex;
+                }
+
+                outPlayers[changeIndex] = changedPlayer;
             }
 
             if (dreamTeamTeamwork < maxTempTeamwork) {
                 dreamTeamTeamwork = maxTempTeamwork;
+
+                sumPassesPerGame -= outPlayers[maxTempTeamworkChangeIndex].getPassesPerGame();
                 outPlayers[maxTempTeamworkChangeIndex] = players[playerIndex];
+                sumPassesPerGame += players[playerIndex].getPassesPerGame();
+
+                Sort.quickSortRecursive(outPlayers, Comparator.comparing(Player::getAssistsPerGame), 0, teamSize - 1);
             }
         }
 
@@ -200,18 +278,15 @@ public class PocuBasketballAssociation {
         return maxTeamworkTeamSize;
     }
 
-    private static long calculateTeamwork(final Player... players) {
+    private static long calculateTeamwork(final int size, final Player... players) {
         // 팀워크 = [팀에 속한 모든 선수의 경기당 패스수를 합한 결과] * [팀에 속한 각 선수의 경기당 어시스트수 중 최솟값]
 
         long sumPassesPerGame = 0;
         long minAssistsPerGame = Long.MAX_VALUE;
 
-        for (final Player player : players) {
-            if (player == null) {
-                continue;
-            }
-            sumPassesPerGame += player.getPassesPerGame();
-            minAssistsPerGame = Math.min(minAssistsPerGame, player.getAssistsPerGame());
+        for (int i = 0; i < size; ++i) {
+            sumPassesPerGame += players[i].getPassesPerGame();
+            minAssistsPerGame = Math.min(minAssistsPerGame, players[i].getAssistsPerGame());
         }
 
         return sumPassesPerGame * minAssistsPerGame;

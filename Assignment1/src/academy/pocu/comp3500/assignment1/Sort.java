@@ -19,8 +19,8 @@ public class Sort {
         }
     }
 
-    public static <T> void quickSort(final T[] objects, final Comparator<T> getter) {
-        quickSortRecursive(objects, getter, 0, objects.length - 1);
+    public static <T> void quickSort(final T[] objects, final Comparator<T> comparator) {
+        quickSortRecursive(objects, comparator, 0, objects.length - 1);
     }
 
     private static <T> void swap(final T[] objects, final int o1, final int o2) {
@@ -29,25 +29,25 @@ public class Sort {
         objects[o2] = temp;
     }
 
-    private static <T> void quickSortRecursive(final T[] objects, final Comparator<T> getter, final int left, final int right) {
+    public static <T> void quickSortRecursive(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
         if (left >= right) {
             return;
         }
 
-        final int pivotPos = partition(objects, getter, left, right);
+        final int pivotPos = partition(objects, comparator, left, right);
 
-        quickSortRecursive(objects, getter, left, pivotPos - 1);
-        quickSortRecursive(objects, getter, pivotPos + 1, right);
+        quickSortRecursive(objects, comparator, left, pivotPos - 1);
+        quickSortRecursive(objects, comparator, pivotPos + 1, right);
     }
 
-    private static <T> int partition(final T[] objects, final Comparator<T> getter, final int left, final int right) {
+    private static <T> int partition(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
         assert (left < right);
 
         int pivot = right;
 
         int pointer = left - 1;
         for (int i = left; i < right; ++i) {
-            final int compare = getter.compare(objects[i], objects[pivot]);
+            final int compare = comparator.compare(objects[i], objects[pivot]);
             if (compare < 0) {
                 ++pointer;
                 swap(objects, pointer, i);
