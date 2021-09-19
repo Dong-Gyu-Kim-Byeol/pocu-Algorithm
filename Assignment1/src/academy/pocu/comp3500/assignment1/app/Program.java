@@ -6,6 +6,7 @@ import academy.pocu.comp3500.assignment1.pba.GameStat;
 import academy.pocu.comp3500.assignment1.pba.Player;
 
 import java.util.Comparator;
+import java.util.Random;
 
 public class Program {
 
@@ -115,7 +116,7 @@ players: [
             long maxTeamwork = PocuBasketballAssociation.findDreamTeam(players, k, outPlayers, scratch); // maxTeamwork: 171, outPlayers: [ Player 6, Player 5, Player 2, Player 7 ]
         }
 
-        Player[] players = new Player[] {
+        Player[] players = new Player[]{
                 new Player("Player 1", 2, 5, 10, 78), // 50
                 new Player("Player 2", 10, 4, 5, 66), // 20
                 new Player("Player 3", 3, 3, 2, 22), // 6
@@ -138,7 +139,7 @@ players: [
         testIncludeComment();
 
         {
-            GameStat[] gameStats = new GameStat[] {
+            GameStat[] gameStats = new GameStat[]{
                     new GameStat("Player 1", 1, 13, 5, 6, 10, 1),
                     new GameStat("Player 2", 2, 5, 2, 5, 0, 10),
                     new GameStat("Player 1", 3, 12, 6, 9, 8, 5),
@@ -152,12 +153,14 @@ players: [
                     new GameStat("Player 2", 4, 5, 1, 3, 1, 9),
             };
 
-            Player[] players = new Player[] {
+            Player[] players = new Player[]{
                     new Player(),
                     new Player(),
                     new Player(),
                     new Player()
             };
+
+            shuffleArray(gameStats);
 
             PocuBasketballAssociation.processGameStats(gameStats, players);
 
@@ -191,7 +194,7 @@ players: [
         }
 
         {
-            Player[] players = new Player[] {
+            Player[] players = new Player[]{
                     new Player("Player 1", 1, 5, 1, 60),
                     new Player("Player 2", 5, 2, 11, 31),
                     new Player("Player 3", 7, 4, 7, 44),
@@ -212,7 +215,7 @@ players: [
         }
 
         {
-            Player[] players = new Player[] {
+            Player[] players = new Player[]{
                     new Player("Player 4", 10, 10, 15, 25),
                     new Player("Player 2", 5, 2, 11, 31),
                     new Player("Player 3", 7, 4, 7, 44),
@@ -233,7 +236,7 @@ players: [
         }
 
         {
-            Player[] players = new Player[] {
+            Player[] players = new Player[]{
                     new Player("Player 2", 5, 12, 14, 50),
                     new Player("Player 6", 15, 2, 5, 40),
                     new Player("Player 5", 11, 1, 11, 54),
@@ -242,6 +245,8 @@ players: [
                     new Player("Player 1", 1, 15, 2, 22),
                     new Player("Player 3", 7, 5, 8, 66)
             };
+
+            shuffleArray(players);
 
             Player[] outPlayers = new Player[3];
             Player[] scratch = new Player[3];
@@ -261,7 +266,7 @@ players: [
         }
 
         {
-            Player[] players = new Player[] {
+            Player[] players = new Player[]{
                     new Player("Player 2", 5, 5, 17, 50),
                     new Player("Player 6", 15, 4, 10, 40),
                     new Player("Player 5", 11, 3, 25, 54),
@@ -271,6 +276,8 @@ players: [
                     new Player("Player 9", 42, 15, 4, 56),
                     new Player("Player 8", 33, 11, 3, 72),
             };
+
+            shuffleArray(players);
 
             final int TEAM_SIZE = 4;
 
@@ -295,7 +302,7 @@ players: [
         }
 
         {
-            Player[] players = new Player[] {
+            Player[] players = new Player[]{
                     new Player("Player 1", 2, 5, 10, 78),
                     new Player("Player 2", 10, 4, 5, 66),
                     new Player("Player 3", 3, 3, 2, 22),
@@ -309,11 +316,25 @@ players: [
                     new Player("Player 11", 2, 6, 9, 88)
             };
 
+            shuffleArray(players);
+
             Player[] tempPlayers = new Player[players.length];
 
             int k = PocuBasketballAssociation.findDreamTeamSize(players, tempPlayers);
 
             assert (k == 6);
+        }
+    }
+
+    private static <T> void shuffleArray(T[] array) {
+        int randomIndex;
+        Random random = new Random();
+        for (int i = array.length - 1; i > 0; i--) {
+            randomIndex = random.nextInt(i + 1);
+
+            T temp = array[randomIndex];
+            array[randomIndex] = array[i];
+            array[i] = temp;
         }
     }
 

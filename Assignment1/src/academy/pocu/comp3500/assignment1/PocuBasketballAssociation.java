@@ -149,14 +149,16 @@ public class PocuBasketballAssociation {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
-        quickSortPlayerTeamwork(players, true);
+        Sort.quickSort(players, Comparator.comparing(Player::getPassesPerGame).reversed());
         for (int i = 0; i < teamSize; ++i) {
             outPlayers[i] = players[i];
         }
 
+        Sort.quickSort(players, Comparator.comparing(Player::getPassesPerGame));
+
         long dreamTeamTeamwork = calculateTeamwork(outPlayers);
 
-        for (int playerIndex = teamSize; playerIndex < players.length; ++playerIndex) {
+        for (int playerIndex = 0; playerIndex < players.length - teamSize; ++playerIndex) {
             long maxTempTeamwork = 0;
             int maxTempTeamworkChangeIndex = -1;
 
