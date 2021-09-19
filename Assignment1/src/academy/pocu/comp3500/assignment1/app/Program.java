@@ -160,8 +160,6 @@ players: [
                     new Player()
             };
 
-            shuffleArray(gameStats);
-
             PocuBasketballAssociation.processGameStats(gameStats, players);
 
             Player player = getPlayerOrNull(players, "Player 1");
@@ -246,8 +244,6 @@ players: [
                     new Player("Player 3", 7, 5, 8, 66)
             };
 
-            shuffleArray(players);
-
             Player[] outPlayers = new Player[3];
             Player[] scratch = new Player[3];
 
@@ -276,8 +272,6 @@ players: [
                     new Player("Player 9", 42, 15, 4, 56),
                     new Player("Player 8", 33, 11, 3, 72),
             };
-
-            shuffleArray(players);
 
             final int TEAM_SIZE = 4;
 
@@ -316,8 +310,6 @@ players: [
                     new Player("Player 11", 2, 6, 9, 88)
             };
 
-            shuffleArray(players);
-
             Player[] tempPlayers = new Player[players.length];
 
             int k = PocuBasketballAssociation.findDreamTeamSize(players, tempPlayers);
@@ -326,7 +318,7 @@ players: [
         }
     }
 
-    private static <T> void shuffleArray(T[] array) {
+    private static <T> void shuffle(T[] array) {
         int randomIndex;
         Random random = new Random();
         for (int i = array.length - 1; i > 0; i--) {
