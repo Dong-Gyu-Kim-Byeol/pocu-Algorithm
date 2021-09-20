@@ -23,6 +23,7 @@ public final class MissionControl {
             return -1;
         }
 
+
         if (mid == 0 && altitudes[mid] < altitudes[mid + 1]) {
             return findMaxAltitudeTimeRecursive(altitudes, mid + 1, right);
         } else if (mid == 0 && altitudes[mid] > altitudes[mid + 1]) {
@@ -34,6 +35,7 @@ public final class MissionControl {
         } else if (mid == altitudes.length - 1 && altitudes[mid - 1] > altitudes[mid]) {
             return findMaxAltitudeTimeRecursive(altitudes, left, mid - 1);
         }
+
 
         if (altitudes[mid - 1] < altitudes[mid] && altitudes[mid] > altitudes[mid + 1]) {
             return mid;
