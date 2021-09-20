@@ -141,29 +141,31 @@ public class PocuBasketballAssociation {
         assert (players.length >= TEAM_SIZE);
         assert (outPlayers.length == TEAM_SIZE);
 
-        long dreamTeamwork = -1;
+//        long dreamTeamwork = -1;
+//
+//        for (int i = 0; i < players.length; ++i) {
+//            final int minAssistsPerGameIndex = i + TEAM_SIZE - 1;
+//            if (minAssistsPerGameIndex >= players.length) {
+//                break;
+//            }
+//
+//            Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
+//            final int minAssistsPerGame = players[minAssistsPerGameIndex].getAssistsPerGame();
+//
+//            quickSortPlayerTeamwork(players, minAssistsPerGame, true);
+//            final long tempTeamwork = calculateTeamwork(TEAM_SIZE, players);
+//
+//            if (dreamTeamwork <= tempTeamwork) {
+//                dreamTeamwork = tempTeamwork;
+//                for (int t = 0; t < TEAM_SIZE; ++t) {
+//                    outPlayers[t] = players[t];
+//                }
+//            }
+//        }
+//
+//        return dreamTeamwork;
 
-        for (int i = 0; i < players.length; ++i) {
-            final int minAssistsPerGameIndex = i + TEAM_SIZE - 1;
-            if (minAssistsPerGameIndex >= players.length) {
-                break;
-            }
-
-            Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
-            final int minAssistsPerGame = players[minAssistsPerGameIndex].getAssistsPerGame();
-
-            quickSortPlayerTeamwork(players, minAssistsPerGame, true);
-            final long tempTeamwork = calculateTeamwork(TEAM_SIZE, players);
-
-            if (dreamTeamwork <= tempTeamwork) {
-                dreamTeamwork = tempTeamwork;
-                for (int t = 0; t < TEAM_SIZE; ++t) {
-                    outPlayers[t] = players[t];
-                }
-            }
-        }
-
-        return dreamTeamwork;
+        return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
@@ -247,11 +249,11 @@ public class PocuBasketballAssociation {
         assert (left < right);
 
         int pivot = right;
-        final int pivotMaxTeamwork = players[pivot].getPassesPerGame() * Math.min(players[pivot].getAssistsPerGame(), minAssistsPerGame);
+        final int pivotMaxTeamwork = players[pivot].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[pivot]);
 
         int pointer = left - 1;
         for (int i = left; i < right; ++i) {
-            final int p1MaxTeamwork = players[i].getPassesPerGame() * Math.min(players[i].getAssistsPerGame(), minAssistsPerGame);
+            final int p1MaxTeamwork = players[i].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[i]);
             if (isDescending) {
                 if (p1MaxTeamwork > pivotMaxTeamwork) {
                     ++pointer;
@@ -269,5 +271,13 @@ public class PocuBasketballAssociation {
         swap(players, pivot, right);
 
         return pivot;
+    }
+
+    private static int getMinAssistsPerGame(final int minAssistsPerGame, final Player player) {
+        if (player.getAssistsPerGame() < minAssistsPerGame) {
+            return -1;
+        } else {
+            return minAssistsPerGame;
+        }
     }
 }
