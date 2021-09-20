@@ -1,6 +1,7 @@
 package academy.pocu.comp3500.lab3;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public final class MissionControl {
     private MissionControl() {
@@ -55,27 +56,10 @@ public final class MissionControl {
 
         final int maxAltitudeTime = findMaxAltitudeTime(altitudes);
 
-        binarySearchRecursive(targetAltitude, altitudes, false, 0, maxAltitudeTime, outTimes);
-        binarySearchRecursive(targetAltitude, altitudes, true, maxAltitudeTime + 1, altitudes.length - 1, outTimes);
+        Search.binarySearchRecursive(targetAltitude, altitudes, false, 0, maxAltitudeTime, outTimes);
+        Search.binarySearchRecursive(targetAltitude, altitudes, true, maxAltitudeTime + 1, altitudes.length - 1, outTimes);
         return outTimes;
     }
 
-    private static void binarySearchRecursive(final int targetNum, final int[] nums, final boolean isReverse, final int left, final int right, final ArrayList<Integer> outIndexes) {
-        if (left > right) {
-            return;
-        }
 
-        final int mid = (left + right) / 2;
-
-        if (targetNum == nums[mid]) {
-            outIndexes.add(mid);
-            return;
-        }
-
-        if (targetNum < nums[mid] ^ isReverse) {
-            binarySearchRecursive(targetNum, nums, isReverse, left, mid - 1, outIndexes);
-        } else { // nums[mid] < targetNum ^ isReverse
-            binarySearchRecursive(targetNum, nums, isReverse, mid + 1, right, outIndexes);
-        }
-    }
 }
