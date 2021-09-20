@@ -199,7 +199,7 @@ public class PocuBasketballAssociation {
         long maxTeamwork = 0;
         int maxTeamworkTeamSize = 0;
 
-        for (int i = 1; i < players.length; ++i) {
+        for (int i = 1; i <= players.length; ++i) {
             final long teamwork = findDreamTeam(players, i, scratch, scratch);
             if (maxTeamwork < teamwork) {
                 maxTeamwork = teamwork;
