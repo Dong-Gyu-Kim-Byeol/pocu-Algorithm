@@ -123,6 +123,19 @@ public class Program {
         }
 
         {
+            final int[] altitudes = new int[]{1, 2, 3, 5, 6, 7};
+
+            ArrayList<Integer> bounds = MissionControl.findAltitudeTimes(altitudes, 4);
+
+            assert (bounds.size() == 0);
+
+            bounds = MissionControl.findAltitudeTimes(altitudes, 6);
+
+            assert (bounds.size() == 1);
+            assert (bounds.get(0) == 4);
+        }
+
+        {
             final int[] altitudes = new int[]{1, 2, 3, 4, 5, 6, 7, 4, 3, 2};
 
             ArrayList<Integer> bounds = MissionControl.findAltitudeTimes(altitudes, 2);
