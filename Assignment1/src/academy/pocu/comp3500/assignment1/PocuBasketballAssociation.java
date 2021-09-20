@@ -154,17 +154,17 @@ public class PocuBasketballAssociation {
             long maxTempTeamwork = 0;
             int maxTempTeamworkChangeIndex = -1;
 
-            for (int scratchChangeIndex = 0; scratchChangeIndex < TEAM_SIZE; ++scratchChangeIndex) {
-                final Player changedPlayer = outPlayers[scratchChangeIndex];
-                outPlayers[scratchChangeIndex] = players[playerIndex];
+            for (int changeIndex = 0; changeIndex < TEAM_SIZE; ++changeIndex) {
+                final Player changedPlayer = outPlayers[changeIndex];
+                outPlayers[changeIndex] = players[playerIndex];
 
                 long tempTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
                 if (maxTempTeamwork < tempTeamwork) {
                     maxTempTeamwork = tempTeamwork;
-                    maxTempTeamworkChangeIndex = scratchChangeIndex;
+                    maxTempTeamworkChangeIndex = changeIndex;
                 }
 
-                outPlayers[scratchChangeIndex] = changedPlayer;
+                outPlayers[changeIndex] = changedPlayer;
             }
 
             if (dreamTeamTeamwork < maxTempTeamwork) {
