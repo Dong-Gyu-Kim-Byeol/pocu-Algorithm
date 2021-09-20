@@ -133,6 +133,21 @@ public class Program {
 
             assert (bounds.size() == 1);
             assert (bounds.get(0) == 4);
+
+            bounds = MissionControl.findAltitudeTimes(altitudes, 7);
+
+            assert (bounds.size() == 1);
+            assert (bounds.get(0) == 5);
+
+            bounds = MissionControl.findAltitudeTimes(altitudes, 2);
+
+            assert (bounds.size() == 1);
+            assert (bounds.get(0) == 4);
+
+            bounds = MissionControl.findAltitudeTimes(altitudes, 7);
+
+            assert (bounds.size() == 1);
+            assert (bounds.get(0) == 4);
         }
 
         {
