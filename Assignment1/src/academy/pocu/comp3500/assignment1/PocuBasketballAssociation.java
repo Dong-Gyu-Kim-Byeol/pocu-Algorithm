@@ -143,14 +143,19 @@ public class PocuBasketballAssociation {
 
         long dreamTeamwork = -1;
 
-        for (int i = 0; i < TEAM_SIZE; ++i) {
+        for (int i = 0; i < players.length; ++i) {
+            final int minAssistsPerGameIndex = i + TEAM_SIZE - 1;
+            if (minAssistsPerGameIndex >= players.length) {
+                break;
+            }
+
             Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
-            final int minAssistsPerGame = players[i + TEAM_SIZE - 1].getAssistsPerGame();
+            final int minAssistsPerGame = players[minAssistsPerGameIndex].getAssistsPerGame();
 
             quickSortPlayerTeamwork(players, minAssistsPerGame, true);
             final long tempTeamwork = calculateTeamwork(TEAM_SIZE, players);
 
-            if (dreamTeamwork < tempTeamwork) {
+            if (dreamTeamwork <= tempTeamwork) {
                 dreamTeamwork = tempTeamwork;
                 for (int t = 0; t < TEAM_SIZE; ++t) {
                     outPlayers[t] = players[t];
@@ -163,20 +168,29 @@ public class PocuBasketballAssociation {
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
         final int teamSize = k;
-        assert (players.length >= k);
-        assert (outPlayers.length >= k);
+        long dreamTeamwork = -1;
 
-        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
-        final int minAssistsPerGame = players[k - 1].getAssistsPerGame();
+        for (int i = 0; i < players.length; ++i) {
+            final int minAssistsPerGameIndex = i + teamSize - 1;
+            if (minAssistsPerGameIndex >= players.length) {
+                break;
+            }
 
-        quickSortPlayerTeamwork(players, minAssistsPerGame, true);
+            Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
+            final int minAssistsPerGame = players[minAssistsPerGameIndex].getAssistsPerGame();
 
-        for (int i = 0; i < k; ++i) {
-            outPlayers[i] = players[i];
+            quickSortPlayerTeamwork(players, minAssistsPerGame, true);
+            final long tempTeamwork = calculateTeamwork(teamSize, players);
+
+            if (dreamTeamwork <= tempTeamwork) {
+                dreamTeamwork = tempTeamwork;
+                for (int t = 0; t < teamSize; ++t) {
+                    outPlayers[t] = players[t];
+                }
+            }
         }
 
-        final long teamwork = calculateTeamwork(teamSize, outPlayers);
-        return teamwork;
+        return dreamTeamwork;
     }
 
     public static int findDreamTeamSize(final Player[] players, final Player[] scratch) {
