@@ -285,7 +285,7 @@ public class PocuBasketballAssociation {
 
     private static int getMinAssistsPerGame(final int minAssistsPerGame, final Player player) {
         if (player.getAssistsPerGame() < minAssistsPerGame) {
-            return -1;
+            return -100;
         } else {
             return minAssistsPerGame;
         }
