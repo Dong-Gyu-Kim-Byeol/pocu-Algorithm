@@ -14,8 +14,20 @@ public final class MissionControl {
     private static int findMaxAltitudeTimeRecursive(final int[] altitudes, final int left, final int right) {
         final int mid = (left + right) / 2;
 
-        if (mid == 0 || mid == altitudes.length - 1) {
-            return -1;
+        if (altitudes.length == 1) {
+            return 0;
+        }
+
+        if (mid == 0 && altitudes[mid] < altitudes[mid + 1]) {
+            return findMaxAltitudeTimeRecursive(altitudes, mid + 1, right);
+        } else if (mid == 0 && altitudes[mid] > altitudes[mid + 1]) {
+            return mid;
+        }
+
+        if (mid == altitudes.length - 1 && altitudes[mid - 1] < altitudes[mid]) {
+            return mid;
+        } else if (mid == altitudes.length - 1 && altitudes[mid - 1] > altitudes[mid]) {
+            return findMaxAltitudeTimeRecursive(altitudes, left, mid - 1);
         }
 
         if (altitudes[mid - 1] < altitudes[mid] && altitudes[mid] > altitudes[mid + 1]) {
@@ -49,8 +61,40 @@ public final class MissionControl {
             return;
         }
 
-        if (mid == 0 || mid == altitudes.length - 1) {
+        if (altitudes.length == 1) {
             return;
+        }
+
+        if (mid == 0 && altitudes[mid] < altitudes[mid + 1]) {
+            if (targetAltitude < altitudes[mid]) {
+                return;
+            } else { // altitudes[mid] < targetAltitude
+                findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes, false, true);
+                return;
+            }
+        } else if (mid == 0 && altitudes[mid] > altitudes[mid + 1]) {
+            if (targetAltitude > altitudes[mid]) {
+                return;
+            } else { // altitudes[mid] > targetAltitude
+                findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes, false, true);
+                return;
+            }
+        }
+
+        if (mid == altitudes.length - 1 && altitudes[mid - 1] < altitudes[mid]) {
+            if (targetAltitude < altitudes[mid]) {
+                findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes, true, false);
+                return;
+            } else { // altitudes[mid] < targetAltitude
+                return;
+            }
+        } else if (mid == altitudes.length - 1 && altitudes[mid - 1] > altitudes[mid]) {
+            if (targetAltitude > altitudes[mid]) {
+                findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes, true, false);
+                return;
+            } else { // altitudes[mid] > targetAltitude
+                return;
+            }
         }
 
         if (altitudes[mid - 1] < altitudes[mid] && altitudes[mid] > altitudes[mid + 1]) {
@@ -84,7 +128,6 @@ public final class MissionControl {
             }
         }
 
-        assert (false);
         return;
     }
 }
