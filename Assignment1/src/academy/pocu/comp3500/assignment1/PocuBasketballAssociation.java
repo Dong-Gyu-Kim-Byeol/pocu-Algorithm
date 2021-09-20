@@ -141,7 +141,7 @@ public class PocuBasketballAssociation {
         assert (players.length >= TEAM_SIZE);
         assert (outPlayers.length == TEAM_SIZE);
 
-        Comparator comparator = Comparator.comparing((Player p) -> p.getAssistsPerGame() * p.getPassesPerGame());
+        Comparator<Player> comparator = Comparator.comparing((Player p) -> p.getAssistsPerGame() * p.getPassesPerGame());
         Sort.quickSort(players, comparator);
 
         int playerIndex = players.length - 1;
