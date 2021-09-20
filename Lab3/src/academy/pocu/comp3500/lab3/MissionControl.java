@@ -111,17 +111,11 @@ public final class MissionControl {
                 findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
             }
         } else if (altitudes[mid - 1] < altitudes[mid] && altitudes[mid] < altitudes[mid + 1]) {
-            if (targetAltitude < altitudes[mid]) {
-                findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
-            } else {
-                findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
-            }
+            findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
+            findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
         } else if (altitudes[mid - 1] > altitudes[mid] && altitudes[mid] > altitudes[mid + 1]) {
-            if (targetAltitude > altitudes[mid]) {
-                findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
-            } else {
-                findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
-            }
+            findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
+            findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
         }
 
         return;

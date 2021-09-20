@@ -142,12 +142,12 @@ public class Program {
             bounds = MissionControl.findAltitudeTimes(altitudes, 2);
 
             assert (bounds.size() == 1);
-            assert (bounds.get(0) == 4);
+            assert (bounds.get(0) == 1);
 
             bounds = MissionControl.findAltitudeTimes(altitudes, 7);
 
             assert (bounds.size() == 1);
-            assert (bounds.get(0) == 4);
+            assert (bounds.get(0) == 5);
         }
 
         {
