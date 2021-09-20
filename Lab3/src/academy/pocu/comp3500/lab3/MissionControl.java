@@ -51,73 +51,31 @@ public final class MissionControl {
     }
 
     public static ArrayList<Integer> findAltitudeTimes(final int[] altitudes, final int targetAltitude) {
-
         ArrayList<Integer> outTimes = new ArrayList<Integer>(altitudes.length / 2);
-        findAltitudeTimesRecursive(targetAltitude, altitudes, 0, altitudes.length - 1, outTimes);
+
+        final int maxAltitudeTime = findMaxAltitudeTime(altitudes);
+
+        binarySearchRecursive(targetAltitude, altitudes, false, 0, maxAltitudeTime, outTimes);
+        binarySearchRecursive(targetAltitude, altitudes, true, maxAltitudeTime + 1, altitudes.length - 1, outTimes);
         return outTimes;
     }
 
-    private static void findAltitudeTimesRecursive(final int targetAltitude, final int[] altitudes, final int left, final int right, final ArrayList<Integer> outTimes) {
-        final int mid = (left + right) / 2;
-
-        if (altitudes[mid] == targetAltitude) {
-            outTimes.add(mid);
-            return;
-        }
-
-        if (altitudes.length == 1) {
-            return;
-        }
-
+    private static void binarySearchRecursive(final int targetNum, final int[] nums, final boolean isReverse, final int left, final int right, final ArrayList<Integer> outIndexes) {
         if (left > right) {
             return;
         }
 
-        if (mid == 0 && altitudes[mid] < altitudes[mid + 1]) {
-            if (targetAltitude < altitudes[mid]) {
-                return;
-            } else { // altitudes[mid] < targetAltitude
-                findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
-                return;
-            }
-        } else if (mid == 0 && altitudes[mid] > altitudes[mid + 1]) {
-            if (targetAltitude > altitudes[mid]) {
-                return;
-            } else { // altitudes[mid] > targetAltitude
-                findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
-                return;
-            }
+        final int mid = (left + right) / 2;
+
+        if (targetNum == nums[mid]) {
+            outIndexes.add(mid);
+            return;
         }
 
-        if (mid == altitudes.length - 1 && altitudes[mid - 1] < altitudes[mid]) {
-            if (targetAltitude < altitudes[mid]) {
-                findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
-                return;
-            } else { // altitudes[mid] < targetAltitude
-                return;
-            }
-        } else if (mid == altitudes.length - 1 && altitudes[mid - 1] > altitudes[mid]) {
-            if (targetAltitude > altitudes[mid]) {
-                findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
-                return;
-            } else { // altitudes[mid] > targetAltitude
-                return;
-            }
+        if (targetNum < nums[mid] ^ isReverse) {
+            binarySearchRecursive(targetNum, nums, isReverse, left, mid - 1, outIndexes);
+        } else { // nums[mid] < targetNum ^ isReverse
+            binarySearchRecursive(targetNum, nums, isReverse, mid + 1, right, outIndexes);
         }
-
-        if (altitudes[mid - 1] < altitudes[mid] && altitudes[mid] > altitudes[mid + 1]) {
-            if (targetAltitude < altitudes[mid]) {
-                findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
-                findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
-            }
-        } else if (altitudes[mid - 1] < altitudes[mid] && altitudes[mid] < altitudes[mid + 1]) {
-            findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
-            findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
-        } else if (altitudes[mid - 1] > altitudes[mid] && altitudes[mid] > altitudes[mid + 1]) {
-            findAltitudeTimesRecursive(targetAltitude, altitudes, left, mid - 1, outTimes);
-            findAltitudeTimesRecursive(targetAltitude, altitudes, mid + 1, right, outTimes);
-        }
-
-        return;
     }
 }

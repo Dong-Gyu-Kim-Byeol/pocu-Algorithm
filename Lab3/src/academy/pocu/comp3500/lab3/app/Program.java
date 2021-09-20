@@ -151,14 +151,21 @@ public class Program {
         }
 
         {
-            final int[] altitudes = new int[]{1, 2, 3, 4, 5, 6, 7, 4, 3, 2};
+            final int[] altitudes = new int[]{1, 2, 3, 4, 5, 6, 8, 12, 6, 4, 3, 2, 1};
 
             ArrayList<Integer> bounds = MissionControl.findAltitudeTimes(altitudes, 2);
 
             assert (bounds.size() == 2);
 
             assert (bounds.get(0) == 1);
-            assert (bounds.get(1) == 9);
+            assert (bounds.get(1) == 11);
+
+            bounds = MissionControl.findAltitudeTimes(altitudes, 1);
+
+            assert (bounds.size() == 2);
+
+            assert (bounds.get(0) == 0);
+            assert (bounds.get(1) == 12);
 
             bounds = MissionControl.findAltitudeTimes(altitudes, 5);
 
