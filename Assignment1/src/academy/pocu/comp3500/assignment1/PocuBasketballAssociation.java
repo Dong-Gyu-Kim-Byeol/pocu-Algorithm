@@ -155,7 +155,7 @@ public class PocuBasketballAssociation {
             quickSortPlayerTeamwork(players, minAssistsPerGame, true);
             final long tempTeamwork = calculateTeamwork(TEAM_SIZE, players);
 
-            if (dreamTeamwork <= tempTeamwork) {
+            if (dreamTeamwork < tempTeamwork) {
                 dreamTeamwork = tempTeamwork;
                 for (int t = 0; t < TEAM_SIZE; ++t) {
                     outPlayers[t] = players[t];
@@ -175,22 +175,16 @@ public class PocuBasketballAssociation {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
+        long dreamTeamwork = 0;
 
-        long dreamTeamwork = -1;
-
-        for (int i = 0; i < players.length; ++i) {
-            final int minAssistsPerGameIndex = i + teamSize - 1;
-            if (minAssistsPerGameIndex >= players.length) {
-                break;
-            }
-
+        for (int i = 1; i < players.length; ++i) {
             Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
-            final int minAssistsPerGame = players[minAssistsPerGameIndex].getAssistsPerGame();
+            final int minAssistsPerGame = players[i].getAssistsPerGame();
 
             quickSortPlayerTeamwork(players, minAssistsPerGame, true);
             final long tempTeamwork = calculateTeamwork(teamSize, players);
 
-            if (dreamTeamwork <= tempTeamwork) {
+            if (dreamTeamwork < tempTeamwork) {
                 dreamTeamwork = tempTeamwork;
                 for (int t = 0; t < teamSize; ++t) {
                     outPlayers[t] = players[t];
@@ -206,11 +200,11 @@ public class PocuBasketballAssociation {
             return 0;
         }
 
-        long maxTeamwork = -1;
-        int maxTeamworkTeamSize = -1;
+        long maxTeamwork = 0;
+        int maxTeamworkTeamSize = 0;
 
         for (int i = 1; i < players.length; ++i) {
-            final long teamwork = findDreamTeam(players, i, scratch, players);
+            final long teamwork = findDreamTeam(players, i, scratch, scratch);
             if (maxTeamwork < teamwork) {
                 maxTeamwork = teamwork;
                 maxTeamworkTeamSize = i;
