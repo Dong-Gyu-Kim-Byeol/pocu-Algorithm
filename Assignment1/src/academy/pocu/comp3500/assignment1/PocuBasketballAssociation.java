@@ -174,11 +174,12 @@ public class PocuBasketballAssociation {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
+        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
+
         long dreamTeamwork = 0;
 
         for (int i = teamSize - 1; i < players.length; ++i) {
 
-            Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
             final int minAssistsPerGame = players[i].getAssistsPerGame();
 
             quickSortPlayerTeamworkRecursive(players, minAssistsPerGame, true, 0, i);
