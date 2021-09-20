@@ -141,27 +141,27 @@ public class PocuBasketballAssociation {
         assert (players.length >= TEAM_SIZE);
         assert (outPlayers.length == TEAM_SIZE);
 
-        long dreamTeamwork = -1;
+//        long dreamTeamwork = -1;
+//
+//        for (int i = TEAM_SIZE - 1; i < players.length; ++i) {
+//
+//            Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
+//            final int minAssistsPerGame = players[i].getAssistsPerGame();
+//
+//            quickSortPlayerTeamwork(players, minAssistsPerGame, true);
+//            final long tempTeamwork = calculateTeamwork(TEAM_SIZE, players);
+//
+//            if (dreamTeamwork < tempTeamwork) {
+//                dreamTeamwork = tempTeamwork;
+//                for (int t = 0; t < TEAM_SIZE; ++t) {
+//                    outPlayers[t] = players[t];
+//                }
+//            }
+//        }
+//
+//        return dreamTeamwork;
 
-        for (int i = TEAM_SIZE - 1; i < players.length; ++i) {
-
-            Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
-            final int minAssistsPerGame = players[i].getAssistsPerGame();
-
-            quickSortPlayerTeamwork(players, minAssistsPerGame, true);
-            final long tempTeamwork = calculateTeamwork(TEAM_SIZE, players);
-
-            if (dreamTeamwork < tempTeamwork) {
-                dreamTeamwork = tempTeamwork;
-                for (int t = 0; t < TEAM_SIZE; ++t) {
-                    outPlayers[t] = players[t];
-                }
-            }
-        }
-
-        return dreamTeamwork;
-
-//        return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
+        return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
