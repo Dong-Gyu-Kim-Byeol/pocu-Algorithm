@@ -167,6 +167,10 @@ public class PocuBasketballAssociation {
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
         final int teamSize = k;
 
+        if (teamSize == 0) {
+            return 0;
+        }
+
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
@@ -177,7 +181,7 @@ public class PocuBasketballAssociation {
             Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
             final int minAssistsPerGame = players[i].getAssistsPerGame();
 
-            quickSortPlayerTeamwork(players, minAssistsPerGame, true);
+            quickSortPlayerTeamworkRecursive(players, minAssistsPerGame, true, 0, i);
             final long tempTeamwork = calculateTeamwork(teamSize, players);
 
             if (dreamTeamwork < tempTeamwork) {
@@ -199,7 +203,7 @@ public class PocuBasketballAssociation {
         long maxTeamwork = 0;
         int maxTeamworkTeamSize = 0;
 
-        for (int i = 1; i <= players.length; ++i) {
+        for (int i = 0; i <= players.length; ++i) {
             final long teamwork = findDreamTeam(players, i, scratch, scratch);
             if (maxTeamwork < teamwork) {
                 maxTeamwork = teamwork;
@@ -224,9 +228,9 @@ public class PocuBasketballAssociation {
         return sumPassesPerGame * minAssistsPerGame;
     }
 
-    public static void quickSortPlayerTeamwork(final Player[] players, final int minAssistsPerGame, final boolean isDescending) {
-        quickSortPlayerTeamworkRecursive(players, minAssistsPerGame, isDescending, 0, players.length - 1);
-    }
+//    public static void quickSortPlayerTeamwork(final Player[] players, final int minAssistsPerGame, final boolean isDescending) {
+//        quickSortPlayerTeamworkRecursive(players, minAssistsPerGame, isDescending, 0, players.length - 1);
+//    }
 
     private static void swap(final Player[] players, final int p1, final int p2) {
         final Player temp = players[p1];
@@ -275,6 +279,7 @@ public class PocuBasketballAssociation {
 
     private static int getMinAssistsPerGame(final int minAssistsPerGame, final Player player) {
         if (player.getAssistsPerGame() < minAssistsPerGame) {
+            assert (false);
             return 0;
         } else {
             return minAssistsPerGame;
