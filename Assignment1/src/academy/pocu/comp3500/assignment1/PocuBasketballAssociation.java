@@ -179,47 +179,35 @@ public class PocuBasketballAssociation {
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
         final int teamSize = k;
-        assert (players.length >= teamSize);
-        assert (outPlayers.length >= teamSize);
 
         if (teamSize == 0) {
             return 0;
         }
 
-        Comparator<Player> comparator = Comparator.comparing((Player p) -> p.getAssistsPerGame() * p.getPassesPerGame());
-        Sort.quickSort(players, comparator);
+        assert (players.length >= teamSize);
+        assert (outPlayers.length >= teamSize);
 
-        int playerIndex = players.length - 1;
-        for (int i = 0; i < teamSize; ++i) {
-            outPlayers[i] = players[playerIndex];
-            --playerIndex;
-        }
+        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
 
-        long dreamTeamTeamwork = calculateTeamwork(teamSize, outPlayers);
-        for (playerIndex = 0; playerIndex < players.length - teamSize; ++playerIndex) {
-            long maxTempTeamwork = 0;
-            int maxTempTeamworkChangeIndex = -1;
+        long dreamTeamwork = 0;
 
-            for (int changeIndex = 0; changeIndex < teamSize; ++changeIndex) {
-                final Player changedPlayer = outPlayers[changeIndex];
-                outPlayers[changeIndex] = players[playerIndex];
+        for (int i = teamSize - 1; i < players.length; ++i) {
 
-                long tempTeamwork = calculateTeamwork(teamSize, outPlayers);
-                if (maxTempTeamwork < tempTeamwork) {
-                    maxTempTeamwork = tempTeamwork;
-                    maxTempTeamworkChangeIndex = changeIndex;
+            final int minAssistsPerGame = players[i].getAssistsPerGame();
+
+            quickSelectPlayerTeamworkRecursive(teamSize - 1, players, minAssistsPerGame, true, 0, i);
+
+            final long tempTeamwork = calculateTeamwork(teamSize, players);
+
+            if (dreamTeamwork < tempTeamwork) {
+                dreamTeamwork = tempTeamwork;
+                for (int t = 0; t < teamSize; ++t) {
+                    outPlayers[t] = players[t];
                 }
-
-                outPlayers[changeIndex] = changedPlayer;
-            }
-
-            if (dreamTeamTeamwork < maxTempTeamwork) {
-                dreamTeamTeamwork = maxTempTeamwork;
-                outPlayers[maxTempTeamworkChangeIndex] = players[playerIndex];
             }
         }
 
-        return dreamTeamTeamwork;
+        return dreamTeamwork;
     }
 
     public static int findDreamTeamSize(final Player[] players, final Player[] scratch) {
