@@ -23,7 +23,7 @@ public class Sort {
         quickSortRecursive(objects, comparator, 0, objects.length - 1);
     }
 
-    private static <T> void swap(final T[] objects, final int o1, final int o2) {
+    public static <T> void swap(final T[] objects, final int o1, final int o2) {
         final T temp = objects[o1];
         objects[o1] = objects[o2];
         objects[o2] = temp;
