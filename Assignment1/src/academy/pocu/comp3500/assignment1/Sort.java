@@ -53,6 +53,37 @@ public class Sort {
         quickSortRecursive(objects, comparator, pivotPos + 1, right);
     }
 
+    public static <T> T quickSelectRecursive(final int targetIndex, final T[] objects, final Comparator<T> comparator, final int left, final int right) {
+        assert (left < right);
+
+        if (left == right) {
+            return objects[left];
+        }
+
+        final int mid = (left + right) / 2;
+
+        if ((comparator.compare(objects[mid], objects[left]) < 0 && comparator.compare(objects[left], objects[right]) < 0)
+                || (comparator.compare(objects[right], objects[left]) < 0 && comparator.compare(objects[left], objects[mid]) < 0)) {
+            Sort.swap(objects, left, right);
+        } else if ((comparator.compare(objects[left], objects[mid]) < 0 && comparator.compare(objects[mid], objects[right]) < 0)
+                || (comparator.compare(objects[right], objects[mid]) < 0 && comparator.compare(objects[mid], objects[left]) < 0)) {
+            Sort.swap(objects, mid, right);
+        }
+//        else {
+//            Sort.swap(objects, right, right);
+//        }
+
+        final int pivotPos = partition(objects, comparator, left, right);
+
+        if (targetIndex == pivotPos) {
+            return objects[pivotPos];
+        } else if (targetIndex < pivotPos) {
+            return quickSelectRecursive(targetIndex, objects, comparator, left, pivotPos - 1);
+        } else {
+            return quickSelectRecursive(targetIndex, objects, comparator, pivotPos + 1, right);
+        }
+    }
+
     private static <T> int partition(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
         assert (left < right);
 
