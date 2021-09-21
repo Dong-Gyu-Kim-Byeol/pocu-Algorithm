@@ -159,7 +159,7 @@ public class PocuBasketballAssociation {
                 final Player changedPlayer = outPlayers[changeIndex];
                 outPlayers[changeIndex] = players[playerIndex];
 
-                long tempTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
+                final long tempTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
                 if (maxTempTeamwork < tempTeamwork) {
                     maxTempTeamwork = tempTeamwork;
                     maxTempTeamworkChangeIndex = changeIndex;
@@ -175,6 +175,8 @@ public class PocuBasketballAssociation {
         }
 
         return dreamTeamTeamwork;
+
+//        return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
