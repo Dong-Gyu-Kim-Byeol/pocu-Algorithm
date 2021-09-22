@@ -244,6 +244,21 @@ players: [
                     new Player("Player 3", 7, 5, 8, 66)
             };
 
+//            players = new Player[]{
+//                    new Player("Player 4", 10, 3, 51, 88),
+//                    new Player("Player 2", 5, 12, 14, 50),
+//
+//                    //new Player("Player 5", 11, 1, 11, 54),
+//
+//                    new Player("Player 3", 7, 5, 8, 66),
+//
+//                    //new Player("Player 6", 15, 2, 5, 40),
+//                    new Player("Player 7", 16, 8, 5, 77),
+//
+//                    new Player("Player 1", 1, 15, 2, 22),
+//
+//            };
+
             Player[] outPlayers = new Player[3];
             Player[] scratch = new Player[3];
 
@@ -293,6 +308,44 @@ players: [
 
             player = getPlayerOrNull(outPlayers, "Player 7");
             assert (player != null);
+        }
+
+        {
+            // p 또는 a*p를 작은 순서대로 정렬 시
+            Player[] players = new Player[]{
+                    new Player("Player 1", 2, 10, 40, 78),
+                    new Player("Player 2", 10, 11, 45, 66),
+                    new Player("Player 3", 3, 12, 50, 22),
+                    new Player("Player 4", 1, 1, 601, 12),
+                    new Player("Player 5", 11, 1, 602, 26),
+                    new Player("Player 6", 7, 1, 1000, 15)
+            };
+
+            Player[] outPlayers = new Player[3];
+            Player[] scratch = new Player[3];
+
+            long maxTeamwork = PocuBasketballAssociation.find3ManDreamTeam(players, outPlayers, scratch);
+
+            assert (maxTeamwork == 2203);
+        }
+
+        {
+            // a*p를 큰 순서대로 정렬 시
+            Player[] players = new Player[]{
+                    new Player("Player 1", 2, 1, 1000, 78),
+                    new Player("Player 2", 10, 999, 1, 66),
+                    new Player("Player 3", 3, 998, 1, 22),
+                    new Player("Player 4", 1, 12, 50, 12),
+                    new Player("Player 5", 11, 11, 45, 26),
+                    new Player("Player 6", 7, 10, 40, 15)
+            };
+
+            Player[] outPlayers = new Player[3];
+            Player[] scratch = new Player[3];
+
+            long maxTeamwork = PocuBasketballAssociation.find3ManDreamTeam(players, outPlayers, scratch);
+
+            assert (maxTeamwork == 1350);
         }
 
         {

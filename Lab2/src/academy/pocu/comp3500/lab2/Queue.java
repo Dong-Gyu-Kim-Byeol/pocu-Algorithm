@@ -30,6 +30,9 @@ public final class Queue {
     }
 
     public int peek() {
+        assert (front != null);
+        assert (getSize() > 0);
+
         return front.getData();
     }
 

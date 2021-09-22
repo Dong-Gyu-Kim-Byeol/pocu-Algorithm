@@ -12,8 +12,6 @@ public final class Stack {
     public void push(final int data) {
         top = LinkedList.prepend(top, data);
         size++;
-        assert (top != null);
-        assert (getSize() > 0);
     }
 
     public int peek() {
@@ -27,7 +25,7 @@ public final class Stack {
         assert (top != null);
         assert (getSize() > 0);
 
-        int data = top.getData();
+        final int data = top.getData();
         top = top.getNextOrNull();
         size--;
         return data;
