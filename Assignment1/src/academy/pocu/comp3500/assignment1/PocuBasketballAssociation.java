@@ -186,14 +186,63 @@ public class PocuBasketballAssociation {
 
         Sort.quickSort(players, Comparator.comparing(Player::getPassesPerGame));
 
+        // --------------------------------------------------------------------------
+
         int index = players.length - 1;
         for (int i = 0; i < teamSize; ++i) {
             outPlayers[i] = players[index];
             index--;
         }
 
+        findDreamTeamPlayersLoop(players, teamSize, outPlayers);
+        final long largeFirstTeamwork = calculateTeamwork(teamSize, outPlayers);
+
+        // --------------------------------------------------------------------------
+
+        for (int i = 0; i < teamSize; ++i) {
+            outPlayers[i] = players[i];
+        }
+
+        findDreamTeamPlayersLoop(players, teamSize, outPlayers);
+        final long smallFirstTeamwork = calculateTeamwork(teamSize, outPlayers);
+
+        // --------------------------------------------------------------------------
+
+        if (largeFirstTeamwork > smallFirstTeamwork) {
+            index = players.length - 1;
+            for (int i = 0; i < teamSize; ++i) {
+                outPlayers[i] = players[index];
+                index--;
+            }
+
+            findDreamTeamPlayersLoop(players, teamSize, outPlayers);
+        }
+
+        final long dreamTeamwork = calculateTeamwork(teamSize, outPlayers);
+        return dreamTeamwork;
+    }
+
+    public static int findDreamTeamSize(final Player[] players, final Player[] scratch) {
+        if (players.length == 0) {
+            return 0;
+        }
+
+        long maxTeamwork = 0;
+        int maxTeamworkTeamSize = 0;
+        for (int i = 0; i <= players.length; ++i) {
+            final long teamwork = findDreamTeam(players, i, scratch, scratch);
+            if (maxTeamwork < teamwork) {
+                maxTeamwork = teamwork;
+                maxTeamworkTeamSize = i;
+            }
+        }
+
+        return maxTeamworkTeamSize;
+    }
+
+    private static void findDreamTeamPlayersLoop(final Player[] players, final int teamSize, final Player[] outPlayers) {
         playersLoop:
-        for (index = 0; index < players.length; ++index) {
+        for (int index = 0; index < players.length; ++index) {
             final int playerIndex = index % players.length;
             for (int i = 0; i < teamSize; ++i) {
                 if (outPlayers[i].getName().equals(players[playerIndex].getName())) {
@@ -236,27 +285,6 @@ public class PocuBasketballAssociation {
                 outPlayers[nowMinPassIndex] = players[playerIndex];
             }
         }
-
-        final long dreamTeamwork = calculateTeamwork(teamSize, outPlayers);
-        return dreamTeamwork;
-    }
-
-    public static int findDreamTeamSize(final Player[] players, final Player[] scratch) {
-        if (players.length == 0) {
-            return 0;
-        }
-
-        long maxTeamwork = 0;
-        int maxTeamworkTeamSize = 0;
-        for (int i = 0; i <= players.length; ++i) {
-            final long teamwork = findDreamTeam(players, i, scratch, scratch);
-            if (maxTeamwork < teamwork) {
-                maxTeamwork = teamwork;
-                maxTeamworkTeamSize = i;
-            }
-        }
-
-        return maxTeamworkTeamSize;
     }
 
     private static long calculateTeamwork(final int size, final Player... players) {

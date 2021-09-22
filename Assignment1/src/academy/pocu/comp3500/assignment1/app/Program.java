@@ -369,6 +369,34 @@ players: [
 
             assert (k == 6);
         }
+
+        {
+            Player[] players = new Player[]{
+                    new Player("Player 2", 5, 100, 1, 50),
+                    new Player("Player 6", 15, 100, 1, 40),
+                    new Player("Player 5", 11, 100, 1, 54),
+                    new Player("Player 4", 10, 1, 50, 88),
+                    new Player("Player 7", 16, 1, 60, 77),
+                    new Player("Player 1", 1, 1, 70, 22),
+                    new Player("Player 3", 7, 1, 80, 66)
+            };
+
+            Player[] outPlayers = new Player[3];
+            Player[] scratch = new Player[3];
+
+            long maxTeamwork = PocuBasketballAssociation.find3ManDreamTeam(players, outPlayers, scratch);
+
+            assert (maxTeamwork == 300);
+
+            Player player = getPlayerOrNull(outPlayers, "Player 2");
+            assert (player != null);
+
+            player = getPlayerOrNull(outPlayers, "Player 6");
+            assert (player != null);
+
+            player = getPlayerOrNull(outPlayers, "Player 5");
+            assert (player != null);
+        }
     }
 
     private static <T> void shuffle(T[] array) {
