@@ -221,13 +221,17 @@ public class PocuBasketballAssociation {
             return 0;
         }
 
-        long maxTeamwork = 0;
-        int maxTeamworkTeamSize = 0;
-        for (int i = 0; i <= players.length; ++i) {
-            final long teamwork = findDreamTeam(players, i, scratch, scratch);
-            if (maxTeamwork < teamwork) {
-                maxTeamwork = teamwork;
-                maxTeamworkTeamSize = i;
+        Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
+
+        long sumPass = 0;
+        int maxTeamworkTeamSize = -1;
+        long maxTeamwork = Integer.MIN_VALUE;
+        for (int i = 0; i < players.length; ++i) {
+            sumPass += players[i].getPassesPerGame();
+            final long tempTeamwork = sumPass * players[i].getAssistsPerGame();
+            if (maxTeamwork < tempTeamwork) {
+                maxTeamwork = tempTeamwork;
+                maxTeamworkTeamSize = i + 1;
             }
         }
 
