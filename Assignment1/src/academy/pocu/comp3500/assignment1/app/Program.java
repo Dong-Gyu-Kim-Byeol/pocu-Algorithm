@@ -244,21 +244,6 @@ players: [
                     new Player("Player 3", 7, 5, 8, 66)
             };
 
-//            players = new Player[]{
-//                    new Player("Player 4", 10, 3, 51, 88),
-//                    new Player("Player 2", 5, 12, 14, 50),
-//
-//                    //new Player("Player 5", 11, 1, 11, 54),
-//
-//                    new Player("Player 3", 7, 5, 8, 66),
-//
-//                    //new Player("Player 6", 15, 2, 5, 40),
-//                    new Player("Player 7", 16, 8, 5, 77),
-//
-//                    new Player("Player 1", 1, 15, 2, 22),
-//
-//            };
-
             Player[] outPlayers = new Player[3];
             Player[] scratch = new Player[3];
 
