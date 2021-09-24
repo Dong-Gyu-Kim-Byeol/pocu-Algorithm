@@ -141,42 +141,42 @@ public class PocuBasketballAssociation {
         assert (players.length >= TEAM_SIZE);
         assert (outPlayers.length == TEAM_SIZE);
 
-//        Comparator<Player> comparator = Comparator.comparing((Player p) -> p.getAssistsPerGame() * p.getPassesPerGame());
-//        Sort.quickSort(players, comparator);
-//
-//        int playerIndex = players.length - 1;
-//        for (int i = 0; i < TEAM_SIZE; ++i) {
-//            outPlayers[i] = players[playerIndex];
-//            --playerIndex;
-//        }
-//
-//        long dreamTeamTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
-//        for (playerIndex = 0; playerIndex < players.length - TEAM_SIZE; ++playerIndex) {
-//            long maxTempTeamwork = 0;
-//            int maxTempTeamworkChangeIndex = -1;
-//
-//            for (int changeIndex = 0; changeIndex < TEAM_SIZE; ++changeIndex) {
-//                final Player changedPlayer = outPlayers[changeIndex];
-//                outPlayers[changeIndex] = players[playerIndex];
-//
-//                final long tempTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
-//                if (maxTempTeamwork < tempTeamwork) {
-//                    maxTempTeamwork = tempTeamwork;
-//                    maxTempTeamworkChangeIndex = changeIndex;
-//                }
-//
-//                outPlayers[changeIndex] = changedPlayer;
-//            }
-//
-//            if (dreamTeamTeamwork < maxTempTeamwork) {
-//                dreamTeamTeamwork = maxTempTeamwork;
-//                outPlayers[maxTempTeamworkChangeIndex] = players[playerIndex];
-//            }
-//        }
-//
-//        return dreamTeamTeamwork;
+        Comparator<Player> comparator = Comparator.comparing((Player p) -> p.getAssistsPerGame() * p.getPassesPerGame());
+        Sort.quickSort(players, comparator);
 
-        return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
+        int playerIndex = players.length - 1;
+        for (int i = 0; i < TEAM_SIZE; ++i) {
+            outPlayers[i] = players[playerIndex];
+            --playerIndex;
+        }
+
+        long dreamTeamTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
+        for (playerIndex = 0; playerIndex < players.length - TEAM_SIZE; ++playerIndex) {
+            long maxTempTeamwork = 0;
+            int maxTempTeamworkChangeIndex = -1;
+
+            for (int changeIndex = 0; changeIndex < TEAM_SIZE; ++changeIndex) {
+                final Player changedPlayer = outPlayers[changeIndex];
+                outPlayers[changeIndex] = players[playerIndex];
+
+                final long tempTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
+                if (maxTempTeamwork < tempTeamwork) {
+                    maxTempTeamwork = tempTeamwork;
+                    maxTempTeamworkChangeIndex = changeIndex;
+                }
+
+                outPlayers[changeIndex] = changedPlayer;
+            }
+
+            if (dreamTeamTeamwork < maxTempTeamwork) {
+                dreamTeamTeamwork = maxTempTeamwork;
+                outPlayers[maxTempTeamworkChangeIndex] = players[playerIndex];
+            }
+        }
+
+        return dreamTeamTeamwork;
+
+//        return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
@@ -193,6 +193,9 @@ public class PocuBasketballAssociation {
 //
 //        이세진  12시간 전
 //        기존 팀원 중 한명씩만 바꿔나가려면 어떤 부분을 고쳐야할지 곰곰해 생각해보시면 답이 나올 것 같습니다.
+
+//        1. findDreamTeam에서 assist순으로 정렬을 해보셨습니다. 그렇다면 최소의 어시스트를 구할 때 매번 for문을 순회할 필요가 있을까요?
+//        2.  특정한  assist 를 기준으로 k명을 어떻게 뽑으면 좋을지 생각해보시고 그리고  업데이트를 할 때 그 k명을 어떻게 업데이트할 것인지 생각해 보세요.
 
         Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
 
