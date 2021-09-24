@@ -38,20 +38,18 @@ public class PocuBasketballAssociation {
                 outPlayers[playerIndex].setPassesPerGame(numPasses / gameCount);
                 outPlayers[playerIndex].setShootingPercentage((int) (100.0f * goals / goalAttempts));
 
-                if (i == gameStats.length - 1) {
-                    break;
+                if (i != gameStats.length - 1) {
+                    playerName = gameStats[i + 1].getPlayerName();
+                    ++playerIndex;
+
+                    gameCount = 0;
+
+                    points = 0;
+                    goals = 0;
+                    goalAttempts = 0;
+                    assists = 0;
+                    numPasses = 0;
                 }
-
-                playerName = gameStats[i + 1].getPlayerName();
-                ++playerIndex;
-
-                gameCount = 0;
-
-                points = 0;
-                goals = 0;
-                goalAttempts = 0;
-                assists = 0;
-                numPasses = 0;
             }
         }
     }
@@ -141,48 +139,13 @@ public class PocuBasketballAssociation {
         assert (players.length >= TEAM_SIZE);
         assert (outPlayers.length == TEAM_SIZE);
 
-//        Comparator<Player> comparator = Comparator.comparing((Player p) -> p.getAssistsPerGame() * p.getPassesPerGame());
-//        Sort.quickSort(players, comparator);
-//
-//        int playerIndex = players.length - 1;
-//        for (int i = 0; i < TEAM_SIZE; ++i) {
-//            outPlayers[i] = players[playerIndex];
-//            --playerIndex;
-//        }
-//
-//        long dreamTeamTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
-//        for (playerIndex = 0; playerIndex < players.length - TEAM_SIZE; ++playerIndex) {
-//            long maxTempTeamwork = 0;
-//            int maxTempTeamworkChangeIndex = -1;
-//
-//            for (int changeIndex = 0; changeIndex < TEAM_SIZE; ++changeIndex) {
-//                final Player changedPlayer = outPlayers[changeIndex];
-//                outPlayers[changeIndex] = players[playerIndex];
-//
-//                final long tempTeamwork = calculateTeamwork(TEAM_SIZE, outPlayers);
-//                if (maxTempTeamwork < tempTeamwork) {
-//                    maxTempTeamwork = tempTeamwork;
-//                    maxTempTeamworkChangeIndex = changeIndex;
-//                }
-//
-//                outPlayers[changeIndex] = changedPlayer;
-//            }
-//
-//            if (dreamTeamTeamwork < maxTempTeamwork) {
-//                dreamTeamTeamwork = maxTempTeamwork;
-//                outPlayers[maxTempTeamworkChangeIndex] = players[playerIndex];
-//            }
-//        }
-//
-//        return dreamTeamTeamwork;
-
         return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
 
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
         final int teamSize = k;
         assert (players.length >= teamSize);
-        assert (outPlayers.length >= teamSize);
+        assert (outPlayers.length == teamSize);
 
         if (teamSize == 0) {
             return 0;
@@ -190,14 +153,15 @@ public class PocuBasketballAssociation {
 
         Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
 
+        long sumPass = 0;
         for (int so = 0; so < teamSize; ++so) {
             scratch[so] = players[so];
-            outPlayers[so] = scratch[so];
+            outPlayers[so] = players[so];
+            sumPass += players[so].getPassesPerGame();
         }
+        long dreamTeamwork = sumPass * players[teamSize - 1].getAssistsPerGame();
 
         int outMinPassIndex = 0;
-        long sumPass = 0;
-        long dreamTeamwork = calculateTeamwork(teamSize, scratch);
         for (int i = teamSize; i < players.length; ++i) {
             for (int s = 0; s < teamSize; ++s) {
                 if (scratch[outMinPassIndex].getPassesPerGame() > scratch[s].getPassesPerGame()) {
@@ -210,8 +174,8 @@ public class PocuBasketballAssociation {
 
                 scratch[outMinPassIndex] = players[i];
             }
-            final long tempTeamwork = calculateTeamwork(teamSize, scratch);
 
+            final long tempTeamwork = sumPass * players[i].getAssistsPerGame();
             if (dreamTeamwork < tempTeamwork) {
                 dreamTeamwork = tempTeamwork;
                 for (int o = 0; o < teamSize; ++o) {
@@ -230,130 +194,18 @@ public class PocuBasketballAssociation {
 
         Sort.quickSort(players, Comparator.comparing(Player::getAssistsPerGame).reversed());
 
+        int dreamTeamworkTeamSize = -1;
         long sumPass = 0;
-        int maxTeamworkTeamSize = -1;
-        long maxTeamwork = Long.MIN_VALUE;
+        long dreamTeamwork = Long.MIN_VALUE;
         for (int i = 0; i < players.length; ++i) {
             sumPass += players[i].getPassesPerGame();
             final long tempTeamwork = sumPass * players[i].getAssistsPerGame();
-            if (maxTeamwork < tempTeamwork) {
-                maxTeamwork = tempTeamwork;
-                maxTeamworkTeamSize = i + 1;
+            if (dreamTeamwork < tempTeamwork) {
+                dreamTeamwork = tempTeamwork;
+                dreamTeamworkTeamSize = i + 1;
             }
         }
 
-        return maxTeamworkTeamSize;
-    }
-
-    private static long calculateTeamwork(final int size, final Player... players) {
-        // 팀워크 = [팀에 속한 모든 선수의 경기당 패스수를 합한 결과] * [팀에 속한 각 선수의 경기당 어시스트수 중 최솟값]
-
-        long sumPassesPerGame = 0;
-        long minAssistsPerGame = Long.MAX_VALUE;
-
-        for (int i = 0; i < size; ++i) {
-            sumPassesPerGame += players[i].getPassesPerGame();
-            minAssistsPerGame = Math.min(minAssistsPerGame, players[i].getAssistsPerGame());
-        }
-
-        return sumPassesPerGame * minAssistsPerGame;
-    }
-
-    private static void quickSortPlayerTeamworkRecursive(final Player[] players, final int minAssistsPerGame, final boolean isDescending, final int left, final int right) {
-        assert (left <= right);
-
-        if (left == right) {
-            return;
-        }
-
-        final int mid = (left + right) / 2;
-        final long leftTeamwork = players[left].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[left]);
-        final long midTeamwork = players[mid].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[mid]);
-        final long rightTeamwork = players[right].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[right]);
-
-        if ((midTeamwork < leftTeamwork && leftTeamwork < rightTeamwork) || (rightTeamwork < leftTeamwork && leftTeamwork < midTeamwork)) {
-            Sort.swap(players, left, right);
-        } else if ((leftTeamwork < midTeamwork && midTeamwork < rightTeamwork) || (rightTeamwork < midTeamwork && midTeamwork < leftTeamwork)) {
-            Sort.swap(players, mid, right);
-        }
-//        else {
-//            Sort.swap(players, right, right);
-//        }
-
-        final int pivotPos = partitionPlayerTeamwork(players, minAssistsPerGame, isDescending, left, right);
-
-        quickSortPlayerTeamworkRecursive(players, minAssistsPerGame, isDescending, left, pivotPos - 1);
-        quickSortPlayerTeamworkRecursive(players, minAssistsPerGame, isDescending, pivotPos + 1, right);
-    }
-
-    private static Player quickSelectPlayerTeamworkRecursive(final int targetIndex, final Player[] players, final int minAssistsPerGame, final boolean isDescending, final int left, final int right) {
-        assert (left <= right);
-
-        if (left == right) {
-            return players[left];
-        }
-
-
-        final int mid = (left + right) / 2;
-        final long leftTeamwork = players[left].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[left]);
-        final long midTeamwork = players[mid].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[mid]);
-        final long rightTeamwork = players[right].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[right]);
-
-        if ((midTeamwork < leftTeamwork && leftTeamwork < rightTeamwork) || (rightTeamwork < leftTeamwork && leftTeamwork < midTeamwork)) {
-            Sort.swap(players, left, right);
-        } else if ((leftTeamwork < midTeamwork && midTeamwork < rightTeamwork) || (rightTeamwork < midTeamwork && midTeamwork < leftTeamwork)) {
-            Sort.swap(players, mid, right);
-        }
-//        else {
-//            Sort.swap(players, right, right);
-//        }
-
-        final int pivotPos = partitionPlayerTeamwork(players, minAssistsPerGame, isDescending, left, right);
-
-        if (targetIndex == pivotPos) {
-            return players[targetIndex];
-        } else if (targetIndex < pivotPos) {
-            return quickSelectPlayerTeamworkRecursive(targetIndex, players, minAssistsPerGame, isDescending, left, pivotPos - 1);
-        } else {
-            return quickSelectPlayerTeamworkRecursive(targetIndex, players, minAssistsPerGame, isDescending, pivotPos + 1, right);
-        }
-    }
-
-
-    private static int partitionPlayerTeamwork(final Player[] players, final int minAssistsPerGame, final boolean isDescending, final int left, final int right) {
-        assert (left < right);
-
-        int pivot = right;
-        final long pivotMaxTeamwork = players[pivot].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[pivot]);
-
-        int pointer = left - 1;
-        for (int i = left; i < right; ++i) {
-            final long p1MaxTeamwork = players[i].getPassesPerGame() * getMinAssistsPerGame(minAssistsPerGame, players[i]);
-            if (isDescending) {
-                if (p1MaxTeamwork > pivotMaxTeamwork) {
-                    ++pointer;
-                    Sort.swap(players, pointer, i);
-                }
-            } else {
-                if (p1MaxTeamwork < pivotMaxTeamwork) {
-                    ++pointer;
-                    Sort.swap(players, pointer, i);
-                }
-            }
-        }
-
-        pivot = pointer + 1;
-        Sort.swap(players, pivot, right);
-
-        return pivot;
-    }
-
-    private static long getMinAssistsPerGame(final int minAssistsPerGame, final Player player) {
-        if (player.getAssistsPerGame() < minAssistsPerGame) {
-            assert (false);
-            return 0;
-        } else {
-            return minAssistsPerGame;
-        }
+        return dreamTeamworkTeamSize;
     }
 }
