@@ -199,6 +199,7 @@ public class PocuBasketballAssociation {
         long dreamTeamwork = Long.MIN_VALUE;
         for (int i = 0; i < players.length; ++i) {
             sumPass += players[i].getPassesPerGame();
+
             final long tempTeamwork = sumPass * players[i].getAssistsPerGame();
             if (dreamTeamwork < tempTeamwork) {
                 dreamTeamwork = tempTeamwork;
