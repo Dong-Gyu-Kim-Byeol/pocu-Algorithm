@@ -151,8 +151,8 @@ public class PocuBasketballAssociation {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
-        return findDreamTeamAssistSort(players, teamSize, outPlayers, scratch);
-//        return findDreamTeamPassSort(players, teamSize, outPlayers, scratch);
+//        return findDreamTeamAssistSort(players, teamSize, outPlayers, scratch);
+        return findDreamTeamPassSort(players, teamSize, outPlayers, scratch);
     }
 
 
