@@ -137,7 +137,7 @@ public class PocuBasketballAssociation {
     public static long find3ManDreamTeam(final Player[] players, final Player[] outPlayers, final Player[] scratch) {
         final int TEAM_SIZE = 3;
         assert (players.length >= TEAM_SIZE);
-        assert (outPlayers.length == TEAM_SIZE);
+        assert (outPlayers.length >= TEAM_SIZE);
 
         return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
@@ -145,7 +145,7 @@ public class PocuBasketballAssociation {
     public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
         final int teamSize = k;
         assert (players.length >= teamSize);
-        assert (outPlayers.length == teamSize);
+        assert (outPlayers.length >= teamSize);
 
         if (teamSize == 0) {
             return 0;
@@ -161,21 +161,21 @@ public class PocuBasketballAssociation {
         }
         long dreamTeamwork = sumPass * players[teamSize - 1].getAssistsPerGame();
 
-        int outMinPassIndex = 0;
-        for (int i = teamSize; i < players.length; ++i) {
+        int scratchMinPassIndex = 0;
+        for (int p = teamSize; p < players.length; ++p) {
             for (int s = 0; s < teamSize; ++s) {
-                if (scratch[outMinPassIndex].getPassesPerGame() > scratch[s].getPassesPerGame()) {
-                    outMinPassIndex = s;
+                if (scratch[scratchMinPassIndex].getPassesPerGame() > scratch[s].getPassesPerGame()) {
+                    scratchMinPassIndex = s;
                 }
             }
-            if (scratch[outMinPassIndex].getPassesPerGame() < players[i].getPassesPerGame()) {
-                sumPass -= scratch[outMinPassIndex].getPassesPerGame();
-                sumPass += players[i].getPassesPerGame();
+            if (scratch[scratchMinPassIndex].getPassesPerGame() < players[p].getPassesPerGame()) {
+                sumPass -= scratch[scratchMinPassIndex].getPassesPerGame();
+                sumPass += players[p].getPassesPerGame();
 
-                scratch[outMinPassIndex] = players[i];
+                scratch[scratchMinPassIndex] = players[p];
             }
 
-            final long tempTeamwork = sumPass * players[i].getAssistsPerGame();
+            final long tempTeamwork = sumPass * players[p].getAssistsPerGame();
             if (dreamTeamwork < tempTeamwork) {
                 dreamTeamwork = tempTeamwork;
                 for (int o = 0; o < teamSize; ++o) {
