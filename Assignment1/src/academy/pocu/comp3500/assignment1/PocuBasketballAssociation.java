@@ -147,8 +147,8 @@ public class PocuBasketballAssociation {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
-//        return findDreamTeamAssist(players, teamSize, outPlayers, scratch);
-        return findDreamTeamPass(players, teamSize, outPlayers, scratch);
+//        return findDreamTeamAssistSort(players, teamSize, outPlayers, scratch);
+        return findDreamTeamPassSort(players, teamSize, outPlayers, scratch);
 
     }
 
@@ -176,7 +176,7 @@ public class PocuBasketballAssociation {
         return dreamTeamworkTeamSize;
     }
 
-    private static long findDreamTeamAssist(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
+    private static long findDreamTeamAssistSort(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
         final int teamSize = k;
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
@@ -222,7 +222,7 @@ public class PocuBasketballAssociation {
     }
 
 
-    private static long findDreamTeamPass(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
+    private static long findDreamTeamPassSort(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
         final int teamSize = k;
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
