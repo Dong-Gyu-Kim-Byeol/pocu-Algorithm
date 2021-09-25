@@ -8,10 +8,10 @@ public class Sort {
     private Sort() {
     }
 
-    public static <T> void bubbleSort(final T[] objects, final Comparator<T> getter) {
+    public static <T> void bubbleSort(final T[] objects, final Comparator<T> comparator) {
         for (int i = 0; i < objects.length - 1; ++i) {
             for (int j = 0; j < objects.length - i - 1; ++j) {
-                final int compare = getter.compare(objects[j], objects[j + 1]);
+                final int compare = comparator.compare(objects[j], objects[j + 1]);
                 if (compare > 0) {
                     swap(objects, j, j + 1);
                 }

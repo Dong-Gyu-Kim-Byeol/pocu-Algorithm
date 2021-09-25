@@ -61,6 +61,8 @@ public class PocuBasketballAssociation {
         int targetPlayerIndex = -1;
         int minDifference = Integer.MAX_VALUE;
 
+        final Comparator<Player> comparator = Comparator.comparing(Player::getPointsPerGame);
+
         while (letf <= right) {
             final int mid = (letf + right) / 2;
 
@@ -74,7 +76,7 @@ public class PocuBasketballAssociation {
             }
 
             if (minDifference == difference) {
-                if (players[targetPlayerIndex].getPointsPerGame() < players[mid].getPointsPerGame()) {
+                if (comparator.compare(players[targetPlayerIndex], players[mid]) < 0) {
                     targetPlayerIndex = mid;
                 }
             }
@@ -101,6 +103,8 @@ public class PocuBasketballAssociation {
         int targetPlayerIndex = -1;
         int minDifference = Integer.MAX_VALUE;
 
+        final Comparator<Player> comparator = Comparator.comparing(Player::getShootingPercentage);
+
         while (letf <= right) {
             final int mid = (letf + right) / 2;
 
@@ -114,7 +118,7 @@ public class PocuBasketballAssociation {
             }
 
             if (minDifference == difference) {
-                if (players[targetPlayerIndex].getShootingPercentage() < players[mid].getShootingPercentage()) {
+                if (comparator.compare(players[targetPlayerIndex], players[mid]) < 0) {
                     targetPlayerIndex = mid;
                 }
             }
@@ -147,9 +151,8 @@ public class PocuBasketballAssociation {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
-//        return findDreamTeamAssistSort(players, teamSize, outPlayers, scratch);
-        return findDreamTeamPassSort(players, teamSize, outPlayers, scratch);
-
+        return findDreamTeamAssistSort(players, teamSize, outPlayers, scratch);
+//        return findDreamTeamPassSort(players, teamSize, outPlayers, scratch);
     }
 
 
@@ -176,8 +179,7 @@ public class PocuBasketballAssociation {
         return dreamTeamworkTeamSize;
     }
 
-    private static long findDreamTeamAssistSort(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
-        final int teamSize = k;
+    private static long findDreamTeamAssistSort(final Player[] players, final int teamSize, final Player[] outPlayers, final Player[] scratch) {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
@@ -222,8 +224,7 @@ public class PocuBasketballAssociation {
     }
 
 
-    private static long findDreamTeamPassSort(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
-        final int teamSize = k;
+    private static long findDreamTeamPassSort(final Player[] players, final int teamSize, final Player[] outPlayers, final Player[] scratch) {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
