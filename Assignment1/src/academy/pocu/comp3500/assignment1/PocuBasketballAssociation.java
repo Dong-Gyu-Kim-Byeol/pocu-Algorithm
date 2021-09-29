@@ -61,8 +61,6 @@ public class PocuBasketballAssociation {
         int targetPlayerIndex = -1;
         int minDifference = Integer.MAX_VALUE;
 
-        final Comparator<Player> comparator = Comparator.comparing(Player::getPointsPerGame);
-
         while (letf <= right) {
             final int mid = (letf + right) / 2;
 
@@ -76,7 +74,7 @@ public class PocuBasketballAssociation {
             }
 
             if (minDifference == difference) {
-                if (comparator.compare(players[targetPlayerIndex], players[mid]) < 0) {
+                if (players[targetPlayerIndex].getPointsPerGame() < players[mid].getPointsPerGame()) {
                     targetPlayerIndex = mid;
                 }
             }
@@ -103,8 +101,6 @@ public class PocuBasketballAssociation {
         int targetPlayerIndex = -1;
         int minDifference = Integer.MAX_VALUE;
 
-        final Comparator<Player> comparator = Comparator.comparing(Player::getShootingPercentage);
-
         while (letf <= right) {
             final int mid = (letf + right) / 2;
 
@@ -118,7 +114,7 @@ public class PocuBasketballAssociation {
             }
 
             if (minDifference == difference) {
-                if (comparator.compare(players[targetPlayerIndex], players[mid]) < 0) {
+                if (players[targetPlayerIndex].getShootingPercentage() < players[mid].getShootingPercentage()) {
                     targetPlayerIndex = mid;
                 }
             }
