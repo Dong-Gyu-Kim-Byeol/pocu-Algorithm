@@ -41,9 +41,9 @@ public class Hash {
     public static String getSha1(final String plain) {
         String hashBase64;
         try {
-            MessageDigest Sha1 = MessageDigest.getInstance("SHA-1");
-            Sha1.update(plain.getBytes(StandardCharsets.UTF_8));
-            hashBase64 = Base64.getEncoder().encodeToString(Sha1.digest());
+            MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+            sha1.update(plain.getBytes(StandardCharsets.UTF_8));
+            hashBase64 = Base64.getEncoder().encodeToString(sha1.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -53,9 +53,9 @@ public class Hash {
     public static String getSha256(final String plain) {
         String hashBase64;
         try {
-            MessageDigest Sha256 = MessageDigest.getInstance("SHA-256");
-            Sha256.update(plain.getBytes(StandardCharsets.UTF_8));
-            hashBase64 = Base64.getEncoder().encodeToString(Sha256.digest());
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            sha256.update(plain.getBytes(StandardCharsets.UTF_8));
+            hashBase64 = Base64.getEncoder().encodeToString(sha256.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
