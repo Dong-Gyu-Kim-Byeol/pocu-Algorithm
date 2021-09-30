@@ -10,8 +10,8 @@ public class Hash {
     public static String getCrc32(final String plain) {
         CRC32 crc32 = new CRC32();
         crc32.update(plain.getBytes(StandardCharsets.UTF_8));
-        final String hashBase64 = String.valueOf(crc32.getValue());
-        return hashBase64;
+        final String hashString = String.valueOf(crc32.getValue());
+        return hashString;
     }
 
     public static String getMd2(final String plain) {
