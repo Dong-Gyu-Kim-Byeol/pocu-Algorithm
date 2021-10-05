@@ -8,18 +8,18 @@ import java.math.BigInteger;
 public class Program {
 
     public static void main(String[] args) {
-        // KeyGenerator
-        assert (!KeyGenerator.isPrime(BigInteger.ZERO));
-        assert (!KeyGenerator.isPrime(BigInteger.ONE));
-        assert (KeyGenerator.isPrime(BigInteger.valueOf(2)));
-        assert (KeyGenerator.isPrime(BigInteger.valueOf(3)));
-        assert (!KeyGenerator.isPrime(BigInteger.valueOf(4)));
-        assert (KeyGenerator.isPrime(BigInteger.valueOf(5)));
-        assert (!KeyGenerator.isPrime(BigInteger.valueOf(6)));
-        assert (KeyGenerator.isPrime(BigInteger.valueOf(7)));
-
-        assert (!KeyGenerator.isPrime(BigInteger.valueOf(2475)));
-        assert (!KeyGenerator.isPrime(BigInteger.valueOf(2476)));
+//        // KeyGenerator
+//        assert (!KeyGenerator.isPrime(BigInteger.ZERO));
+//        assert (!KeyGenerator.isPrime(BigInteger.ONE));
+//        assert (KeyGenerator.isPrime(BigInteger.valueOf(2)));
+//        assert (KeyGenerator.isPrime(BigInteger.valueOf(3)));
+//        assert (!KeyGenerator.isPrime(BigInteger.valueOf(4)));
+//        assert (KeyGenerator.isPrime(BigInteger.valueOf(5)));
+//        assert (!KeyGenerator.isPrime(BigInteger.valueOf(6)));
+//        assert (KeyGenerator.isPrime(BigInteger.valueOf(7)));
+//
+//        assert (!KeyGenerator.isPrime(BigInteger.valueOf(2475)));
+//        assert (!KeyGenerator.isPrime(BigInteger.valueOf(2476)));
 //        assert (KeyGenerator.isPrime(BigInteger.valueOf(2477)));
 
 //        assert (KeyGenerator.isPrime(BigInteger.valueOf(886913)));
