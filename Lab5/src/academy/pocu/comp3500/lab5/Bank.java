@@ -63,7 +63,10 @@ public class Bank {
         }
 
         final Long fromBalance = this.accounts.get(fromString);
-        if (fromBalance != null && fromBalance < amount) {
+        if (fromBalance == null) {
+            return false;
+        }
+        if (fromBalance < amount) {
             return false;
         }
 
@@ -72,11 +75,8 @@ public class Bank {
             return false;
         }
 
-
-        if (fromBalance != null) {
-            this.accounts.put(fromString, fromBalance - amount);
-        }
         if (toBalance != null) {
+            this.accounts.put(fromString, fromBalance - amount);
             this.accounts.put(toString, toBalance + amount);
         }
 
