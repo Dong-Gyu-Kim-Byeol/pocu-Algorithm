@@ -11,14 +11,11 @@ public class KeyGenerator {
     private static final BigInteger SIX = BigInteger.valueOf(6);
 
     public static boolean isPrime(final BigInteger number) {
-        if (number.compareTo(ONE) <= 0) {
-            return false;
-        }
-
         if (number.compareTo(TWO) == 0 || number.compareTo(THREE) == 0) {
             return true;
         }
-        if (number.mod(TWO).compareTo(ZERO) == 0 || number.mod(THREE).compareTo(ZERO) == 0) {
+
+        if (number.compareTo(ONE) <= 0 || number.mod(TWO).compareTo(ZERO) == 0 || number.mod(THREE).compareTo(ZERO) == 0) {
             return false;
         }
 
