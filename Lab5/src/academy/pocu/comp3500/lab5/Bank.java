@@ -11,6 +11,9 @@ public class Bank {
 
         int index = 0;
         for (final byte[] pubKey : pubKeys) {
+            if (amounts[index] < 0) {
+                continue;
+            }
             this.accounts.put(encodeToHexString(pubKey), amounts[index++]);
         }
     }
@@ -26,6 +29,10 @@ public class Bank {
     }
 
     public boolean transfer(final byte[] from, byte[] to, final long amount, final byte[] signature) {
+        if (amount < 1) {
+            return false;
+        }
+
         final String fromString = encodeToHexString(from);
         final String toString = encodeToHexString(to);
 
@@ -62,13 +69,17 @@ public class Bank {
         if (fromBalance < amount) {
             return false;
         }
-        this.accounts.put(fromString, fromBalance - amount);
-
 
         final Long toBalance = this.accounts.get(toString);
-        if (toBalance != null) {
-            this.accounts.put(toString, toBalance + amount);
+        if (toBalance == null) {
+            return false;
         }
+        if (Long.MAX_VALUE - toBalance < amount) {
+            return false;
+        }
+
+        this.accounts.put(fromString, fromBalance - amount);
+        this.accounts.put(toString, toBalance + amount);
 
         return true;
     }
