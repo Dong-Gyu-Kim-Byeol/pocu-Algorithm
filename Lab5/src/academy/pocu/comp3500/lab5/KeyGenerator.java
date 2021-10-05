@@ -16,27 +16,30 @@ public class KeyGenerator {
         }
 
         final byte[] numberBytes = number.toByteArray();
-
         final short firstByte = (short) (numberBytes[0] & 0xff);
+        final short lastByte = (short) (numberBytes[numberBytes.length - 1] & 0xff);
+
+        // number == 1
         if (numberBytes.length == 1 && firstByte == 1) {
             return false;
         }
 
+        // number == 2
         if (numberBytes.length == 1 && firstByte == 2) {
             return true;
         }
+
+        // number == 3
         if (numberBytes.length == 1 && firstByte == 3) {
             return true;
         }
 
-        final short lastByte = (short) (numberBytes[numberBytes.length - 1] & 0xff);
+        // number % 2 == 0
         if (lastByte % 2 == 0) {
             return false;
         }
 
-        if (lastByte % 3 == 0) {
-            return false;
-        }
+        // number % 3 == 0
         if (number.mod(THREE).equals(ZERO)) {
             return false;
         }

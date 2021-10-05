@@ -27,6 +27,18 @@ public class Program {
         assert (KeyGenerator.isPrime(BigInteger.valueOf(886913)));
         assert (KeyGenerator.isPrime(BigInteger.valueOf(8900000189L)));
 
+//        for (long i = 1; i < Long.MAX_VALUE / 2L; i++) {
+//            if (KeyGenerator.isPrime(BigInteger.valueOf(i * 2))) {
+//                System.out.println(BigInteger.valueOf(i * 2));
+//            }
+//        }
+//
+//        for (long i = 1; i < Long.MAX_VALUE / 3L; i++) {
+//            if (KeyGenerator.isPrime(BigInteger.valueOf(i * 3))) {
+//                System.out.println(BigInteger.valueOf(i * 3));
+//            }
+//        }
+
         // Bank
         final String TEST_PUBLIC_KEY_1 = "30820122300d06092a864886f70d01010105000382010f003082010a0282010100b2bb213e18fe414ff32bf17f6630d542a667275813627445a92043791cd924dc4dec2007a10aa6a268bfef2b56677e2cecd0092a2e348aec34316edc20648820fee83125daba065826d2cbcc684fcbafc8fb22930eb6bd827713d7c7e598b9efd83689745288e9a1630175bf2759e5749cdfbad304921d15bb901d1ba0ca31b367733161d60839c7378be720863cb5e20d845edff236f442bc0bb6ac726970038b4490d2d4f25b3b0721510cea4aa45a50fe59fa09cdadcd4c0d1ab7f268e02b3cced773985e10a18f72cb808d104874e43a0c2eb0e44345751fefd6153211a9b3dc53592e2c203694bd501d6fabc3ae53b7ec8207de79bc8188a74e0d359f290203010001";
         final String TEST_PRIVATE_KEY_1 = "308204be020100300d06092a864886f70d0101010500048204a8308204a40201000282010100b2bb213e18fe414ff32bf17f6630d542a667275813627445a92043791cd924dc4dec2007a10aa6a268bfef2b56677e2cecd0092a2e348aec34316edc20648820fee83125daba065826d2cbcc684fcbafc8fb22930eb6bd827713d7c7e598b9efd83689745288e9a1630175bf2759e5749cdfbad304921d15bb901d1ba0ca31b367733161d60839c7378be720863cb5e20d845edff236f442bc0bb6ac726970038b4490d2d4f25b3b0721510cea4aa45a50fe59fa09cdadcd4c0d1ab7f268e02b3cced773985e10a18f72cb808d104874e43a0c2eb0e44345751fefd6153211a9b3dc53592e2c203694bd501d6fabc3ae53b7ec8207de79bc8188a74e0d359f290203010001028201006d1649f3dccd528fb99bd88a29952494c97bac47d58d01ea828f6e9f3d3c4b832b0c3380748a4baa54c4d0f56287483ba34e5649a869e960c17a6a6f7055ebc037d5002a5a95afc99de88afaf7afbc624e08f9d147e9c1411fecbc87055b7221319617cf2790e907d7a5cc781f4c7effedbfa007ab8282be00fcb4c7681c00b8b625a772ad0a50047128d9a0c87286bb94b7c3791f1b1d5465e57726440f93da0cb4a125e25c607b85b52647b5a6297e4ff327e94eaa8a0bf42999e9704a43adb524bfa018"
@@ -84,7 +96,7 @@ public class Program {
             int secondDigit = Character.digit(hexString.charAt(i + 1), 16);
             bytes[i / 2] = (byte) ((firstDigit << 4) + secondDigit);
         }
-       return bytes;
+        return bytes;
     }
 
     private static String encodeToHexString(byte[] bytes) {
