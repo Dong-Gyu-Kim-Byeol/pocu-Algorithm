@@ -7,8 +7,8 @@ public class KeyGenerator {
     private static final BigInteger ONE = BigInteger.valueOf(1);
     private static final BigInteger TWO = BigInteger.valueOf(2);
     private static final BigInteger THREE = BigInteger.valueOf(3);
-    private static final BigInteger FIVE = BigInteger.valueOf(3);
-    private static final BigInteger SIX = BigInteger.valueOf(3);
+    private static final BigInteger FIVE = BigInteger.valueOf(5);
+    private static final BigInteger SIX = BigInteger.valueOf(6);
 
     public static boolean isPrime(final BigInteger number) {
         if (number.compareTo(ONE) <= 0) {
