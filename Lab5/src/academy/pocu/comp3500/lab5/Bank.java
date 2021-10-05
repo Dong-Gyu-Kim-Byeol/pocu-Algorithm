@@ -75,9 +75,11 @@ public class Bank {
             return false;
         }
 
+        this.accounts.put(fromString, fromBalance - amount);
         if (toBalance != null) {
-            this.accounts.put(fromString, fromBalance - amount);
             this.accounts.put(toString, toBalance + amount);
+        } else {
+            this.accounts.put(toString, amount);
         }
 
         return true;

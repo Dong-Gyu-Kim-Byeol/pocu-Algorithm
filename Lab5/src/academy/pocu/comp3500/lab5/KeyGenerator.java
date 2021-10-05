@@ -3,33 +3,31 @@ package academy.pocu.comp3500.lab5;
 import java.math.BigInteger;
 
 public class KeyGenerator {
-    public static boolean isPrime(final BigInteger number) {
-        final BigInteger zero = BigInteger.valueOf(0);
-        final BigInteger one = BigInteger.valueOf(1);
-        final BigInteger two = BigInteger.valueOf(2);
-        final BigInteger three = BigInteger.valueOf(3);
-        final BigInteger five = BigInteger.valueOf(3);
-        final BigInteger six = BigInteger.valueOf(3);
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger TWO = BigInteger.valueOf(2);
+    private static final BigInteger THREE = BigInteger.valueOf(3);
+    private static final BigInteger FIVE = BigInteger.valueOf(3);
+    private static final BigInteger SIX = BigInteger.valueOf(3);
 
-        if (number.compareTo(one) <= 0) {
+    public static boolean isPrime(final BigInteger number) {
+        if (number.compareTo(ONE) <= 0) {
             return false;
         }
 
-        if (number.compareTo(two) == 0 || number.compareTo(three) == 0) {
+        if (number.compareTo(TWO) == 0 || number.compareTo(THREE) == 0) {
             return true;
         }
-        if (number.mod(two).compareTo(zero) == 0 || number.mod(three).compareTo(zero) == 0) {
+        if (number.mod(TWO).compareTo(ZERO) == 0 || number.mod(THREE).compareTo(ZERO) == 0) {
             return false;
         }
 
-        for (BigInteger i = five; i.multiply(i).compareTo(number) <= 0; i = i.add(six)) {
-            if (number.mod(i).compareTo(zero) == 0 || number.mod(i.add(two)).compareTo(zero) == 0) {
+        for (BigInteger i = FIVE; i.multiply(i).compareTo(number) <= 0; i = i.add(SIX)) {
+            if (number.mod(i).compareTo(ZERO) == 0 || number.mod(i.add(TWO)).compareTo(ZERO) == 0) {
                 return false;
             }
         }
 
         return true;
     }
-
-
 }
