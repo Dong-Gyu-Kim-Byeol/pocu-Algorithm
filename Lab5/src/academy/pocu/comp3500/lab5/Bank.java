@@ -51,7 +51,6 @@ public class Bank {
         // test
         {
             KeyPair kp = Rsa.getKeyPair();
-
             final byte[] e = Rsa.encryptWithPrivateKey(fromToAmountHash, Rsa.convertPrivateKey(kp.getPrivate().getEncoded()));
             final byte[] hash = Rsa.decryptWithPublicKey(e, Rsa.convertPublicKey(kp.getPublic().getEncoded()));
             assert (encodeToHexString(fromToAmountHash).equals(encodeToHexString(hash)));
