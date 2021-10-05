@@ -1,8 +1,5 @@
 package academy.pocu.comp3500.lab5;
 
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Bank {
@@ -32,7 +29,7 @@ public class Bank {
         final String fromString = encodeToHexString(from);
         final String toString = encodeToHexString(to);
 
-        byte[] fromToAmount = new byte[from.length + to.length + 8];
+        byte[] fromToAmount = new byte[from.length + to.length + Long.BYTES];
         {
             int byteIndex = 0;
             for (final byte oneByte : from) {
@@ -48,15 +45,10 @@ public class Bank {
         final byte[] fromToAmountHash = Hash.sha256(fromToAmount);
         final String fromToAmountHashString = encodeToHexString(fromToAmountHash);
 
-        // test
-        {
-            KeyPair kp = Rsa.getKeyPair();
-            final byte[] e = Rsa.encryptWithPrivateKey(fromToAmountHash, Rsa.convertPrivateKey(kp.getPrivate().getEncoded()));
-            final byte[] hash = Rsa.decryptWithPublicKey(e, Rsa.convertPublicKey(kp.getPublic().getEncoded()));
-            assert (encodeToHexString(fromToAmountHash).equals(encodeToHexString(hash)));
+        final byte[] signatureHash = Rsa.decryptWithPublicKeyOrNull(signature, Rsa.convertPublicKey(from));
+        if (signatureHash == null) {
+            return false;
         }
-
-        final byte[] signatureHash = Rsa.decryptWithPublicKey(signature, Rsa.convertPublicKey(from));
         final String signatureHashString = encodeToHexString(signatureHash);
 
         if (fromToAmountHashString.equals(signatureHashString) == false) {

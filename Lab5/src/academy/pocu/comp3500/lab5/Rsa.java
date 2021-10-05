@@ -1,5 +1,6 @@
 package academy.pocu.comp3500.lab5;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -8,6 +9,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -65,13 +68,15 @@ public class Rsa {
         }
     }
 
-    public static byte[] decryptWithPublicKey(final byte[] encryptedMessage, PublicKey publicKey) {
+    public static byte[] decryptWithPublicKeyOrNull(final byte[] encryptedMessage, PublicKey publicKey) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, publicKey);
 
             final byte[] plaintext = cipher.doFinal(encryptedMessage);
             return plaintext;
+        } catch (BadPaddingException e) {
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -84,8 +89,8 @@ public class Rsa {
 
     public static PrivateKey convertPrivateKey(final byte[] encodedPrivateKey) {
         try {
-            final KeyFactory kf = KeyFactory.getInstance("RSA");
             final EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(encodedPrivateKey);
+            final KeyFactory kf = KeyFactory.getInstance("RSA");
 
             final PrivateKey privateKey = kf.generatePrivate(privateKeySpec);
             return privateKey;
@@ -96,8 +101,8 @@ public class Rsa {
 
     public static PublicKey convertPublicKey(final byte[] encodedPublicKey) {
         try {
-            final KeyFactory kf = KeyFactory.getInstance("RSA");
             final EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(encodedPublicKey);
+            final KeyFactory kf = KeyFactory.getInstance("RSA");
 
             final PublicKey publicKey = kf.generatePublic(publicKeySpec);
             return publicKey;
