@@ -23,7 +23,8 @@ public class KeyGenerator {
             return false;
         }
 
-        for (BigInteger i = FIVE; i.multiply(i).compareTo(number) <= 0; i = i.add(SIX)) {
+        final BigInteger numberSqrt = number.sqrt();
+        for (BigInteger i = FIVE; i.compareTo(numberSqrt) <= 0; i = i.add(SIX)) {
             if (number.mod(i).equals(ZERO) || number.mod(i.add(TWO)).equals(ZERO)) {
                 return false;
             }

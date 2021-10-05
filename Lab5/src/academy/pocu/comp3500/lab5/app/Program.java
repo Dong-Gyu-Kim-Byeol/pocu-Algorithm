@@ -6,6 +6,8 @@ import academy.pocu.comp3500.lab5.KeyGenerator;
 import java.math.BigInteger;
 
 public class Program {
+    private static final BigInteger FIVE = BigInteger.valueOf(5);
+    private static final BigInteger SIX = BigInteger.valueOf(6);
 
     public static void main(String[] args) {
         // KeyGenerator
