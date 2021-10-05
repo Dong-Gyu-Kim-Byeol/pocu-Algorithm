@@ -27,6 +27,24 @@ public class Program {
         assert (KeyGenerator.isPrime(BigInteger.valueOf(886913)));
         assert (KeyGenerator.isPrime(BigInteger.valueOf(8900000189L)));
 
+        {
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(0)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-1)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-2)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-3)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-4)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-5)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-6)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-7)));
+
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-2475)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-2476)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-2477)));
+
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-886913)));
+            assert (!KeyGenerator.isPrime(BigInteger.valueOf(-8900000189L)));
+        }
+
 //        for (long i = 1; i < Long.MAX_VALUE / 2L; i++) {
 //            if (KeyGenerator.isPrime(BigInteger.valueOf(i * 2))) {
 //                System.out.println(BigInteger.valueOf(i * 2));

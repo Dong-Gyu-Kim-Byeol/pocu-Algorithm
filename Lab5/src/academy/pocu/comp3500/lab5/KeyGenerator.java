@@ -11,13 +11,13 @@ public class KeyGenerator {
     private static final BigInteger SIX = BigInteger.valueOf(6);
 
     public static boolean isPrime(final BigInteger number) {
-        if (number.signum() <= 0) {
-            return false;
-        }
-
         final byte[] numberBytes = number.toByteArray();
         final short firstByte = (short) (numberBytes[0] & 0xff);
         final short lastByte = (short) (numberBytes[numberBytes.length - 1] & 0xff);
+
+        if (numberBytes[0] < 0) {
+            return false;
+        }
 
         // number == 1
         if (numberBytes.length == 1 && firstByte == 1) {
@@ -53,4 +53,5 @@ public class KeyGenerator {
 
         return true;
     }
+
 }
