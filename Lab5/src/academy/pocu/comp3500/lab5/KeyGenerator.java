@@ -15,11 +15,20 @@ public class KeyGenerator {
             return false;
         }
 
-        if (number.equals(TWO) || number.equals(THREE)) {
+        final byte[] numberBytes = number.toByteArray();
+
+        if (numberBytes.length == 1 && numberBytes[0] == 2) {
+            return true;
+        }
+        if (numberBytes.length == 1 && numberBytes[0] == 3) {
             return true;
         }
 
-        if (number.equals(ONE) || number.mod(TWO).equals(ZERO) || number.mod(THREE).equals(ZERO)) {
+        if (numberBytes[numberBytes.length - 1] % 2 == 0) {
+            return false;
+        }
+
+        if (number.equals(ONE) || number.mod(THREE).equals(ZERO)) {
             return false;
         }
 
