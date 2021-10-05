@@ -71,14 +71,15 @@ public class Bank {
         }
 
         final Long toBalance = this.accounts.get(toString);
-        if (toBalance != null && Long.MAX_VALUE - toBalance < amount) {
+        if (toBalance == null) {
+            return false;
+        }
+        if (Long.MAX_VALUE - toBalance < amount) {
             return false;
         }
 
         this.accounts.put(fromString, fromBalance - amount);
-        if (toBalance != null) {
-            this.accounts.put(toString, toBalance + amount);
-        }
+        this.accounts.put(toString, toBalance + amount);
 
         return true;
     }
