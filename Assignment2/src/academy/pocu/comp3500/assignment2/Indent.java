@@ -6,7 +6,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 public class Indent {
-    private static final String indentString = "  ";
+    private static final String INDENT_STRING = "  ";
 
     private final ArrayList<String> texts;
     private final String indentChar;
