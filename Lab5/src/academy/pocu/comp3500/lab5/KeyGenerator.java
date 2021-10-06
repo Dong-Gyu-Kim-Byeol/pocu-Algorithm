@@ -90,36 +90,36 @@ public class KeyGenerator {
                 return isCanPrime(number, d, BIG_31)
                         && isCanPrime(number, d, BIG_73);
             } else if (number.compareTo(DETERMINISTIC_TEST_25_326_001) < 0) {
-                //if n < 25,326,001, it is enough to test a = 2, 3, and 5;
+                // if n < 25,326,001, it is enough to test a = 2, 3, and 5;
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_3)
                         && isCanPrime(number, d, BIG_5);
             } else if (number.compareTo(DETERMINISTIC_TEST_3_215_031_751) < 0) {
-                //if n < 3,215,031,751, it is enough to test a = 2, 3, 5, and 7;
+                // if n < 3,215,031,751, it is enough to test a = 2, 3, 5, and 7;
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_3)
                         && isCanPrime(number, d, BIG_5)
                         && isCanPrime(number, d, BIG_7);
             } else if (number.compareTo(DETERMINISTIC_TEST_4_759_123_141) < 0) {
-                //if n < 4,759,123,141, it is enough to test a = 2, 7, and 61;
+                // if n < 4,759,123,141, it is enough to test a = 2, 7, and 61;
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_7)
                         && isCanPrime(number, d, BIG_61);
             } else if (number.compareTo(DETERMINISTIC_TEST_1_122_004_669_633) < 0) {
-                //if n < 1,122,004,669,633, it is enough to test a = 2, 13, 23, and 1662803;
+                // if n < 1,122,004,669,633, it is enough to test a = 2, 13, 23, and 1662803;
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_13)
                         && isCanPrime(number, d, BIG_23)
                         && isCanPrime(number, d, BIG_1_662_803);
             } else if (number.compareTo(DETERMINISTIC_TEST_2_152_302_898_747) < 0) {
-                //if n < 2,152,302,898,747, it is enough to test a = 2, 3, 5, 7, and 11;
+                // if n < 2,152,302,898,747, it is enough to test a = 2, 3, 5, 7, and 11;
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_3)
                         && isCanPrime(number, d, BIG_5)
                         && isCanPrime(number, d, BIG_7)
                         && isCanPrime(number, d, BIG_11);
             } else if (number.compareTo(DETERMINISTIC_TEST_3_474_749_660_383) < 0) {
-                //if n < 3,474,749,660,383, it is enough to test a = 2, 3, 5, 7, 11, and 13;
+                // if n < 3,474,749,660,383, it is enough to test a = 2, 3, 5, 7, 11, and 13;
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_3)
                         && isCanPrime(number, d, BIG_5)
@@ -127,7 +127,7 @@ public class KeyGenerator {
                         && isCanPrime(number, d, BIG_11)
                         && isCanPrime(number, d, BIG_13);
             } else if (number.compareTo(DETERMINISTIC_TEST_341_550_071_728_321) < 0) {
-                //if n < 341,550,071,728,321, it is enough to test a = 2, 3, 5, 7, 11, 13, and 17.
+                // if n < 341,550,071,728,321, it is enough to test a = 2, 3, 5, 7, 11, 13, and 17.
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_3)
                         && isCanPrime(number, d, BIG_5)
@@ -136,7 +136,7 @@ public class KeyGenerator {
                         && isCanPrime(number, d, BIG_13)
                         && isCanPrime(number, d, BIG_17);
             } else if (number.compareTo(DETERMINISTIC_TEST_3_825_123_056_546_413_051) < 0) {
-                //if n < 3,825,123,056,546,413,051, it is enough to test a = 2, 3, 5, 7, 11, 13, 17, 19, and 23.
+                // if n < 3,825,123,056,546,413,051, it is enough to test a = 2, 3, 5, 7, 11, 13, 17, 19, and 23.
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_3)
                         && isCanPrime(number, d, BIG_5)
@@ -161,7 +161,7 @@ public class KeyGenerator {
                         && isCanPrime(number, d, BIG_31)
                         && isCanPrime(number, d, BIG_37);
             } else if (number.compareTo(DETERMINISTIC_TEST_318_665_857_834_031_151_167_461) < 0) {
-                //if n < 318,665,857,834,031,151,167,461, it is enough to test a = 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, and 37.
+                // if n < 318,665,857,834,031,151,167,461, it is enough to test a = 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, and 37.
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_3)
                         && isCanPrime(number, d, BIG_5)
@@ -176,7 +176,7 @@ public class KeyGenerator {
                         && isCanPrime(number, d, BIG_37);
             } else {
                 assert (number.compareTo(DETERMINISTIC_TEST_3_317_044_064_679_887_385_961_981) < 0);
-                //if n < 3,317,044,064,679,887,385,961,981, it is enough to test a = 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, and 41.
+                // if n < 3,317,044,064,679,887,385,961,981, it is enough to test a = 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, and 41.
                 return isCanPrime(number, d, BIG_2)
                         && isCanPrime(number, d, BIG_3)
                         && isCanPrime(number, d, BIG_5)
