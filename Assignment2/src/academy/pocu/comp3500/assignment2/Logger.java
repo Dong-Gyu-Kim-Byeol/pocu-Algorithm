@@ -1,6 +1,6 @@
 package academy.pocu.comp3500.assignment2;
 
-import academy.pocu.comp3500.assignment2.datastructure.ArrayList;
+import academy.pocu.comp3500.assignment2.datastructure.Stack;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -8,17 +8,18 @@ import java.io.IOException;
 public final class Logger {
     private static final char[] BASE_INDENT_CHAR = {' ', ' '};
 
-    private static ArrayList<Indent> indents;
+    private static Indent rootIndent;
+
+    private static Stack<Indent> indentStack;
     private static char[] indentChar;
     private static int indentCharNextIndex;
 
     public static void log(final String text) {
-        if (indents == null) {
+        if (rootIndent == null) {
             clear();
         }
 
-        assert (indents.getSize() > 0);
-        indents.get(indents.getSize() - 1).add(text);
+        indentStack.peek().addLog(new Log(ELogType.TEXT, text));
     }
 
     public static void printTo(final BufferedWriter writer) throws IOException {
@@ -26,27 +27,18 @@ public final class Logger {
     }
 
     public static void printTo(final BufferedWriter writer, final String filter) throws IOException {
-        for (final Indent indent : indents) {
-            indent.printTo(writer, filter);
-        }
-
+        rootIndent.printTo(writer, filter);
         writer.flush();
     }
 
     public static void clear() {
-        indentCharNextIndex = 0;
-
-        if (indents == null) {
-            indents = new ArrayList<Indent>();
-        } else {
-            indents.clear();
-        }
-
         indentChar = new char[4];
         indentCharNextIndex = 0;
 
-        Indent indent = new Indent(indentChar, indentCharNextIndex);
-        indents.add(indent);
+        rootIndent = new Indent(indentChar, indentCharNextIndex);
+
+        indentStack = new Stack<Indent>();
+        indentStack.push(rootIndent);
     }
 
     public static Indent indent() {
@@ -64,24 +56,26 @@ public final class Logger {
         indentCharNextIndex += BASE_INDENT_CHAR.length;
 
         Indent indent = new Indent(indentChar, indentCharNextIndex);
-        indents.add(indent);
+        indentStack.peek().addLog(new Log(ELogType.INDENT, indent));
+        indentStack.push(indent);
         return indent;
     }
 
     public static void unindent() {
-        if (indentCharNextIndex <= 0) {
+        if (indentStack.getSize() == 1) {
+            assert (indentCharNextIndex == 0);
             return;
         }
+
+        assert (indentCharNextIndex >= BASE_INDENT_CHAR.length);
 
         for (int i = 0; i < BASE_INDENT_CHAR.length; i++) {
             indentChar[indentCharNextIndex - i] = 0;
         }
         indentCharNextIndex -= BASE_INDENT_CHAR.length;
 
-        Indent indent = new Indent(indentChar, indentCharNextIndex);
-        indents.add(indent);
+        indentStack.pop();
     }
 
     // private
-
 }

@@ -6,16 +6,20 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 public class Indent {
-    private static final String INDENT_STRING = "  ";
+    private final ArrayList<Log> logs;
 
-    private final ArrayList<String> texts;
     private final String indentChar;
     private boolean isPrint;
 
     public Indent(final char[] indentChar, final int indentCharCount) {
-        this.texts = new ArrayList<String>();
+        this.logs = new ArrayList<Log>();
+
         this.indentChar = String.valueOf(indentChar, 0, indentCharCount);
         this.isPrint = true;
+    }
+
+    public void addLog(final Log log) {
+        this.logs.add(log);
     }
 
     public void printTo(final BufferedWriter writer, final String filter) throws IOException {
@@ -23,19 +27,26 @@ public class Indent {
             return;
         }
 
-        for (final String text : this.texts) {
-            if (text.contains(filter) == false) {
-                continue;
+        for (final Log log : this.logs) {
+            switch (log.getLogType()) {
+                case TEXT: {
+                    if (log.getTextOrNull().contains(filter) == false) {
+                        continue;
+                    }
+
+                    writer.write(this.indentChar);
+                    writer.write(log.getTextOrNull());
+                    writer.write(System.lineSeparator());
+                    break;
+                }
+                case INDENT: {
+                    log.getIndentOrNull().printTo(writer, filter);
+                    break;
+                }
+                default:
+                    throw new IllegalArgumentException("unknown type");
             }
-
-            writer.write(this.indentChar);
-            writer.write(text);
-            writer.write(System.lineSeparator());
         }
-    }
-
-    public void add(final String text) {
-        this.texts.add(text);
     }
 
     public void discard() {
