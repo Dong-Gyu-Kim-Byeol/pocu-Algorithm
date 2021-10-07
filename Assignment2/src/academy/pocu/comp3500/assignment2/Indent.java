@@ -11,22 +11,24 @@ public class Indent {
     private final String indentChar;
     private boolean isPrint;
 
-    public Indent(final char[] indentChar, final int indentCharCount) {
+    // public
+    public void discard() {
+        this.isPrint = false;
+    }
+
+    // package
+    Indent(final char[] indentChar, final int indentCharCount) {
         this.logs = new ArrayList<Log>();
 
         this.indentChar = String.valueOf(indentChar, 0, indentCharCount);
         this.isPrint = true;
     }
 
-    public void discard() {
-        this.isPrint = false;
-    }
-
-    public void addLog(final Log log) {
+    void addLog(final Log log) {
         this.logs.add(log);
     }
 
-    public void printTo(final BufferedWriter writer, final String filter) throws IOException {
+    void printTo(final BufferedWriter writer, final String filter) throws IOException {
         if (this.isPrint == false) {
             return;
         }
