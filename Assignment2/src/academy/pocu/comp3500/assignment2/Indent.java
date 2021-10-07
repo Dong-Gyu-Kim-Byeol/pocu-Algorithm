@@ -18,6 +18,10 @@ public class Indent {
         this.isPrint = true;
     }
 
+    public void discard() {
+        this.isPrint = false;
+    }
+
     public void addLog(final Log log) {
         this.logs.add(log);
     }
@@ -49,7 +53,4 @@ public class Indent {
         }
     }
 
-    public void discard() {
-        this.isPrint = false;
-    }
 }

@@ -7,12 +7,25 @@ import java.io.IOException;
 
 public final class Logger {
     private static final char[] BASE_INDENT_CHAR = {' ', ' '};
+    private static final int START_INDENT_CHAR_LENGTH = 100 * BASE_INDENT_CHAR.length;
+    private static final int INCREASE_INDENT_CHAR_LENGTH_RATE = 2;
 
     private static Indent rootIndent;
 
     private static Stack<Indent> indentStack;
+
     private static char[] indentChar;
     private static int indentCharNextIndex;
+
+    public static void clear() {
+        indentChar = new char[START_INDENT_CHAR_LENGTH];
+        indentCharNextIndex = 0;
+
+        rootIndent = new Indent(indentChar, indentCharNextIndex);
+
+        indentStack = new Stack<Indent>();
+        indentStack.push(rootIndent);
+    }
 
     public static void log(final String text) {
         if (rootIndent == null) {
@@ -31,20 +44,10 @@ public final class Logger {
         writer.flush();
     }
 
-    public static void clear() {
-        indentChar = new char[4];
-        indentCharNextIndex = 0;
-
-        rootIndent = new Indent(indentChar, indentCharNextIndex);
-
-        indentStack = new Stack<Indent>();
-        indentStack.push(rootIndent);
-    }
-
     public static Indent indent() {
         if (indentCharNextIndex + BASE_INDENT_CHAR.length >= indentChar.length - 1) {
             char[] temp = indentChar;
-            indentChar = new char[temp.length * 2];
+            indentChar = new char[temp.length * INCREASE_INDENT_CHAR_LENGTH_RATE];
             for (int i = 0; i < temp.length; i++) {
                 indentChar[i] = temp[i];
             }
@@ -76,6 +79,4 @@ public final class Logger {
 
         indentStack.pop();
     }
-
-    // private
 }
