@@ -13,24 +13,24 @@ public class BinaryTreeNode<T> {
         this.setRight(right);
     }
 
-    public BinaryTreeNode<T> getParent() {
-        return parent;
-    }
-
-    public BinaryTreeNode<T> getLeft() {
-        return left;
-    }
-
-    public BinaryTreeNode<T> getRight() {
-        return right;
-    }
-
     public T getData() {
         return data;
     }
 
     public void setData(final T data) {
         this.data = data;
+    }
+
+    public BinaryTreeNode<T> getParent() {
+        return parent;
+    }
+
+    public void setParent(BinaryTreeNode<T> parent) {
+        this.parent = parent;
+    }
+
+    public BinaryTreeNode<T> getLeft() {
+        return left;
     }
 
     public void setLeft(final BinaryTreeNode<T> left) {
@@ -40,15 +40,15 @@ public class BinaryTreeNode<T> {
         }
     }
 
+    public BinaryTreeNode<T> getRight() {
+        return right;
+    }
+
     public void setRight(final BinaryTreeNode<T> right) {
         this.right = right;
         if (right != null) {
             right.setParent(this);
         }
-    }
-
-    public void setParent(BinaryTreeNode<T> parent) {
-        this.parent = parent;
     }
 
     public void clear() {

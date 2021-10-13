@@ -26,13 +26,6 @@ public class BinaryTree<T> {
     }
 
     public boolean insert(final T data) {
-        if (this.root == null) {
-            assert (this.size() == 0);
-            this.root = new BinaryTreeNode<T>(data, null, null);
-            ++this.size;
-            return true;
-        }
-
         return insertRecursive(this.root, data);
     }
 
@@ -66,13 +59,13 @@ public class BinaryTree<T> {
         }
 
         final int keyCompare = this.keyComparator.compare(target, rootOrNull.getData());
-        final int compare = this.treeBuildComparator.compare(target, rootOrNull.getData());
+        final int treeBuildCompare = this.treeBuildComparator.compare(target, rootOrNull.getData());
         if (keyCompare == 0) {
-            assert (compare == 0);
+            assert (treeBuildCompare == 0);
             return rootOrNull;
         }
 
-        if (compare < 0) {
+        if (treeBuildCompare < 0) {
             return searchOrNullRecursive(rootOrNull.getLeft(), target);
         } else {
             return searchOrNullRecursive(rootOrNull.getRight(), target);
@@ -80,18 +73,25 @@ public class BinaryTree<T> {
     }
 
     private boolean insertRecursive(final BinaryTreeNode<T> rootOrNull, final T data) {
+        if (this.root == null) {
+            assert (this.size() == 0);
+            this.root = new BinaryTreeNode<T>(data, null, null);
+            ++this.size;
+            return true;
+        }
+
         if (rootOrNull == null) {
             return false;
         }
 
         final int keyCompare = this.keyComparator.compare(data, rootOrNull.getData());
-        final int compare = this.treeBuildComparator.compare(data, rootOrNull.getData());
+        final int treeBuildCompare = this.treeBuildComparator.compare(data, rootOrNull.getData());
         if (keyCompare == 0) {
-            assert (compare == 0);
+            assert (treeBuildCompare == 0);
             return false;
         }
 
-        if (compare < 0) {
+        if (treeBuildCompare < 0) {
             if (rootOrNull.getLeft() == null) {
                 rootOrNull.setLeft(new BinaryTreeNode<T>(data, null, null));
                 ++this.size;
@@ -174,54 +174,54 @@ public class BinaryTree<T> {
         }
     }
 
-    private static <T> void descendingTraversalRecursive(final BinaryTreeNode<T> root, final T[] outData, final int[] writeIndex) {
-        assert (writeIndex.length == 1);
+    private static <T> void descendingTraversalRecursive(final BinaryTreeNode<T> rootOrNull, final T[] outData, final int[] outWriteIndex) {
+        assert (outWriteIndex.length == 1);
 
-        if (root == null) {
+        if (rootOrNull == null) {
             return;
         }
 
 
-        if (outData.length <= writeIndex[0]) {
+        if (outData.length <= outWriteIndex[0]) {
             return;
         }
-        descendingTraversalRecursive(root.getRight(), outData, writeIndex);
+        descendingTraversalRecursive(rootOrNull.getRight(), outData, outWriteIndex);
 
-        if (outData.length <= writeIndex[0]) {
+        if (outData.length <= outWriteIndex[0]) {
             return;
         }
-        outData[writeIndex[0]] = root.getData();
-        writeIndex[0]++;
+        outData[outWriteIndex[0]] = rootOrNull.getData();
+        outWriteIndex[0]++;
 
-        if (outData.length <= writeIndex[0]) {
+        if (outData.length <= outWriteIndex[0]) {
             return;
         }
-        descendingTraversalRecursive(root.getLeft(), outData, writeIndex);
+        descendingTraversalRecursive(rootOrNull.getLeft(), outData, outWriteIndex);
     }
 
-    private static <T> void inOrderTraversalRecursive(final BinaryTreeNode<T> root, final T[] outData, final int[] writeIndex) {
-        assert (writeIndex.length == 1);
+    private static <T> void inOrderTraversalRecursive(final BinaryTreeNode<T> rootOrNull, final T[] outData, final int[] outWriteIndex) {
+        assert (outWriteIndex.length == 1);
 
-        if (root == null) {
+        if (rootOrNull == null) {
             return;
         }
 
 
-        if (outData.length <= writeIndex[0]) {
+        if (outData.length <= outWriteIndex[0]) {
             return;
         }
-        inOrderTraversalRecursive(root.getLeft(), outData, writeIndex);
+        inOrderTraversalRecursive(rootOrNull.getLeft(), outData, outWriteIndex);
 
-        if (outData.length <= writeIndex[0]) {
+        if (outData.length <= outWriteIndex[0]) {
             return;
         }
-        outData[writeIndex[0]] = root.getData();
-        writeIndex[0]++;
+        outData[outWriteIndex[0]] = rootOrNull.getData();
+        outWriteIndex[0]++;
 
-        if (outData.length <= writeIndex[0]) {
+        if (outData.length <= outWriteIndex[0]) {
             return;
         }
-        inOrderTraversalRecursive(root.getRight(), outData, writeIndex);
+        inOrderTraversalRecursive(rootOrNull.getRight(), outData, outWriteIndex);
     }
 
     private static <T> BinaryTreeNode<T> getSmallNode(final BinaryTreeNode<T> root) {
