@@ -56,10 +56,6 @@ public class League {
     }
 
     public boolean leave(final Player player) {
-        if (this.map.containsKey(player.getId()) == false) {
-            return false;
-        }
-
         this.map.remove(player.getId());
         return this.tree.delete(player);
     }
