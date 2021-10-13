@@ -27,7 +27,7 @@ public class League {
             }
             this.map.put(player.getId(), player);
         }
-        this.tree.insertArray(this.map.values().toArray(new Player[0]));
+        this.tree.insertArray(players);
     }
 
     public Player findMatchOrNull(final Player player) {
