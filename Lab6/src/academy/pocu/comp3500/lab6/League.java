@@ -73,8 +73,8 @@ public class League {
         final Comparator<Player> comparator = Comparator.comparing(function);
 
         BinaryTreeNode<Player> node = root;
-        Player data = node.getData();
-        int loopMinDifference = Math.abs(function.apply(player) - function.apply(node.getData()));
+        Player data = null;
+        int loopMinDifference = Integer.MAX_VALUE;
 
         while (node != null) {
             if (player.getId() == node.getData().getId()) {
@@ -100,29 +100,30 @@ public class League {
                     assert (minDifference == loopMinDifference);
                     return data;
                 }
-            }
+            } else { // player.getId() != node.getData().getId()
+                final int tempDifference = Math.abs(function.apply(player) - function.apply(node.getData()));
 
-            final int tempDifference = Math.abs(function.apply(player) - function.apply(node.getData()));
+                if (tempDifference == 0) {
+                    return node.getData();
+                }
 
-            if (tempDifference == 0) {
-                return node.getData();
-            }
+                if (loopMinDifference == tempDifference) {
+                    assert (data != null);
+                    if (comparator.compare(data, node.getData()) < 0) {
+                        data = node.getData();
+                    }
+                }
 
-            if (loopMinDifference == tempDifference) {
-                if (comparator.compare(data, node.getData()) < 0) {
+                if (loopMinDifference > tempDifference) {
+                    loopMinDifference = tempDifference;
                     data = node.getData();
                 }
-            }
 
-            if (loopMinDifference > tempDifference) {
-                loopMinDifference = tempDifference;
-                data = node.getData();
-            }
-
-            if (comparator.compare(player, node.getData()) < 0) {
-                node = node.getLeft();
-            } else {
-                node = node.getRight();
+                if (comparator.compare(player, node.getData()) < 0) {
+                    node = node.getLeft();
+                } else {
+                    node = node.getRight();
+                }
             }
         }
 
