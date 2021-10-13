@@ -13,10 +13,7 @@ public class League {
     }
 
     public League(final Player[] players, final boolean isSorted) {
-        final Function<Player, Integer> function = Player::getRating;
-        final Comparator<Player> comparator = Comparator.comparing(function);
-
-        this.tree = new BinaryTree<Player>(comparator, Comparator.comparing(Player::getId));
+        this.tree = new BinaryTree<Player>(Comparator.comparing(Player::getRating), Comparator.comparing(Player::getId));
         this.tree.insertArray(players);
     }
 

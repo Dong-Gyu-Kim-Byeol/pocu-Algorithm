@@ -7,6 +7,7 @@ import academy.pocu.comp3500.lab6.leagueofpocu.Player;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.function.Function;
 
 public class Program {
 
@@ -68,7 +69,10 @@ public class Program {
         }
 
         {
-            final BinaryTree<Player> tree = new BinaryTree<Player>(Comparator.comparing(Player::getRating), Comparator.comparing(Player::getId));
+            final Function<Player, Integer> ratingFunction = Player::getRating;
+            final Comparator<Player> treeBuildComparator = Comparator.comparing(ratingFunction);
+            final BinaryTree<Player> tree = new BinaryTree<Player>(treeBuildComparator, Comparator.comparing(Player::getId));
+
             final HashMap<Integer, Player> map = new HashMap<Integer, Player>();
 
             Random random = new Random();
