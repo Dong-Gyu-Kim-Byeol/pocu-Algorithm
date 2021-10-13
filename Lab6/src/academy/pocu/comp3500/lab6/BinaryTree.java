@@ -42,6 +42,7 @@ public class BinaryTree<T> {
 
     public boolean delete(final T target) {
         if (this.root == null) {
+            assert (this.size() == 0);
             return false;
         }
 
