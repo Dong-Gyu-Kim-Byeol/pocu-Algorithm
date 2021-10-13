@@ -41,11 +41,6 @@ public class BinaryTree<T> {
     }
 
     public boolean delete(final T target) {
-        if (this.root == null) {
-            assert (this.size() == 0);
-            return false;
-        }
-
         final BinaryTreeNode<T> targetNode = searchOrNullRecursive(this.root, target);
         if (targetNode == null) {
             return false;
@@ -136,14 +131,12 @@ public class BinaryTree<T> {
                 } else {
                     deleteNode.getParent().setRight(null);
                 }
-
-                deleteNode.setNullAll();
-                --this.size;
-                return true;
             }
-        }
 
-        if (deleteNode.getRight() != null) {
+            deleteNode.setNullAll();
+            --this.size;
+            return true;
+        } else if (deleteNode.getRight() != null) {
             final BinaryTreeNode<T> rightSmall = getSmallNode(deleteNode.getRight());
 
             deleteNode.setData(rightSmall.getData());
@@ -152,12 +145,21 @@ public class BinaryTree<T> {
             return this.deleteRecursive(rightSmall, target);
         } else { // deleteNode.getRight() == null
             assert (deleteNode.getLeft() != null);
-            final BinaryTreeNode<T> leftBig = getBigNode(deleteNode.getLeft());
 
-            deleteNode.setData(leftBig.getData());
-            leftBig.setData(target);
+            if (deleteNode.getParent() == null) {
+                assert (this.size() == 1);
+                this.root = deleteNode.getLeft();
+            } else {
+                if (deleteNode.getParent().getLeft() == deleteNode) {
+                    deleteNode.getParent().setLeft(deleteNode.getLeft());
+                } else {
+                    deleteNode.getParent().setRight(deleteNode.getLeft());
+                }
+            }
 
-            return this.deleteRecursive(leftBig, target);
+            deleteNode.setNullAll();
+            --this.size;
+            return true;
         }
     }
 
