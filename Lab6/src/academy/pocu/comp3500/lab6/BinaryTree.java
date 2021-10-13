@@ -85,8 +85,12 @@ public class BinaryTree<T> {
             return false;
         }
 
-        final int compare = this.treeBuildComparator.compare(data, rootOrNull.getData());
+        final int keyCompare = this.keyComparator.compare(data, rootOrNull.getData());
+        if (keyCompare == 0) {
+            return false;
+        }
 
+        final int compare = this.treeBuildComparator.compare(data, rootOrNull.getData());
         if (compare < 0) {
             if (rootOrNull.getLeft() == null) {
                 rootOrNull.setLeft(new BinaryTreeNode<T>(data, null, null));

@@ -8,7 +8,6 @@ import java.util.function.Function;
 
 public class League {
     private final BinaryTree<Player> tree;
-    private final HashMap<Integer, Player> map;
 
     public League() {
         this(new Player[0], true);
@@ -19,14 +18,6 @@ public class League {
         final Comparator<Player> comparator = Comparator.comparing(function);
 
         this.tree = new BinaryTree<Player>(comparator, Comparator.comparing(Player::getId));
-        this.map = new HashMap<Integer, Player>();
-
-        for (final Player player : players) {
-            if (this.map.containsKey(player.getId())) {
-                continue;
-            }
-            this.map.put(player.getId(), player);
-        }
         this.tree.insertArray(players);
     }
 
@@ -47,16 +38,10 @@ public class League {
     }
 
     public boolean join(final Player player) {
-        if (this.map.containsKey(player.getId())) {
-            return false;
-        }
-
-        this.map.put(player.getId(), player);
         return this.tree.insert(player);
     }
 
     public boolean leave(final Player player) {
-        this.map.remove(player.getId());
         return this.tree.delete(player);
     }
 
