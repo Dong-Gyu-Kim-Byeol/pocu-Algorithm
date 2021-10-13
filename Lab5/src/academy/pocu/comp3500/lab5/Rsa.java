@@ -68,7 +68,7 @@ public class Rsa {
         }
     }
 
-    public static byte[] decryptWithPublicKeyOrNull(final byte[] encryptedMessage, PublicKey publicKey) {
+    public static byte[] decryptWithPublicKeyOrNull(final byte[] encryptedMessage, final PublicKey publicKey) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, publicKey);
