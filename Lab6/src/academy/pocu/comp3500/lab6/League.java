@@ -3,7 +3,6 @@ package academy.pocu.comp3500.lab6;
 import academy.pocu.comp3500.lab6.leagueofpocu.Player;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.function.Function;
 
 public class League {

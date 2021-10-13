@@ -65,12 +65,11 @@ public class BinaryTree<T> {
             return null;
         }
 
+        final int keyCompare = this.keyComparator.compare(target, rootOrNull.getData());
         final int compare = this.treeBuildComparator.compare(target, rootOrNull.getData());
-
-        if (compare == 0) {
-            if (this.keyComparator.compare(target, rootOrNull.getData()) == 0) {
-                return rootOrNull;
-            }
+        if (keyCompare == 0) {
+            assert (compare == 0);
+            return rootOrNull;
         }
 
         if (compare < 0) {
@@ -86,11 +85,12 @@ public class BinaryTree<T> {
         }
 
         final int keyCompare = this.keyComparator.compare(data, rootOrNull.getData());
+        final int compare = this.treeBuildComparator.compare(data, rootOrNull.getData());
         if (keyCompare == 0) {
+            assert (compare == 0);
             return false;
         }
 
-        final int compare = this.treeBuildComparator.compare(data, rootOrNull.getData());
         if (compare < 0) {
             if (rootOrNull.getLeft() == null) {
                 rootOrNull.setLeft(new BinaryTreeNode<T>(data, null, null));
@@ -124,6 +124,7 @@ public class BinaryTree<T> {
 
     private boolean deleteRecursive(final BinaryTreeNode<T> deleteNode, final T target) {
         assert (deleteNode != null);
+        assert (this.root.getParent() == null);
 
         if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
             if (deleteNode.getParent() == null) {
@@ -137,22 +138,27 @@ public class BinaryTree<T> {
                 }
             }
 
-            deleteNode.setNullAll();
+            deleteNode.clear();
             --this.size;
+            assert (this.root == null || this.root.getParent() == null);
             return true;
+
         } else if (deleteNode.getRight() != null) {
             final BinaryTreeNode<T> rightSmall = getSmallNode(deleteNode.getRight());
 
             deleteNode.setData(rightSmall.getData());
             rightSmall.setData(target);
 
+            assert (this.root.getParent() == null);
             return this.deleteRecursive(rightSmall, target);
-        } else { // deleteNode.getRight() == null
+
+        } else {
             assert (deleteNode.getLeft() != null);
+            assert (deleteNode.getRight() == null);
 
             if (deleteNode.getParent() == null) {
-                assert (this.size() == 1);
                 this.root = deleteNode.getLeft();
+                this.root.setParent(null);
             } else {
                 if (deleteNode.getParent().getLeft() == deleteNode) {
                     deleteNode.getParent().setLeft(deleteNode.getLeft());
@@ -161,8 +167,9 @@ public class BinaryTree<T> {
                 }
             }
 
-            deleteNode.setNullAll();
+            deleteNode.clear();
             --this.size;
+            assert (this.root.getParent() == null);
             return true;
         }
     }

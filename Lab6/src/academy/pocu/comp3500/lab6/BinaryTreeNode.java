@@ -47,16 +47,15 @@ public class BinaryTreeNode<T> {
         }
     }
 
-    public void setNullAll() {
+    public void setParent(BinaryTreeNode<T> parent) {
+        this.parent = parent;
+    }
+
+    public void clear() {
         this.setData(null);
         this.setParent(null);
         this.setLeft(null);
         this.setRight(null);
-    }
-
-    // private
-    private void setParent(BinaryTreeNode<T> parent) {
-        this.parent = parent;
     }
 
 }

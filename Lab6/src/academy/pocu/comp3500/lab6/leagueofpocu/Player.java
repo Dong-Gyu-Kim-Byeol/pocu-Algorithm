@@ -26,7 +26,7 @@ public final class Player {
     /**
      * Example:
      * [0012] Hoddor           Rating: 12
-     * */
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(30);
