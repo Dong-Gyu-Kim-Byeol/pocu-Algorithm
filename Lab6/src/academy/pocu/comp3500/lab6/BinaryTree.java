@@ -80,9 +80,7 @@ public class BinaryTree<T> {
             return true;
         }
 
-        if (rootOrNull == null) {
-            return false;
-        }
+        assert (rootOrNull != null);
 
         final int keyCompare = this.keyComparator.compare(data, rootOrNull.getData());
         final int treeBuildCompare = this.treeBuildComparator.compare(data, rootOrNull.getData());
