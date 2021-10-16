@@ -4,13 +4,13 @@ import java.util.Comparator;
 
 public class BinaryTree<T> {
     private BinaryTreeNode<T> root;
-    private final Comparator<T> treeBuildComparator;
     private final Comparator<T> keyComparator;
+    private final Comparator<T> treeBuildComparator;
     private int size;
 
-    public BinaryTree(final Comparator<T> treeBuildComparator, final Comparator<T> keyComparator) {
-        this.treeBuildComparator = treeBuildComparator;
+    public BinaryTree(final Comparator<T> keyComparator, final Comparator<T> treeBuildComparator) {
         this.keyComparator = keyComparator;
+        this.treeBuildComparator = treeBuildComparator;
     }
 
     public BinaryTreeNode<T> getRoot() {

@@ -71,7 +71,7 @@ public class Program {
         {
             final Function<Player, Integer> ratingFunction = Player::getRating;
             final Comparator<Player> treeBuildComparator = Comparator.comparing(ratingFunction);
-            final BinaryTree<Player> tree = new BinaryTree<Player>(treeBuildComparator, Comparator.comparing(Player::getId));
+            final BinaryTree<Player> tree = new BinaryTree<Player>(Comparator.comparing(Player::getId), treeBuildComparator);
 
             final HashMap<Integer, Player> map = new HashMap<Integer, Player>();
 
