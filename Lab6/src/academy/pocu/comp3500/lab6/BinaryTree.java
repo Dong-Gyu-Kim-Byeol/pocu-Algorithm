@@ -1,17 +1,22 @@
 package academy.pocu.comp3500.lab6;
 
 import java.util.Comparator;
+import java.util.function.Function;
 
 public class BinaryTree<T> {
     private final Comparator<T> keyComparator;
+
+    private final Function<T, Integer> treeBuildFunction;
     private final Comparator<T> treeBuildComparator;
 
     private BinaryTreeNode<T> rootOrNull;
     private int size;
 
-    public BinaryTree(final Comparator<T> keyComparator, final Comparator<T> treeBuildComparator) {
+    public BinaryTree(final Comparator<T> keyComparator, final Function<T, Integer> treeBuildFunction) {
         this.keyComparator = keyComparator;
-        this.treeBuildComparator = treeBuildComparator;
+
+        this.treeBuildFunction = treeBuildFunction;
+        this.treeBuildComparator = Comparator.comparing(treeBuildFunction);
     }
 
     public void initByArray(final T[] sortedData) {
@@ -24,8 +29,16 @@ public class BinaryTree<T> {
         this.size = 0;
     }
 
-    public BinaryTreeNode<T> getRootOrNull() {
-        return rootOrNull;
+    public Comparator<T> getKeyComparator() {
+        return keyComparator;
+    }
+
+    public Function<T, Integer> getTreeBuildFunction() {
+        return treeBuildFunction;
+    }
+
+    public Comparator<T> getTreeBuildComparator() {
+        return treeBuildComparator;
     }
 
     public int size() {
@@ -62,6 +75,15 @@ public class BinaryTree<T> {
         assert (outData.length <= this.size());
         inOrderTraversalRecursive(this.rootOrNull, outData, new int[1]);
     }
+
+    public T findAndNearOrNull(final T target) {
+        return findAndNearOrNullRecursive(this.rootOrNull, target, false);
+    }
+
+    public T findAndNearWithoutTargetOrNull(final T target) {
+        return findAndNearOrNullRecursive(this.rootOrNull, target, true);
+    }
+
 
     // private
     private void initByArrayRecursive(final T[] sortedData, final int left, final int right, final BinaryTreeNode<T> parentNodeOrRootOrNull) {
@@ -292,4 +314,73 @@ public class BinaryTree<T> {
         return node;
     }
 
+    private T findAndNearOrNullRecursive(final BinaryTreeNode<T> rootOrNull, final T target, final boolean isWithoutTarget) {
+        if (rootOrNull == null) {
+            return null;
+        }
+
+        BinaryTreeNode<T> node = rootOrNull;
+        T data = null;
+        int loopMinDifference = Integer.MAX_VALUE;
+
+        while (node != null) {
+            final int keyCompare = this.keyComparator.compare(target, node.getData());
+            if (keyCompare == 0) {
+                if (isWithoutTarget) {
+                    int rightDifference = Integer.MAX_VALUE;
+                    final T right = findAndNearOrNullRecursive(node.getRight(), target, isWithoutTarget);
+                    if (right != null) {
+                        rightDifference = Math.abs(this.treeBuildFunction.apply(target) - this.treeBuildFunction.apply(right));
+                    }
+
+                    int leftDifference = Integer.MAX_VALUE;
+                    final T left = findAndNearOrNullRecursive(node.getLeft(), target, isWithoutTarget);
+                    if (left != null) {
+                        leftDifference = Math.abs(this.treeBuildFunction.apply(target) - this.treeBuildFunction.apply(left));
+                    }
+
+                    final int minDifference = Math.min(loopMinDifference, Math.min(rightDifference, leftDifference));
+
+                    if (minDifference == rightDifference) {
+                        return right;
+                    } else if (minDifference == loopMinDifference) {
+                        return data;
+                    } else {
+                        assert (minDifference == leftDifference);
+                        return left;
+                    }
+                } else {
+                    data = node.getData();
+                    return data;
+                }
+            } else { // keyCompare != 0
+                final int targetTreeBuildCompare = this.treeBuildComparator.compare(target, node.getData());
+                if (targetTreeBuildCompare == 0) {
+                    return node.getData();
+                }
+
+                final int tempDifference = Math.abs(this.treeBuildFunction.apply(target) - this.treeBuildFunction.apply(node.getData()));
+
+                if (loopMinDifference == tempDifference) {
+                    assert (data != null);
+                    if (this.treeBuildComparator.compare(data, node.getData()) < 0) {
+                        data = node.getData();
+                    }
+                }
+
+                if (loopMinDifference > tempDifference) {
+                    loopMinDifference = tempDifference;
+                    data = node.getData();
+                }
+
+                if (targetTreeBuildCompare < 0) {
+                    node = node.getLeft();
+                } else {
+                    node = node.getRight();
+                }
+            }
+        }
+
+        return data;
+    }
 }
