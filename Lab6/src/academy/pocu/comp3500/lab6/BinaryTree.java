@@ -13,6 +13,12 @@ public class BinaryTree<T> {
         this.treeBuildComparator = treeBuildComparator;
     }
 
+    public void clear() {
+        this.root = null;
+        this.size = 0;
+    }
+
+
     public BinaryTreeNode<T> getRoot() {
         return root;
     }
@@ -31,6 +37,11 @@ public class BinaryTree<T> {
 
     public void insertArray(final T[] data) {
         this.insertArrayRecursive(data, 0, data.length - 1);
+    }
+
+    public void initArray(final T[] data) {
+        this.clear();
+        this.initArrayRecursive(data, 0, data.length - 1, this.root);
     }
 
     public boolean delete(final T target) {
@@ -118,6 +129,33 @@ public class BinaryTree<T> {
 
         insertArrayRecursive(data, left, mid - 1);
         insertArrayRecursive(data, mid + 1, right);
+    }
+
+    private void initArrayRecursive(final T[] data, final int left, final int right, final BinaryTreeNode<T> parentNode) {
+        if (left > right) {
+            return;
+        }
+
+        final int mid = (left + right) / 2;
+        final BinaryTreeNode<T> newNode = new BinaryTreeNode<>(data[mid], null, null);
+
+        if (this.root == null) {
+            assert (parentNode == null);
+            this.root = newNode;
+        } else {
+            final int treeBuildCompare = this.treeBuildComparator.compare(newNode.getData(), parentNode.getData());
+            if (treeBuildCompare < 0) {
+                assert (parentNode.getLeft() == null);
+                parentNode.setLeft(newNode);
+            } else {
+                assert (parentNode.getRight() == null);
+                parentNode.setRight(newNode);
+            }
+        }
+        ++this.size;
+
+        initArrayRecursive(data, left, mid - 1, newNode);
+        initArrayRecursive(data, mid + 1, right, newNode);
     }
 
     private boolean deleteRecursive(final BinaryTreeNode<T> deleteNode, final T target) {

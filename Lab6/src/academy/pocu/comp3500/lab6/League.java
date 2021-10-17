@@ -14,7 +14,11 @@ public class League {
 
     public League(final Player[] players, final boolean isSorted) {
         this.tree = new BinaryTree<Player>(Comparator.comparing(Player::getId), Comparator.comparing(Player::getRating));
-        this.tree.insertArray(players);
+        if (isSorted) {
+            this.tree.initArray(players);
+        } else {
+            this.tree.insertArray(players);
+        }
     }
 
     public Player findMatchOrNull(final Player player) {
