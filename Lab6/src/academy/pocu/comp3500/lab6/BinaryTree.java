@@ -14,9 +14,9 @@ public class BinaryTree<T> {
         this.treeBuildComparator = treeBuildComparator;
     }
 
-    public void initArray(final T[] sortedData) {
+    public void initByArray(final T[] sortedData) {
         this.clear();
-        this.initArrayRecursive(sortedData, 0, sortedData.length - 1, this.rootOrNull);
+        this.initByArrayRecursive(sortedData, 0, sortedData.length - 1, this.rootOrNull);
     }
 
     public void clear() {
@@ -64,7 +64,7 @@ public class BinaryTree<T> {
     }
 
     // private
-    private void initArrayRecursive(final T[] sortedData, final int left, final int right, final BinaryTreeNode<T> parentNodeOrRootOrNull) {
+    private void initByArrayRecursive(final T[] sortedData, final int left, final int right, final BinaryTreeNode<T> parentNodeOrRootOrNull) {
         if (left > right) {
             return;
         }
@@ -101,8 +101,8 @@ public class BinaryTree<T> {
         }
         ++this.size;
 
-        initArrayRecursive(sortedData, left, mid - 1, newNode);
-        initArrayRecursive(sortedData, mid + 1, right, newNode);
+        initByArrayRecursive(sortedData, left, mid - 1, newNode);
+        initByArrayRecursive(sortedData, mid + 1, right, newNode);
     }
 
     private BinaryTreeNode<T> searchOrNullRecursive(final BinaryTreeNode<T> rootOrNull, final T target) {
