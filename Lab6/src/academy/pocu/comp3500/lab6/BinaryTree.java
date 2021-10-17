@@ -136,11 +136,25 @@ public class BinaryTree<T> {
             return;
         }
 
-        final int mid = (left + right) / 2;
+        int mid = (left + right) / 2;
+        while (true) {
+            if (mid == left) {
+                break;
+            }
+
+            assert (mid > left);
+            final int compare = this.treeBuildComparator.compare(data[mid - 1], data[mid]);
+            if (compare < 0) {
+                break;
+            }
+
+            --mid;
+        }
         final BinaryTreeNode<T> newNode = new BinaryTreeNode<>(data[mid], null, null);
 
         if (this.root == null) {
             assert (parentNode == null);
+            assert (this.size() == 0);
             this.root = newNode;
         } else {
             final int treeBuildCompare = this.treeBuildComparator.compare(newNode.getData(), parentNode.getData());
