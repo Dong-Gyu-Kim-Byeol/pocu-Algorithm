@@ -3,9 +3,10 @@ package academy.pocu.comp3500.lab6;
 import java.util.Comparator;
 
 public class BinaryTree<T> {
-    private BinaryTreeNode<T> root;
     private final Comparator<T> keyComparator;
     private final Comparator<T> treeBuildComparator;
+
+    private BinaryTreeNode<T> rootOrNull;
     private int size;
 
     public BinaryTree(final Comparator<T> keyComparator, final Comparator<T> treeBuildComparator) {
@@ -13,14 +14,18 @@ public class BinaryTree<T> {
         this.treeBuildComparator = treeBuildComparator;
     }
 
+    public void initArray(final T[] sortedData) {
+        this.clear();
+        this.initArrayRecursive(sortedData, 0, sortedData.length - 1, this.rootOrNull);
+    }
+
     public void clear() {
-        this.root = null;
+        this.rootOrNull = null;
         this.size = 0;
     }
 
-
-    public BinaryTreeNode<T> getRoot() {
-        return root;
+    public BinaryTreeNode<T> getRootOrNull() {
+        return rootOrNull;
     }
 
     public int size() {
@@ -28,24 +33,19 @@ public class BinaryTree<T> {
     }
 
     public T searchOrNull(final T target) {
-        return searchOrNullRecursive(this.root, target).getData();
+        return searchOrNullRecursive(this.rootOrNull, target).getData();
     }
 
     public boolean insert(final T data) {
-        return insertRecursive(this.root, data);
+        return insertRecursive(this.rootOrNull, data);
     }
 
     public void insertArray(final T[] data) {
         this.insertArrayRecursive(data, 0, data.length - 1);
     }
 
-    public void initArray(final T[] data) {
-        this.clear();
-        this.initArrayRecursive(data, 0, data.length - 1, this.root);
-    }
-
     public boolean delete(final T target) {
-        final BinaryTreeNode<T> targetNode = searchOrNullRecursive(this.root, target);
+        final BinaryTreeNode<T> targetNode = searchOrNullRecursive(this.rootOrNull, target);
         if (targetNode == null) {
             return false;
         }
@@ -55,15 +55,56 @@ public class BinaryTree<T> {
 
     public void descendingTraversal(final T[] outData) {
         assert (outData.length <= this.size());
-        descendingTraversalRecursive(this.root, outData, new int[1]);
+        descendingTraversalRecursive(this.rootOrNull, outData, new int[1]);
     }
 
     public void inOrderTraversal(final T[] outData) {
         assert (outData.length <= this.size());
-        inOrderTraversalRecursive(this.root, outData, new int[1]);
+        inOrderTraversalRecursive(this.rootOrNull, outData, new int[1]);
     }
 
     // private
+    private void initArrayRecursive(final T[] sortedData, final int left, final int right, final BinaryTreeNode<T> parentNodeOrRootOrNull) {
+        if (left > right) {
+            return;
+        }
+
+        int mid = (left + right) / 2;
+        while (true) {
+            if (mid == left) {
+                break;
+            }
+
+            assert (mid > left);
+            final int compare = this.treeBuildComparator.compare(sortedData[mid - 1], sortedData[mid]);
+            if (compare < 0) {
+                break;
+            }
+
+            --mid;
+        }
+        final BinaryTreeNode<T> newNode = new BinaryTreeNode<>(sortedData[mid], null, null);
+
+        if (parentNodeOrRootOrNull == null) {
+            assert (rootOrNull == null);
+            assert (this.size() == 0);
+            this.rootOrNull = newNode;
+        } else {
+            final int treeBuildCompare = this.treeBuildComparator.compare(newNode.getData(), parentNodeOrRootOrNull.getData());
+            if (treeBuildCompare < 0) {
+                assert (parentNodeOrRootOrNull.getLeft() == null);
+                parentNodeOrRootOrNull.setLeft(newNode);
+            } else {
+                assert (parentNodeOrRootOrNull.getRight() == null);
+                parentNodeOrRootOrNull.setRight(newNode);
+            }
+        }
+        ++this.size;
+
+        initArrayRecursive(sortedData, left, mid - 1, newNode);
+        initArrayRecursive(sortedData, mid + 1, right, newNode);
+    }
+
     private BinaryTreeNode<T> searchOrNullRecursive(final BinaryTreeNode<T> rootOrNull, final T target) {
         if (rootOrNull == null) {
             return null;
@@ -84,9 +125,9 @@ public class BinaryTree<T> {
     }
 
     private boolean insertRecursive(final BinaryTreeNode<T> rootOrNull, final T data) {
-        if (this.root == null) {
+        if (this.rootOrNull == null) {
             assert (this.size() == 0);
-            this.root = new BinaryTreeNode<T>(data, null, null);
+            this.rootOrNull = new BinaryTreeNode<T>(data, null, null);
             ++this.size;
             return true;
         }
@@ -131,55 +172,14 @@ public class BinaryTree<T> {
         insertArrayRecursive(data, mid + 1, right);
     }
 
-    private void initArrayRecursive(final T[] data, final int left, final int right, final BinaryTreeNode<T> parentNode) {
-        if (left > right) {
-            return;
-        }
-
-        int mid = (left + right) / 2;
-        while (true) {
-            if (mid == left) {
-                break;
-            }
-
-            assert (mid > left);
-            final int compare = this.treeBuildComparator.compare(data[mid - 1], data[mid]);
-            if (compare < 0) {
-                break;
-            }
-
-            --mid;
-        }
-        final BinaryTreeNode<T> newNode = new BinaryTreeNode<>(data[mid], null, null);
-
-        if (this.root == null) {
-            assert (parentNode == null);
-            assert (this.size() == 0);
-            this.root = newNode;
-        } else {
-            final int treeBuildCompare = this.treeBuildComparator.compare(newNode.getData(), parentNode.getData());
-            if (treeBuildCompare < 0) {
-                assert (parentNode.getLeft() == null);
-                parentNode.setLeft(newNode);
-            } else {
-                assert (parentNode.getRight() == null);
-                parentNode.setRight(newNode);
-            }
-        }
-        ++this.size;
-
-        initArrayRecursive(data, left, mid - 1, newNode);
-        initArrayRecursive(data, mid + 1, right, newNode);
-    }
-
     private boolean deleteRecursive(final BinaryTreeNode<T> deleteNode, final T target) {
         assert (deleteNode != null);
-        assert (this.root.getParent() == null);
+        assert (this.rootOrNull.getParent() == null);
 
         if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
             if (deleteNode.getParent() == null) {
                 assert (this.size() == 1);
-                this.root = null;
+                this.rootOrNull = null;
             } else {
                 if (deleteNode.getParent().getLeft() == deleteNode) {
                     deleteNode.getParent().setLeft(null);
@@ -190,7 +190,7 @@ public class BinaryTree<T> {
 
             deleteNode.clear();
             --this.size;
-            assert (this.root == null || this.root.getParent() == null);
+            assert (this.rootOrNull == null || this.rootOrNull.getParent() == null);
             return true;
 
         } else if (deleteNode.getRight() != null) {
@@ -199,7 +199,7 @@ public class BinaryTree<T> {
             deleteNode.setData(rightSmall.getData());
             rightSmall.setData(target);
 
-            assert (this.root.getParent() == null);
+            assert (this.rootOrNull.getParent() == null);
             return this.deleteRecursive(rightSmall, target);
 
         } else {
@@ -207,8 +207,8 @@ public class BinaryTree<T> {
             assert (deleteNode.getRight() == null);
 
             if (deleteNode.getParent() == null) {
-                this.root = deleteNode.getLeft();
-                this.root.setParent(null);
+                this.rootOrNull = deleteNode.getLeft();
+                this.rootOrNull.setParent(null);
             } else {
                 if (deleteNode.getParent().getLeft() == deleteNode) {
                     deleteNode.getParent().setLeft(deleteNode.getLeft());
@@ -219,7 +219,7 @@ public class BinaryTree<T> {
 
             deleteNode.clear();
             --this.size;
-            assert (this.root.getParent() == null);
+            assert (this.rootOrNull.getParent() == null);
             return true;
         }
     }

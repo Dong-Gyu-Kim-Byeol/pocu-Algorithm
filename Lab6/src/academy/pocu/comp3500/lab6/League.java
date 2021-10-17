@@ -22,7 +22,7 @@ public class League {
     }
 
     public Player findMatchOrNull(final Player player) {
-        return findAndNearOrNullRecursive(this.tree.getRoot(), player, Player::getRating);
+        return findAndNearOrNullRecursive(this.tree.getRootOrNull(), player, Player::getRating);
     }
 
     public Player[] getTop(final int count) {
