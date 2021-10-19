@@ -6,22 +6,18 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 public class Indent {
-    private final ArrayList<Log> logs;
-
+    private ArrayList<Log> logs;
     private final String indentChar;
-    private boolean isPrint;
 
     // public
     public void discard() {
-        this.isPrint = false;
+        this.logs = null;
     }
 
     // package
     Indent(final char[] indentChar, final int indentCharCount) {
         this.logs = new ArrayList<Log>();
-
         this.indentChar = String.valueOf(indentChar, 0, indentCharCount);
-        this.isPrint = true;
     }
 
     void addLog(final Log log) {
@@ -29,14 +25,14 @@ public class Indent {
     }
 
     void printTo(final BufferedWriter writer, final String filter) throws IOException {
-        if (this.isPrint == false) {
+        if (this.logs == null) {
             return;
         }
 
         for (final Log log : this.logs) {
             switch (log.getLogType()) {
                 case TEXT: {
-                    if (log.getTextOrNull().contains(filter) == false) {
+                    if (!log.getTextOrNull().contains(filter)) {
                         continue;
                     }
 

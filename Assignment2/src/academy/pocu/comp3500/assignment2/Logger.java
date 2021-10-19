@@ -32,7 +32,7 @@ public final class Logger {
             clear();
         }
 
-        indentStack.peek().addLog(new Log(ELogType.TEXT, text));
+        indentStack.peek().addLog(new Log(text));
     }
 
     public static void printTo(final BufferedWriter writer) throws IOException {
@@ -59,7 +59,7 @@ public final class Logger {
         indentCharNextIndex += BASE_INDENT_CHAR.length;
 
         Indent indent = new Indent(indentChar, indentCharNextIndex);
-        indentStack.peek().addLog(new Log(ELogType.INDENT, indent));
+        indentStack.peek().addLog(new Log(indent));
         indentStack.push(indent);
         return indent;
     }

@@ -5,22 +5,16 @@ public class Log {
     private final Indent indentOrNull;
     private final String textOrNull;
 
-    public Log(final ELogType logType, final Object textOrIndent) {
-        this.logType = logType;
-        switch (this.logType) {
-            case TEXT:
-                assert (textOrIndent instanceof String);
-                this.textOrNull = (String) textOrIndent;
-                this.indentOrNull = null;
-                break;
-            case INDENT:
-                assert (textOrIndent instanceof Indent);
-                this.textOrNull = null;
-                this.indentOrNull = (Indent) textOrIndent;
-                break;
-            default:
-                throw new IllegalArgumentException("unknown type");
-        }
+    public Log(final String text) {
+        this.logType = ELogType.TEXT;
+        this.textOrNull = text;
+        this.indentOrNull = null;
+    }
+
+    public Log(final Indent indent) {
+        this.logType = ELogType.INDENT;
+        this.textOrNull = null;
+        this.indentOrNull = indent;
     }
 
     public ELogType getLogType() {
