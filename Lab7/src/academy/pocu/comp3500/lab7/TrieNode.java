@@ -3,9 +3,9 @@ package academy.pocu.comp3500.lab7;
 public final class TrieNode {
     public final static int ALPHABET_COUNT = 26;
 
-    private final boolean isWordEnd;
     private final char character;
-    private final String wordOrNull;
+    private boolean isWordEnd;
+    private String wordOrNull;
     private final TrieNode[] children;
 
     public TrieNode(final char character, final boolean isWordEnd, final String wordOrNull) {
@@ -19,6 +19,11 @@ public final class TrieNode {
         this.isWordEnd = isWordEnd;
         this.wordOrNull = wordOrNull;
         this.children = new TrieNode[ALPHABET_COUNT];
+    }
+
+    public void setWord(final String word) {
+        this.isWordEnd = true;
+        this.wordOrNull = word;
     }
 
     public void addChild(final TrieNode node) {

@@ -38,6 +38,10 @@ public final class Trie {
                 } else {
                     parentOrNull.addChild(newNode);
                 }
+            } else {
+                if (isEndChar) {
+                    nodes[character - 'a'].setWord(lowWord);
+                }
             }
 
             parentOrNull = nodes[character - 'a'];
@@ -101,7 +105,6 @@ public final class Trie {
                 while (accessIndexStack.peek() != -1) {
                     wordAccessArray[accessIndexStack.pop()] = false;
                 }
-
                 continue;
             }
             final TrieNode node = nodeOrNull;
