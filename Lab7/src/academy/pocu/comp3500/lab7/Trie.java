@@ -1,15 +1,23 @@
 package academy.pocu.comp3500.lab7;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Stack;
 
 public final class Trie {
     private final TrieNode[] roots;
+    private int size;
+    private int wordSize;
 
     public Trie() {
         this.roots = new TrieNode[TrieNode.ALPHABET_COUNT];
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public int getWordSize() {
+        return wordSize;
     }
 
     public void addWord(final String word) {
@@ -31,6 +39,7 @@ public final class Trie {
                 final TrieNode newNode;
                 if (isEndChar) {
                     newNode = new TrieNode(character, isEndChar, lowWord);
+                    ++this.wordSize;
                 } else {
                     newNode = new TrieNode(character, isEndChar, null);
                 }
@@ -41,9 +50,11 @@ public final class Trie {
                 } else {
                     parentOrNull.addChild(newNode);
                 }
+                ++this.size;
             } else {
-                if (isEndChar) {
+                if (isEndChar && nodes[charIndex].isWordEnd() == false) {
                     nodes[charIndex].setWord(lowWord);
+                    ++this.wordSize;
                 }
             }
 
@@ -86,10 +97,10 @@ public final class Trie {
 
     public ArrayList<String> findSameAlphabetDifferentOrder(final String word) {
         final String lowWord = word.toLowerCase();
-        final ArrayList<String> candidates = new ArrayList<String>();
+        final ArrayList<String> candidates = new ArrayList<String>(this.wordSize);
 
-        final Stack<TrieNode> nodeOrNullStack = new Stack<TrieNode>();
-        final Stack<Integer> accessIndexStack = new Stack<Integer>();
+        final FixedStack<TrieNode> nodeOrNullStack = new FixedStack<TrieNode>(2 * this.size + 1);
+        final FixedStack<Integer> accessIndexStack = new FixedStack<Integer>(2 * this.size + 1);
 
         accessIndexStack.push(-1);
         for (final TrieNode node : this.roots) {
@@ -103,7 +114,7 @@ public final class Trie {
 
         final HashMap<Character, Integer[]> accessArrayStartIndex = new HashMap<Character, Integer[]>(lowWord.length());
         final char[] wordArray = lowWord.toCharArray();
-        Sort.quickSort(wordArray);
+        Sort.radixSort(wordArray, 3);
         for (int i = 0; i < lowWord.length(); ++i) {
             if (accessArrayStartIndex.containsKey(wordArray[i]) == false) {
                 accessArrayStartIndex.put(wordArray[i], new Integer[]{i, 1});
@@ -175,6 +186,8 @@ public final class Trie {
 
         assert (accessIndexStack.size() == 1);
         assert (accessIndexStack.peek() == -1);
+        assert (accessIndexStack.capacity() == 2 * this.size + 1);
+        assert (nodeOrNullStack.capacity() == 2 * this.size + 1);
 
         return candidates;
     }

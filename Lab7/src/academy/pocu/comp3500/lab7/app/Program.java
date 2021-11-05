@@ -17,6 +17,37 @@ public class Program {
         }
 
         {
+            String[] codeWords = new String[]{"aaaaaaaaaaaaaaaaaaaaaaaa"};
+
+            Decryptor decryptor = new Decryptor(codeWords);
+
+            String[] candidates = decryptor.findCandidates("aaaaaaaaaaaaaaaaaaaaaaaa");
+
+            assert (candidates.length == 1);
+            assert (candidates[0].equals("aaaaaaaaaaaaaaaaaaaaaaaa"));
+        }
+
+        {
+            String[] codeWords = new String[]{"aaaaaaaaaaaaaaaaaaaaaaaa"};
+
+            Decryptor decryptor = new Decryptor(codeWords);
+
+            String[] candidates = decryptor.findCandidates("aaaaaaaaaaaaaaaaaaaaaaaaa");
+
+            assert (candidates.length == 0);
+        }
+
+        {
+            String[] codeWords = new String[]{"aaaaaaaaaaaaaaaaaaaaaaaa"};
+
+            Decryptor decryptor = new Decryptor(codeWords);
+
+            String[] candidates = decryptor.findCandidates("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+            assert (candidates.length == 0);
+        }
+
+        {
             String[] codeWords = new String[]{"cat", "CATS", "AcTS", "SCAN", "acre", "aNTS", "nNn", "N"};
 
             Decryptor decryptor = new Decryptor(codeWords);

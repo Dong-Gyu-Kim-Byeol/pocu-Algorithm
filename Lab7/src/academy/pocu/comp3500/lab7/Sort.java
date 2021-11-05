@@ -1,8 +1,9 @@
 package academy.pocu.comp3500.lab7;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
-public class Sort {
+public final class Sort {
     private Sort() {
     }
 
@@ -14,6 +15,68 @@ public class Sort {
                     swap(objects, j, j + 1);
                 }
             }
+        }
+    }
+
+    public static void radixSort(final char[] array, int cycle) {
+        final ArrayList<ArrayList<Character>> scratch = new ArrayList<ArrayList<Character>>(10);
+        for (int i = 0; i < 10; ++i) {
+            scratch.add(new ArrayList<Character>(array.length));
+        }
+        int div = 1;
+
+        while (cycle > 0) {
+            for (final char c : array) {
+                final int scratchIndex = (c / div) % 10;
+                scratch.get(scratchIndex).add(c);
+            }
+
+            int arrayIndex = 0;
+            for (int i = 0; i < 10; ++i) {
+                final ArrayList<Character> subScratch = scratch.get(i);
+                for (final char c : subScratch) {
+                    assert (arrayIndex < array.length);
+                    array[arrayIndex++] = c;
+                }
+            }
+
+            for (int i = 0; i < 10; ++i) {
+                scratch.get(i).clear();
+            }
+
+            div *= 10;
+            --cycle;
+        }
+    }
+
+    public static void radixSort(final int[] array, int cycle) {
+        final ArrayList<ArrayList<Integer>> scratch = new ArrayList<ArrayList<Integer>>(10);
+        for (int i = 0; i < 10; ++i) {
+            scratch.add(new ArrayList<Integer>(array.length));
+        }
+        int div = 1;
+
+        while (cycle > 0) {
+            for (final int num : array) {
+                final int scratchIndex = (num / div) % 10;
+                scratch.get(scratchIndex).add(num);
+            }
+
+            int arrayIndex = 0;
+            for (int i = 0; i < 10; ++i) {
+                final ArrayList<Integer> subScratch = scratch.get(i);
+                for (final int num : subScratch) {
+                    assert (arrayIndex < array.length);
+                    array[arrayIndex++] = num;
+                }
+            }
+
+            for (int i = 0; i < 10; ++i) {
+                scratch.get(i).clear();
+            }
+
+            div *= 10;
+            --cycle;
         }
     }
 
@@ -124,11 +187,11 @@ public class Sort {
     private static int chooseMedianPivotPos(final char[] array, final int left, final int right) {
         final int mid = (left + right) / 2;
 
-        if ((Character.compare(array[mid], array[left]) < 0 && Character.compare(array[left], array[right]) < 0)
-                || (Character.compare(array[right], array[left]) < 0 && Character.compare(array[left], array[mid]) < 0)) {
+        if ((array[mid] < array[left] && array[left] < array[right])
+                || (array[right] < array[left] && array[left] < array[mid])) {
             return left;
-        } else if ((Character.compare(array[left], array[mid]) < 0 && Character.compare(array[mid], array[right]) < 0)
-                || (Character.compare(array[right], array[mid]) < 0 && Character.compare(array[mid], array[left]) < 0)) {
+        } else if ((array[left] < array[mid] && array[mid] < array[right])
+                || (array[right] < array[mid] && array[mid] < array[left])) {
             return mid;
         } else {
             return right;

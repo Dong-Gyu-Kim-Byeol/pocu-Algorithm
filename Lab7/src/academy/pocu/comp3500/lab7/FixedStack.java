@@ -1,0 +1,37 @@
+package academy.pocu.comp3500.lab7;
+
+public final class FixedStack<T> extends java.util.ArrayList<T> {
+    private final int capacity;
+
+    public FixedStack(final int capacity) {
+        super(capacity);
+        this.capacity = capacity;
+    }
+
+    public int capacity() {
+        assert (this.capacity >= this.size());
+        return this.capacity;
+    }
+
+    public T peek() {
+        assert (this.capacity >= this.size());
+        return this.get(this.size() - 1);
+    }
+
+    public void push(final T data) {
+        assert (this.capacity > this.size());
+        this.add(data);
+    }
+
+    public T pop() {
+        assert (this.capacity >= this.size());
+        final T data = this.get(this.size() - 1);
+        this.remove(this.size() - 1);
+        return data;
+    }
+
+    public boolean empty() {
+        assert (this.capacity >= this.size());
+        return this.size() == 0;
+    }
+}
