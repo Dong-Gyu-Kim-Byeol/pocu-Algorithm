@@ -12,7 +12,7 @@ public class Hash {
         return crc32;
     }
 
-    public static long fnv1_32(final byte[] data) {
+    public static long fnv1(final byte[] data) {
         final long PRIME_32 = 16777619;
         final long OFFSET_32 = 2166136261L;
 
@@ -25,7 +25,7 @@ public class Hash {
         return hash;
     }
 
-    public static long fnv1a_32(final byte[] data) {
+    public static long fnv1a(final byte[] data) {
         final long PRIME_32 = 16777619;
         final long OFFSET_32 = 2166136261L;
 

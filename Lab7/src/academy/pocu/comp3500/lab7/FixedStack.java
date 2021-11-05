@@ -3,7 +3,7 @@ package academy.pocu.comp3500.lab7;
 import java.nio.charset.StandardCharsets;
 
 public final class FixedStack<T> extends java.util.ArrayList<T> {
-    private static final long serialVersionUID = Hash.fnv1_32("FixedStack".getBytes(StandardCharsets.UTF_8));
+    private static final long serialVersionUID = Hash.fnv1("FixedStack".getBytes(StandardCharsets.UTF_8));
 
     private final int capacity;
 

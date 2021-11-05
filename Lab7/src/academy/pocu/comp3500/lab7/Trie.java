@@ -100,9 +100,9 @@ public final class Trie {
         final ArrayList<String> candidates = new ArrayList<String>(this.wordSize);
 
         final FixedStack<TrieNode> nodeOrNullStack = new FixedStack<TrieNode>(2 * this.size + 1);
-        final FixedStack<Integer> accessIndexStack = new FixedStack<Integer>(2 * this.size + 1);
+        final FixedStack<Integer> accessIndexOrNullStack = new FixedStack<Integer>(2 * this.size + 1);
 
-        accessIndexStack.push(-1);
+        accessIndexOrNullStack.push(null);
         for (final TrieNode node : this.roots) {
             if (node != null) {
                 nodeOrNullStack.push(node);
@@ -112,9 +112,9 @@ public final class Trie {
         int wordAccessCount = 0;
         final boolean[] wordAccessArray = new boolean[lowWord.length()];
 
-        final HashMap<Character, Integer[]> accessArrayStartIndex = new HashMap<Character, Integer[]>(lowWord.length());
         final char[] wordArray = lowWord.toCharArray();
         Sort.radixSort(wordArray, 3);
+        final HashMap<Character, Integer[]> accessArrayStartIndex = new HashMap<Character, Integer[]>(lowWord.length());
         for (int i = 0; i < lowWord.length(); ++i) {
             if (accessArrayStartIndex.containsKey(wordArray[i]) == false) {
                 accessArrayStartIndex.put(wordArray[i], new Integer[]{i, 1});
@@ -126,11 +126,11 @@ public final class Trie {
         while (nodeOrNullStack.empty() == false) {
             final TrieNode nodeOrNull = nodeOrNullStack.pop();
             if (nodeOrNull == null) {
-                assert (accessIndexStack.peek() == -1);
-                accessIndexStack.pop();
+                assert (accessIndexOrNullStack.peek() == null);
+                accessIndexOrNullStack.pop();
 
-                while (accessIndexStack.peek() != -1) {
-                    wordAccessArray[accessIndexStack.pop()] = false;
+                while (accessIndexOrNullStack.peek() != null) {
+                    wordAccessArray[accessIndexOrNullStack.pop()] = false;
                     --wordAccessCount;
                 }
                 continue;
@@ -145,7 +145,7 @@ public final class Trie {
                     if (wordAccessArray[i] == false) {
                         wordAccessArray[i] = true;
 
-                        accessIndexStack.push(i);
+                        accessIndexOrNullStack.push(i);
                         ++wordAccessCount;
 
                         isDifferent = false;
@@ -155,8 +155,8 @@ public final class Trie {
             }
 
             if (isDifferent) {
-                while (accessIndexStack.peek() != -1) {
-                    wordAccessArray[accessIndexStack.pop()] = false;
+                while (accessIndexOrNullStack.peek() != null) {
+                    wordAccessArray[accessIndexOrNullStack.pop()] = false;
                     --wordAccessCount;
                 }
                 continue;
@@ -167,15 +167,15 @@ public final class Trie {
                 assert (candidate != null);
                 candidates.add(candidate);
 
-                while (accessIndexStack.peek() != -1) {
-                    wordAccessArray[accessIndexStack.pop()] = false;
+                while (accessIndexOrNullStack.peek() != null) {
+                    wordAccessArray[accessIndexOrNullStack.pop()] = false;
                     --wordAccessCount;
                 }
                 continue;
             }
 
 
-            accessIndexStack.push(-1);
+            accessIndexOrNullStack.push(null);
             nodeOrNullStack.push(null);
             for (int i = 0; i < node.getChildren().length; ++i) {
                 if (node.getChildren()[i] != null) {
@@ -184,9 +184,9 @@ public final class Trie {
             }
         }
 
-        assert (accessIndexStack.size() == 1);
-        assert (accessIndexStack.peek() == -1);
-        assert (accessIndexStack.capacity() == 2 * this.size + 1);
+        assert (accessIndexOrNullStack.size() == 1);
+        assert (accessIndexOrNullStack.peek() == null);
+        assert (accessIndexOrNullStack.capacity() == 2 * this.size + 1);
         assert (nodeOrNullStack.capacity() == 2 * this.size + 1);
 
         return candidates;
