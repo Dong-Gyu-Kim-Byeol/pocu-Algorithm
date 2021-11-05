@@ -186,7 +186,7 @@ public final class Trie {
 
         assert (accessIndexOrNullStack.size() == 1);
         assert (accessIndexOrNullStack.peek() == null);
-        
+
         return candidates;
     }
 }
