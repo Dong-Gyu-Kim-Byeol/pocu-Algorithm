@@ -1,6 +1,8 @@
 package academy.pocu.comp3500.lab7;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Stack;
 
 public final class Trie {
@@ -99,6 +101,17 @@ public final class Trie {
         int wordAccessCount = 0;
         final boolean[] wordAccessArray = new boolean[lowWord.length()];
 
+        final HashMap<Character, Integer[]> accessArrayStartIndex = new HashMap<Character, Integer[]>(lowWord.length());
+        final char[] wordArray = lowWord.toCharArray();
+        Sort.quickSort(wordArray);
+        for (int i = 0; i < lowWord.length(); ++i) {
+            if (accessArrayStartIndex.containsKey(wordArray[i]) == false) {
+                accessArrayStartIndex.put(wordArray[i], new Integer[]{i, 1});
+            } else {
+                ++accessArrayStartIndex.get(wordArray[i])[1];
+            }
+        }
+
         while (nodeOrNullStack.empty() == false) {
             final TrieNode nodeOrNull = nodeOrNullStack.pop();
             if (nodeOrNull == null) {
@@ -115,8 +128,9 @@ public final class Trie {
             assert (node != null);
 
             boolean isDifferent = true;
-            for (int i = 0; i < wordAccessArray.length; ++i) {
-                if (node.getCharacter() == lowWord.charAt(i)) {
+            if (accessArrayStartIndex.containsKey(node.getCharacter())) {
+                final int iLimit = accessArrayStartIndex.get(node.getCharacter())[0] + accessArrayStartIndex.get(node.getCharacter())[1];
+                for (int i = accessArrayStartIndex.get(node.getCharacter())[0]; i < iLimit; ++i) {
                     if (wordAccessArray[i] == false) {
                         wordAccessArray[i] = true;
 
@@ -138,25 +152,15 @@ public final class Trie {
             }
 
             if (node.isWordEnd() && wordAccessCount == lowWord.length()) {
-                boolean isSame = true;
-                for (final boolean access : wordAccessArray) {
-                    if (access == false) {
-                        isSame = false;
-                        break;
-                    }
-                }
+                final String candidate = node.getWordOrNull();
+                assert (candidate != null);
+                candidates.add(candidate);
 
-                if (isSame) {
-                    final String candidate = node.getWordOrNull();
-                    assert (candidate != null);
-                    candidates.add(candidate);
-
-                    while (accessIndexStack.peek() != -1) {
-                        wordAccessArray[accessIndexStack.pop()] = false;
-                        --wordAccessCount;
-                    }
-                    continue;
+                while (accessIndexStack.peek() != -1) {
+                    wordAccessArray[accessIndexStack.pop()] = false;
+                    --wordAccessCount;
                 }
+                continue;
             }
 
 
