@@ -9,6 +9,9 @@ public final class TrieNode {
     private final TrieNode[] children;
 
     public TrieNode(final char character, final boolean isWordEnd, final String wordOrNull) {
+        assert ('a' <= character);
+        assert (character <= 'z');
+
         assert (isWordEnd == true && wordOrNull != null
                 || isWordEnd == false && wordOrNull == null);
 

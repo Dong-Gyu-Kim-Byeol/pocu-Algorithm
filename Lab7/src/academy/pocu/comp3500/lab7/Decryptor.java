@@ -9,7 +9,7 @@ public final class Decryptor {
     public Decryptor(final String[] codeWords) {
         this.trie = new Trie();
         for (final String word : codeWords) {
-            this.trie.addWord(word.toLowerCase());
+            this.trie.addWord(word);
         }
     }
 
