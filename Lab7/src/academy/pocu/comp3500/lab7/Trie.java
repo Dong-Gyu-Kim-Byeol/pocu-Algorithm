@@ -23,8 +23,9 @@ public final class Trie {
             assert (character <= 'z');
 
             final boolean isEndChar = wordIndex == lowWord.length() - 1;
+            final int charIndex = character - 'a';
 
-            if (nodes[character - 'a'] == null) {
+            if (nodes[charIndex] == null) {
                 final TrieNode newNode;
                 if (isEndChar) {
                     newNode = new TrieNode(character, isEndChar, lowWord);
@@ -34,17 +35,17 @@ public final class Trie {
 
                 if (parentOrNull == null) {
                     assert (nodes == this.roots);
-                    nodes[character - 'a'] = newNode;
+                    nodes[charIndex] = newNode;
                 } else {
                     parentOrNull.addChild(newNode);
                 }
             } else {
                 if (isEndChar) {
-                    nodes[character - 'a'].setWord(lowWord);
+                    nodes[charIndex].setWord(lowWord);
                 }
             }
 
-            parentOrNull = nodes[character - 'a'];
+            parentOrNull = nodes[charIndex];
             nodes = parentOrNull.getChildren();
             ++wordIndex;
         }
@@ -62,17 +63,18 @@ public final class Trie {
             assert (character <= 'z');
 
             final boolean isEndChar = wordIndex == lowWord.length() - 1;
+            final int charIndex = character - 'a';
 
-            if (nodes[character - 'a'] == null) {
+            if (nodes[charIndex] == null) {
                 return false;
             }
 
             if (isEndChar) {
-                assert (nodes[character - 'a'].isWordEnd());
+                assert (nodes[charIndex].isWordEnd());
                 return true;
             }
 
-            nodes = nodes[character - 'a'].getChildren();
+            nodes = nodes[charIndex].getChildren();
             ++wordIndex;
         }
 
@@ -94,6 +96,7 @@ public final class Trie {
             }
         }
 
+        int wordAccessCount = 0;
         final boolean[] wordAccessArray = new boolean[lowWord.length()];
 
         while (nodeOrNullStack.empty() == false) {
@@ -104,6 +107,7 @@ public final class Trie {
 
                 while (accessIndexStack.peek() != -1) {
                     wordAccessArray[accessIndexStack.pop()] = false;
+                    --wordAccessCount;
                 }
                 continue;
             }
@@ -115,7 +119,9 @@ public final class Trie {
                 if (node.getCharacter() == lowWord.charAt(i)) {
                     if (wordAccessArray[i] == false) {
                         wordAccessArray[i] = true;
+
                         accessIndexStack.push(i);
+                        ++wordAccessCount;
 
                         isDifferent = false;
                         break;
@@ -126,11 +132,12 @@ public final class Trie {
             if (isDifferent) {
                 while (accessIndexStack.peek() != -1) {
                     wordAccessArray[accessIndexStack.pop()] = false;
+                    --wordAccessCount;
                 }
                 continue;
             }
 
-            if (node.isWordEnd()) {
+            if (node.isWordEnd() && wordAccessCount == lowWord.length()) {
                 boolean isSame = true;
                 for (final boolean access : wordAccessArray) {
                     if (access == false) {
@@ -146,6 +153,7 @@ public final class Trie {
 
                     while (accessIndexStack.peek() != -1) {
                         wordAccessArray[accessIndexStack.pop()] = false;
+                        --wordAccessCount;
                     }
                     continue;
                 }
