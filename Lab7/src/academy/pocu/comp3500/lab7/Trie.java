@@ -116,13 +116,13 @@ public final class Trie {
             }
         }
 
+        accessIndexOrNullStack.push(null);
         for (final TrieNode root : this.roots) {
             if (root != null && accessArrayStartIndex.containsKey(root.getCharacter())) {
                 nodeOrNullStack.push(root);
             }
         }
 
-        accessIndexOrNullStack.push(null);
         while (nodeOrNullStack.empty() == false) {
             final TrieNode nodeOrNull = nodeOrNullStack.pop();
             if (nodeOrNull == null) {
