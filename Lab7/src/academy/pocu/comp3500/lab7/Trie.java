@@ -178,7 +178,7 @@ public final class Trie {
             accessIndexOrNullStack.push(null);
             nodeOrNullStack.push(null);
             for (int i = 0; i < node.getChildren().length; ++i) {
-                if (node.getChildren()[i] != null) {
+                if (node.getChildren()[i] != null && accessArrayStartIndex.containsKey(node.getChildren()[i].getCharacter())) {
                     nodeOrNullStack.push(node.getChildren()[i]);
                 }
             }
