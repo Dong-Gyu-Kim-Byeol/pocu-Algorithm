@@ -110,20 +110,19 @@ public final class Trie {
         final HashMap<Character, Integer[]> accessArrayStartIndex = new HashMap<Character, Integer[]>(lowWord.length());
         for (int i = 0; i < lowWord.length(); ++i) {
             if (accessArrayStartIndex.containsKey(wordArray[i]) == false) {
-                accessArrayStartIndex.put(wordArray[i], new Integer[]{i, 1});
+                accessArrayStartIndex.put(wordArray[i], new Integer[]{i, 1}); // Integer[] : first -> wordAccessArray index / second -> same char count
             } else {
                 ++accessArrayStartIndex.get(wordArray[i])[1];
             }
         }
 
-        accessIndexOrNullStack.push(null);
-        for (int i = 0; i < this.roots.length; ++i) {
-            final TrieNode root = this.roots[i];
+        for (final TrieNode root : this.roots) {
             if (root != null && accessArrayStartIndex.containsKey(root.getCharacter())) {
                 nodeOrNullStack.push(root);
             }
         }
 
+        accessIndexOrNullStack.push(null);
         while (nodeOrNullStack.empty() == false) {
             final TrieNode nodeOrNull = nodeOrNullStack.pop();
             if (nodeOrNull == null) {
@@ -178,8 +177,7 @@ public final class Trie {
 
             accessIndexOrNullStack.push(null);
             nodeOrNullStack.push(null);
-            for (int i = 0; i < node.getChildren().length; ++i) {
-                final TrieNode nextNode = node.getChildren()[i];
+            for (final TrieNode nextNode : node.getChildren()) {
                 if (nextNode != null && accessArrayStartIndex.containsKey(nextNode.getCharacter())) {
                     nodeOrNullStack.push(nextNode);
                 }
