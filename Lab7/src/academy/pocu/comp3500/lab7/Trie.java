@@ -102,13 +102,6 @@ public final class Trie {
         final FixedStack<TrieNode> nodeOrNullStack = new FixedStack<TrieNode>(2 * this.size + 1);
         final FixedStack<Integer> accessIndexOrNullStack = new FixedStack<Integer>(2 * this.size + 1);
 
-        accessIndexOrNullStack.push(null);
-        for (final TrieNode node : this.roots) {
-            if (node != null) {
-                nodeOrNullStack.push(node);
-            }
-        }
-
         int wordAccessCount = 0;
         final boolean[] wordAccessArray = new boolean[lowWord.length()];
 
@@ -120,6 +113,14 @@ public final class Trie {
                 accessArrayStartIndex.put(wordArray[i], new Integer[]{i, 1});
             } else {
                 ++accessArrayStartIndex.get(wordArray[i])[1];
+            }
+        }
+
+        accessIndexOrNullStack.push(null);
+        for (int i = 0; i < this.roots.length; ++i) {
+            final TrieNode root = this.roots[i];
+            if (root != null && accessArrayStartIndex.containsKey(root.getCharacter())) {
+                nodeOrNullStack.push(root);
             }
         }
 
@@ -138,21 +139,21 @@ public final class Trie {
             final TrieNode node = nodeOrNull;
             assert (node != null);
 
+            assert (accessArrayStartIndex.containsKey(node.getCharacter()));
             boolean isDifferent = true;
-            if (accessArrayStartIndex.containsKey(node.getCharacter())) {
-                final int iLimit = accessArrayStartIndex.get(node.getCharacter())[0] + accessArrayStartIndex.get(node.getCharacter())[1];
-                for (int i = accessArrayStartIndex.get(node.getCharacter())[0]; i < iLimit; ++i) {
-                    if (wordAccessArray[i] == false) {
-                        wordAccessArray[i] = true;
+            final int iLimit = accessArrayStartIndex.get(node.getCharacter())[0] + accessArrayStartIndex.get(node.getCharacter())[1];
+            for (int i = accessArrayStartIndex.get(node.getCharacter())[0]; i < iLimit; ++i) {
+                if (wordAccessArray[i] == false) {
+                    wordAccessArray[i] = true;
 
-                        accessIndexOrNullStack.push(i);
-                        ++wordAccessCount;
+                    accessIndexOrNullStack.push(i);
+                    ++wordAccessCount;
 
-                        isDifferent = false;
-                        break;
-                    }
+                    isDifferent = false;
+                    break;
                 }
             }
+
 
             if (isDifferent) {
                 while (accessIndexOrNullStack.peek() != null) {
@@ -178,8 +179,9 @@ public final class Trie {
             accessIndexOrNullStack.push(null);
             nodeOrNullStack.push(null);
             for (int i = 0; i < node.getChildren().length; ++i) {
-                if (node.getChildren()[i] != null && accessArrayStartIndex.containsKey(node.getChildren()[i].getCharacter())) {
-                    nodeOrNullStack.push(node.getChildren()[i]);
+                final TrieNode nextNode = node.getChildren()[i];
+                if (nextNode != null && accessArrayStartIndex.containsKey(nextNode.getCharacter())) {
+                    nodeOrNullStack.push(nextNode);
                 }
             }
         }
