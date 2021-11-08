@@ -55,6 +55,9 @@ public class Program {
                 break;
             }
         }
+
+//        int i = Player.boardNum;
+//        int d = 1;
     }
 
     public static void pause(long milliseconds) {

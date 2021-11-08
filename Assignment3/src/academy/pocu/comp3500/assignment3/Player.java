@@ -3,11 +3,11 @@ package academy.pocu.comp3500.assignment3;
 import academy.pocu.comp3500.assignment3.chess.Move;
 import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Stack;
+import java.util.ArrayList;
 
-public class Player extends PlayerBase {
+public final class Player extends PlayerBase {
+    private static final int BOARD_SIZE = 8;
+
     private static final int[][] KING_MOVE_OFFSETS = {
             {-1, 1},
             {-1, 0},
@@ -30,628 +30,613 @@ public class Player extends PlayerBase {
             {2, 1}
     };
 
-    private static final int[][] WHITE_PAWN_MOVE_OFFSETS = {
+    private static final int[][] PAWN_MOVE_OFFSETS = {
             {0, -1},
-            {0, -2}
-    };
-    private static final int[][] WHITE_PAWN_ATTACK_OFFSETS = {
-            {-1, -1},
-            {1, -1}
-    };
-
-    private static final int[][] BLACK_PAWN_MOVE_OFFSETS = {
+            {0, -2},
             {0, 1},
-            {0, 2}
-    };
-    private static final int[][] BLACK_PAWN_ATTACK_OFFSETS = {
+            {0, 2},
+            {-1, -1},
+            {1, -1},
             {-1, 1},
             {1, 1}
     };
 
-    private final static int BOARD_SIZE = 8;
-    private final static char[] PIECES = {'p', 'r', 'b', 'q', 'n', 'k'};
+    private static final int KING_SCORE = 10000;
+    private static final int QUEEN_SCORE = 1000;
+    private static final int ROOK_SCORE = 700;
+    private static final int BISHOP_SCORE = 500;
+    private static final int KNIGHT_SCORE = 300;
+    private static final int PAWN_SCORE = 100;
 
-    private final Random random = new Random();
+    private static final int DEPTH = 4;
 
-    // char position : (char) ((y << 4) ^ x) // char position == (char) -1 : die
-    // char piece : (char) (symbol(piece) << 4 ^ number)
-    private final char[][] board;
-    private final HashMap<Character, Character> myPositionsFromPieces;
-    private final HashMap<Character, Character> opponentPositionsFromPieces;
+//    public int scoreMoveNum;
+//    public int movesArrayListNum;
+//    public int moveNum;
+//    public static int boardNum;
 
+    private final EColor color;
     private Move scratchMove;
-    private Move myMove;
-    private final Stack<Move> moveRecoveryStack;
-    private final Stack<Move> moveBestStack;
-
-    private final int[][] MY_PAWN_MOVE_OFFSETS;
-    private final int[][] MY_PAWN_ATTACK_OFFSETS;
-
+    private Move bestMove;
+    private Move resultMove;
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
 
-        this.myPositionsFromPieces = new HashMap<Character, Character>();
-//        this.myPiecesFromPositions = new HashMap<Character, Character>();
+//        scoreMoveNum = 0;
+//        movesArrayListNum = 0;
+//        moveNum = 0;
+//        boardNum = 0;
 
-        this.opponentPositionsFromPieces = new HashMap<Character, Character>();
-//        this.opponentPiecesFromPositions = new HashMap<Character, Character>();
-
-        this.myMove = new Move();
+        this.color = isWhite ? EColor.WHITE : EColor.BLACK;
         this.scratchMove = new Move();
-        this.moveRecoveryStack = new Stack<Move>();
-        this.moveBestStack = new Stack<Move>();
-
-        this.MY_PAWN_MOVE_OFFSETS = this.isWhite() ? WHITE_PAWN_MOVE_OFFSETS : BLACK_PAWN_MOVE_OFFSETS;
-        this.MY_PAWN_ATTACK_OFFSETS = this.isWhite() ? WHITE_PAWN_ATTACK_OFFSETS : BLACK_PAWN_ATTACK_OFFSETS;
-
-        this.board = this.createNewBoard();
-//        this.printMap();
-    }
-
-    private void printMap() {
-        if (this.isWhite()) {
-            System.out.println(" W ");
-        } else {
-            System.out.println(" B ");
-        }
-
-        for (final char pos : myPositionsFromPieces.values()) {
-            final char piece = this.board[pos >> 4][pos & 0x0f];
-            System.out.print((char) (piece >> 4));
-            System.out.print(" ");
-            System.out.print(piece & 0x0f);
-
-            System.out.print("  ");
-            System.out.print((int) (pos >> 4));
-            System.out.print(" ");
-            System.out.println(pos & 0x0f);
-        }
+        this.bestMove = new Move();
+        this.resultMove = new Move();
     }
 
     public Move getNextMove(final char[][] board) {
         return getNextMove(board, null);
     }
 
-    private int calculateScore(final char attackedPiece) {
-        switch (attackedPiece) {
-            case 'k': {
-                return Integer.MAX_VALUE;
-            }
+    public Move getNextMove(final char[][] board, final Move opponentMove) {
+        assert (board.length == BOARD_SIZE);
+        assert (board[0].length == BOARD_SIZE);
 
-            case 'q': {
-                return 500;
-            }
+        final EColor opponent = this.color == EColor.WHITE ? EColor.BLACK : EColor.WHITE;
 
-            case 'r': {
-                return 300;
-            }
+        ScoreMove move = getBestMoveRecursive(board,
+                this.color,
+                opponent,
+                this.color,
+                1,
+                Player.DEPTH);
 
-            case 'b': {
-                return 200;
-            }
+        resultMove.fromX = move.fromX;
+        resultMove.fromY = move.fromY;
+        resultMove.toX = move.toX;
+        resultMove.toY = move.toY;
 
-            case 'n': {
-                return 100;
-            }
+        return resultMove;
+    }
 
-            case 'p': {
-                return 50;
-            }
+    private ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
+        assert (board.length == BOARD_SIZE);
+        assert (board[0].length == BOARD_SIZE);
 
+        if (turnCount >= maxTurnCount) {
+//            scoreMoveNum++;
+            return new ScoreMove(-1, -1, -1, -1, calculateBoardPoint(board, player));
+        }
+
+        if (hasWon(board, opponent)) {
+//            scoreMoveNum++;
+            return new ScoreMove(-1, -1, -1, -1, -10000);
+        }
+
+        if (hasWon(board, player)) {
+//            scoreMoveNum++;
+            return new ScoreMove(-1, -1, -1, -1, 10000);
+        }
+
+        final ArrayList<Move> canMoveList = getCanMoveList(board, player);
+        if (canMoveList.isEmpty()) {
+//            scoreMoveNum++;
+            return new ScoreMove(-1, -1, -1, -1, 0);
+        }
+
+//        movesArrayListNum++;
+        final ArrayList<ScoreMove> moves = new ArrayList<>();
+
+        for (final Move canMove : canMoveList) {
+            final char[][] newBoard = createCopy(board);
+            newBoard[canMove.toY][canMove.toX] = newBoard[canMove.fromY][canMove.fromX];
+            newBoard[canMove.fromY][canMove.fromX] = 0;
+
+            final EColor nextPlayer = turn == player
+                    ? opponent : player;
+
+            int score = getBestMoveRecursive(newBoard,
+                    player,
+                    opponent,
+                    nextPlayer,
+                    turnCount + 1,
+                    maxTurnCount).score;
+
+//            scoreMoveNum++;
+            ScoreMove move = new ScoreMove(canMove.fromX, canMove.fromY, canMove.toX, canMove.toY, score);
+            moves.add(move);
+        }
+
+        if (turn == player) {
+            return getMaxScoreMove(moves);
+        }
+
+        return getMinScoreMove(moves);
+    }
+
+    private static int getPieceScore(final char attackedPiece) {
+        switch (Character.toLowerCase(attackedPiece)) {
+            case 'k':
+                return KING_SCORE;
+            case 'q':
+                return QUEEN_SCORE;
+            case 'r':
+                return ROOK_SCORE;
+            case 'b':
+                return BISHOP_SCORE;
+            case 'n':
+                return KNIGHT_SCORE;
+            case 'p':
+                return PAWN_SCORE;
             default:
                 return 0;
         }
     }
 
-    private boolean isOpponentPiece(final char piece) {
-        if (piece == 0) {
-            return false;
-        }
+    private ArrayList<Move> getCanMoveList(final char[][] board, final EColor player) {
+//        movesArrayListNum++;
+        ArrayList<Move> moves = new ArrayList<>();
 
-        if (this.isWhite()) {
-            return Character.isUpperCase(piece);
-        } else {
-            return Character.isLowerCase(piece);
-        }
-    }
-
-    private boolean isMyPiece(final char piece) {
-        if (piece == 0) {
-            return false;
-        }
-
-        if (this.isWhite()) {
-            return Character.isLowerCase(piece);
-        } else {
-            return Character.isUpperCase(piece);
-        }
-    }
-
-    private void movePiece(final boolean isOpponentMove, final Move move) {
-        final HashMap<Character, Character> moveMap = isOpponentMove ? this.opponentPositionsFromPieces : this.myPositionsFromPieces;
-        final HashMap<Character, Character> deleteMap = !isOpponentMove ? this.opponentPositionsFromPieces : this.myPositionsFromPieces;
-
-        final char movePiece = this.board[move.fromY][move.fromX];
-        this.board[move.fromY][move.fromX] = 0;
-
-        final char deletePiece = this.board[move.toY][move.toX];
-        if (this.isMyPiece((char) (deletePiece >> 4))) {
-            deleteMap.put(deletePiece, (char) -1);
-        }
-
-        this.board[move.toY][move.toX] = movePiece;
-        moveMap.put(movePiece, (char) (move.toY << 4 ^ move.toX));
-    }
-
-    public Move getNextMove(final char[][] board, final Move opponentMove) {
-        if (opponentMove != null) {
-            movePiece(true, opponentMove);
-        }
-
-
-        int bestScore = Integer.MIN_VALUE;
-        force_break:
-        for (char switchPiece : Player.PIECES) {
-            switch (switchPiece) {
-                case 'p': {
-                    switchPiece = this.isWhite() ? switchPiece : Character.toUpperCase(switchPiece);
-                    for (int i = 1; i <= 8; i++) {
-                        final char piece = (char) (switchPiece << 4 ^ i);
-                        final char pos = myPositionsFromPieces.get(piece);
-                        if (pos == (char) -1) {
-                            continue;
-                        }
-
-                        final int fromX = pos & 0x0f;
-                        final int fromY = pos >> 4;
-
-                        // pawn attack
-                        for (final int[] pawnAttackOffset : MY_PAWN_ATTACK_OFFSETS) {
-                            final int toX = fromX + pawnAttackOffset[0];
-                            final int toY = fromY + pawnAttackOffset[1];
-
-                            if (this.isMoveValid(fromX, fromY, toX, toY)) {
-                                scratchMove.fromX = fromX;
-                                scratchMove.fromY = fromY;
-                                scratchMove.toX = toX;
-                                scratchMove.toY = toY;
-
-                                final char attackedPiece = (char) (this.board[toY][toX] >> 4);
-                                assert (this.isOpponentPiece(attackedPiece));
-                                final int score = this.calculateScore(Character.toLowerCase(attackedPiece));
-                                if (score == Integer.MAX_VALUE) {
-                                    bestScore = score;
-                                    final Move temp = this.myMove;
-                                    this.myMove = this.scratchMove;
-                                    this.scratchMove = temp;
-                                    break force_break;
-                                } else {
-                                    if (bestScore < score) {
-                                        bestScore = score;
-                                        final Move temp = this.myMove;
-                                        this.myMove = this.scratchMove;
-                                        this.scratchMove = temp;
-                                    }
-                                }
-                            }
-                        }
-
-                        // pawn move
-                        for (final int[] pawnMoveOffset : MY_PAWN_MOVE_OFFSETS) {
-                            final int toX = fromX + pawnMoveOffset[0];
-                            final int toY = fromY + pawnMoveOffset[1];
-
-                            if (this.isMoveValid(fromX, fromY, toX, toY)) {
-                                this.scratchMove.fromX = fromX;
-                                this.scratchMove.fromY = fromY;
-                                this.scratchMove.toX = toX;
-                                this.scratchMove.toY = toY;
-
-                                final char emptyPiece = (char) (this.board[toY][toX] >> 4);
-                                assert (emptyPiece == 0);
-                                final int score = this.calculateScore(Character.toLowerCase(emptyPiece));
-                                assert (score == 0);
-                                if (bestScore < score) {
-                                    bestScore = score;
-                                    final Move temp = this.myMove;
-                                    this.myMove = this.scratchMove;
-                                    this.scratchMove = temp;
-                                }
-                            }
-                        }
-                    }
-
-                    break;
+        Move move;
+        for (int y = 0; y < BOARD_SIZE; ++y) {
+            for (int x = 0; x < BOARD_SIZE; ++x) {
+                if (board[y][x] == 0) {
+                    continue;
                 }
 
-                case 'k': {
-                    switchPiece = this.isWhite() ? switchPiece : Character.toUpperCase(switchPiece);
-                    final char piece = (char) (switchPiece << 4 ^ 1);
-                    final char pos = myPositionsFromPieces.get(piece);
-                    assert (pos != 0);
-                    if (pos == (char) -1) {
-                        continue;
-                    }
-
-                    final int fromX = pos & 0x0f;
-                    final int fromY = pos >> 4;
-                    // king
-                    for (final int[] kingMoveOffset : KING_MOVE_OFFSETS) {
-                        final int toX = fromX + kingMoveOffset[0];
-                        final int toY = fromY + kingMoveOffset[1];
-
-                        if (this.isMoveValid(fromX, fromY, toX, toY)) {
-                            this.scratchMove.fromX = fromX;
-                            this.scratchMove.fromY = fromY;
-                            this.scratchMove.toX = toX;
-                            this.scratchMove.toY = toY;
-
-                            final char attackedPiece = (char) (this.board[toY][toX] >> 4);
-                            assert (this.isOpponentPiece(attackedPiece) || attackedPiece == 0);
-                            final int score = this.calculateScore(Character.toLowerCase(attackedPiece));
-                            if (score == Integer.MAX_VALUE) {
-                                bestScore = score;
-                                final Move temp = this.myMove;
-                                this.myMove = this.scratchMove;
-                                this.scratchMove = temp;
-                                break force_break;
-                            } else {
-                                if (bestScore < score) {
-                                    bestScore = score;
-                                    final Move temp = this.myMove;
-                                    this.myMove = this.scratchMove;
-                                    this.scratchMove = temp;
-                                }
-                            }
-                        }
-                    }
-
-                    break;
+                final char symbol = board[y][x];
+                switch (Character.toLowerCase(symbol)) {
+                    case 'p':
+                        move = pawnMoveOrNull(board, x, y, player);
+                        break;
+                    case 'k':
+                        move = kingMoveOrNull(board, x, y, player);
+                        break;
+                    case 'q':
+                        move = queenMoveOrNull(board, x, y, player);
+                        break;
+                    case 'r':
+                        move = rookMoveOrNull(board, x, y, player);
+                        break;
+                    case 'b':
+                        move = bishopMoveOrNull(board, x, y, player);
+                        break;
+                    case 'n':
+                        move = knightMoveOrNull(board, x, y, player);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown piece symbol");
                 }
 
-                case 'q': {
-                    switchPiece = this.isWhite() ? switchPiece : Character.toUpperCase(switchPiece);
-                    final char piece = (char) (switchPiece << 4 ^ 1);
-                    final char pos = myPositionsFromPieces.get(piece);
-                    assert (pos != 0);
-                    if (pos == (char) -1) {
-                        continue;
-                    }
-
-                    final int fromX = pos & 0x0f;
-                    final int fromY = pos >> 4;
-                    // queen
-                    for (int moveType = 0; moveType < 8; ++moveType) {
-                        final int UP_VERTICAL_MOVE_TYPE = 0;
-                        final int DOWN_VERTICAL_MOVE_TYPE = 1;
-                        final int RIGHT_HORIZONTAL_MOVE_TYPE = 2;
-                        final int LEFT_HORIZONTAL_MOVE_TYPE = 3;
-                        final int UP_RIGHT_CROSS_MOVE_TYPE = 4;
-                        final int UP_LEFT_CROSS_MOVE_TYPE = 5;
-                        final int DOWN_RIGHT_CROSS_MOVE_TYPE = 6;
-                        final int DOWN_LEFT_CROSS_MOVE_TYPE = 7;
-
-                        for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
-                            final int queenMoveOffsetX;
-                            final int queenMoveOffsetY;
-                            switch (moveType) {
-                                case UP_VERTICAL_MOVE_TYPE:
-                                    queenMoveOffsetX = 0;
-                                    queenMoveOffsetY = moveSize;
-                                    break;
-
-                                case DOWN_VERTICAL_MOVE_TYPE:
-                                    queenMoveOffsetX = 0;
-                                    queenMoveOffsetY = -moveSize;
-                                    break;
-
-                                case RIGHT_HORIZONTAL_MOVE_TYPE:
-                                    queenMoveOffsetX = moveSize;
-                                    queenMoveOffsetY = 0;
-                                    break;
-
-                                case LEFT_HORIZONTAL_MOVE_TYPE:
-                                    queenMoveOffsetX = -moveSize;
-                                    queenMoveOffsetY = 0;
-                                    break;
-
-                                case UP_RIGHT_CROSS_MOVE_TYPE:
-                                    queenMoveOffsetX = moveSize;
-                                    queenMoveOffsetY = moveSize;
-                                    break;
-
-                                case UP_LEFT_CROSS_MOVE_TYPE:
-                                    queenMoveOffsetX = -moveSize;
-                                    queenMoveOffsetY = moveSize;
-                                    break;
-
-                                case DOWN_RIGHT_CROSS_MOVE_TYPE:
-                                    queenMoveOffsetX = moveSize;
-                                    queenMoveOffsetY = -moveSize;
-                                    break;
-
-                                case DOWN_LEFT_CROSS_MOVE_TYPE:
-                                    queenMoveOffsetX = -moveSize;
-                                    queenMoveOffsetY = -moveSize;
-                                    break;
-
-                                default:
-                                    throw new IllegalArgumentException("Unknown queen move type");
-                            }
-
-                            final int toX = fromX + queenMoveOffsetX;
-                            final int toY = fromY + queenMoveOffsetY;
-                            if (this.isMoveValid(fromX, fromY, toX, toY)) {
-                                this.scratchMove.fromX = fromX;
-                                this.scratchMove.fromY = fromY;
-                                this.scratchMove.toX = toX;
-                                this.scratchMove.toY = toY;
-
-                                final char attackedPiece = (char) (this.board[toY][toX] >> 4);
-                                assert (this.isOpponentPiece(attackedPiece) || attackedPiece == 0);
-                                final int score = this.calculateScore(Character.toLowerCase(attackedPiece));
-                                if (score == Integer.MAX_VALUE) {
-                                    bestScore = score;
-                                    final Move temp = this.myMove;
-                                    this.myMove = this.scratchMove;
-                                    this.scratchMove = temp;
-                                    break force_break;
-                                } else {
-                                    if (bestScore < score) {
-                                        bestScore = score;
-                                        final Move temp = this.myMove;
-                                        this.myMove = this.scratchMove;
-                                        this.scratchMove = temp;
-                                    }
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-
-                    break;
+                if (move == null) {
+                    continue;
                 }
 
-                case 'r': {
-                    switchPiece = this.isWhite() ? switchPiece : Character.toUpperCase(switchPiece);
-                    for (int i = 1; i <= 2; i++) {
-                        final char piece = (char) (switchPiece << 4 ^ i);
-                        final char pos = myPositionsFromPieces.get(piece);
-                        if (pos == (char) -1) {
-                            continue;
-                        }
-
-                        final int fromX = pos & 0x0f;
-                        final int fromY = pos >> 4;
-
-                        for (int moveType = 0; moveType < 4; ++moveType) {
-                            final int UP_VERTICAL_MOVE_TYPE = 0;
-                            final int DOWN_VERTICAL_MOVE_TYPE = 1;
-                            final int RIGHT_HORIZONTAL_MOVE_TYPE = 2;
-                            final int LEFT_HORIZONTAL_MOVE_TYPE = 3;
-
-                            for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
-                                final int rookMoveOffsetX;
-                                final int rookMoveOffsetY;
-                                switch (moveType) {
-                                    case UP_VERTICAL_MOVE_TYPE:
-                                        rookMoveOffsetX = 0;
-                                        rookMoveOffsetY = moveSize;
-                                        break;
-
-                                    case DOWN_VERTICAL_MOVE_TYPE:
-                                        rookMoveOffsetX = 0;
-                                        rookMoveOffsetY = -moveSize;
-                                        break;
-
-                                    case RIGHT_HORIZONTAL_MOVE_TYPE:
-                                        rookMoveOffsetX = moveSize;
-                                        rookMoveOffsetY = 0;
-                                        break;
-
-                                    case LEFT_HORIZONTAL_MOVE_TYPE:
-                                        rookMoveOffsetX = -moveSize;
-                                        rookMoveOffsetY = 0;
-                                        break;
-
-                                    default:
-                                        throw new IllegalArgumentException("Unknown queen move type");
-                                }
-
-                                final int toX = fromX + rookMoveOffsetX;
-                                final int toY = fromY + rookMoveOffsetY;
-
-                                if (this.isMoveValid(fromX, fromY, toX, toY)) {
-                                    this.scratchMove.fromX = fromX;
-                                    this.scratchMove.fromY = fromY;
-                                    this.scratchMove.toX = toX;
-                                    this.scratchMove.toY = toY;
-
-                                    final char attackedPiece = (char) (this.board[toY][toX] >> 4);
-                                    assert (this.isOpponentPiece(attackedPiece) || attackedPiece == 0);
-                                    final int score = this.calculateScore(Character.toLowerCase(attackedPiece));
-                                    if (score == Integer.MAX_VALUE) {
-                                        bestScore = score;
-                                        final Move temp = this.myMove;
-                                        this.myMove = this.scratchMove;
-                                        this.scratchMove = temp;
-                                        break force_break;
-                                    } else {
-                                        if (bestScore < score) {
-                                            bestScore = score;
-                                            final Move temp = this.myMove;
-                                            this.myMove = this.scratchMove;
-                                            this.scratchMove = temp;
-                                        }
-                                    }
-                                } else {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    break;
-                }
-
-                case 'b': {
-                    switchPiece = this.isWhite() ? switchPiece : Character.toUpperCase(switchPiece);
-                    for (int i = 1; i <= 2; i++) {
-                        final char piece = (char) (switchPiece << 4 ^ i);
-                        final char pos = myPositionsFromPieces.get(piece);
-                        if (pos == (char) -1) {
-                            continue;
-                        }
-
-                        final int fromX = pos & 0x0f;
-                        final int fromY = pos >> 4;
-
-                        for (int moveType = 0; moveType < 4; ++moveType) {
-                            final int UP_RIGHT_CROSS_MOVE_TYPE = 0;
-                            final int UP_LEFT_CROSS_MOVE_TYPE = 1;
-                            final int DOWN_RIGHT_CROSS_MOVE_TYPE = 2;
-                            final int DOWN_LEFT_CROSS_MOVE_TYPE = 3;
-
-                            for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
-                                final int bishopMoveOffsetX;
-                                final int bishopMoveOffsetY;
-                                switch (moveType) {
-                                    case UP_RIGHT_CROSS_MOVE_TYPE:
-                                        bishopMoveOffsetX = moveSize;
-                                        bishopMoveOffsetY = moveSize;
-                                        break;
-
-                                    case UP_LEFT_CROSS_MOVE_TYPE:
-                                        bishopMoveOffsetX = -moveSize;
-                                        bishopMoveOffsetY = moveSize;
-                                        break;
-
-                                    case DOWN_RIGHT_CROSS_MOVE_TYPE:
-                                        bishopMoveOffsetX = moveSize;
-                                        bishopMoveOffsetY = -moveSize;
-                                        break;
-
-                                    case DOWN_LEFT_CROSS_MOVE_TYPE:
-                                        bishopMoveOffsetX = -moveSize;
-                                        bishopMoveOffsetY = -moveSize;
-                                        break;
-
-                                    default:
-                                        throw new IllegalArgumentException("Unknown queen move type");
-                                }
-
-                                final int toX = fromX + bishopMoveOffsetX;
-                                final int toY = fromY + bishopMoveOffsetY;
-
-                                if (this.isMoveValid(fromX, fromY, toX, toY)) {
-                                    this.scratchMove.fromX = fromX;
-                                    this.scratchMove.fromY = fromY;
-                                    this.scratchMove.toX = toX;
-                                    this.scratchMove.toY = toY;
-
-                                    final char attackedPiece = (char) (this.board[toY][toX] >> 4);
-                                    assert (this.isOpponentPiece(attackedPiece) || attackedPiece == 0);
-                                    final int score = this.calculateScore(Character.toLowerCase(attackedPiece));
-                                    if (score == Integer.MAX_VALUE) {
-                                        bestScore = score;
-                                        final Move temp = this.myMove;
-                                        this.myMove = this.scratchMove;
-                                        this.scratchMove = temp;
-                                        break force_break;
-                                    } else {
-                                        if (bestScore < score) {
-                                            bestScore = score;
-                                            final Move temp = this.myMove;
-                                            this.myMove = this.scratchMove;
-                                            this.scratchMove = temp;
-                                        }
-                                    }
-                                } else {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    break;
-                }
-
-                case 'n': {
-                    switchPiece = this.isWhite() ? switchPiece : Character.toUpperCase(switchPiece);
-                    for (int i = 1; i <= 2; i++) {
-                        final char piece = (char) (switchPiece << 4 ^ i);
-                        final char pos = myPositionsFromPieces.get(piece);
-                        if (pos == (char) -1) {
-                            continue;
-                        }
-
-                        final int fromX = pos & 0x0f;
-                        final int fromY = pos >> 4;
-
-                        for (final int[] knightMoveOffset : KNIGHT_MOVE_OFFSETS) {
-                            final int toX = fromX + knightMoveOffset[0];
-                            final int toY = fromY + knightMoveOffset[1];
-
-                            if (this.isMoveValid(fromX, fromY, toX, toY)) {
-                                this.scratchMove.fromX = fromX;
-                                this.scratchMove.fromY = fromY;
-                                this.scratchMove.toX = toX;
-                                this.scratchMove.toY = toY;
-
-                                final char attackedPiece = (char) (this.board[toY][toX] >> 4);
-                                assert (this.isOpponentPiece(attackedPiece) || attackedPiece == 0);
-                                final int score = this.calculateScore(Character.toLowerCase(attackedPiece));
-                                if (score == Integer.MAX_VALUE) {
-                                    bestScore = score;
-                                    final Move temp = this.myMove;
-                                    this.myMove = this.scratchMove;
-                                    this.scratchMove = temp;
-                                    break force_break;
-                                } else {
-                                    if (bestScore < score) {
-                                        bestScore = score;
-                                        final Move temp = this.myMove;
-                                        this.myMove = this.scratchMove;
-                                        this.scratchMove = temp;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    break;
-                }
-
-                default:
-                    throw new IllegalArgumentException("Unknown queen move type");
+                assert (isMoveValid(board, player, move.fromX, move.fromY, move.toX, move.toY));
+//                moveNum++;
+                moves.add(new Move(move.fromX, move.fromY, move.toX, move.toY));
             }
         }
 
-
-        assert (isMoveValid(this.myMove.fromX, this.myMove.fromY, this.myMove.toX, this.myMove.toY));
-        movePiece(false, this.myMove);
-
-        return this.myMove;
-
+        return moves;
     }
 
-    private boolean isMoveValid(final int fromX, final int fromY, final int toX, final int toY) {
+    private Move pawnMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+        int bestScore = -1;
+        for (final int[] pawnAttackOffset : PAWN_MOVE_OFFSETS) {
+            final int toX = fromX + pawnAttackOffset[0];
+            final int toY = fromY + pawnAttackOffset[1];
+
+            if (isMoveValid(board, player, fromX, fromY, toX, toY)) {
+                this.scratchMove.fromX = fromX;
+                this.scratchMove.fromY = fromY;
+                this.scratchMove.toX = toX;
+                this.scratchMove.toY = toY;
+
+                final char attackedPiece = board[toY][toX];
+                final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
+                if (score == Integer.MAX_VALUE) {
+                    bestScore = score;
+                    final Move temp = this.bestMove;
+                    this.bestMove = this.scratchMove;
+                    this.scratchMove = temp;
+                    break;
+                } else {
+                    if (bestScore < score) {
+                        bestScore = score;
+                        final Move temp = this.bestMove;
+                        this.bestMove = this.scratchMove;
+                        this.scratchMove = temp;
+                    }
+                }
+            }
+        }
+
+        if (bestScore == -1) {
+            return null;
+        }
+
+        return this.bestMove;
+    }
+
+    private Move kingMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+        int bestScore = -1;
+        for (final int[] kingMoveOffset : KING_MOVE_OFFSETS) {
+            final int toX = fromX + kingMoveOffset[0];
+            final int toY = fromY + kingMoveOffset[1];
+
+            if (isMoveValid(board, player, fromX, fromY, toX, toY)) {
+                this.scratchMove.fromX = fromX;
+                this.scratchMove.fromY = fromY;
+                this.scratchMove.toX = toX;
+                this.scratchMove.toY = toY;
+
+                final char attackedPiece = board[toY][toX];
+                final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
+                if (score == Integer.MAX_VALUE) {
+                    bestScore = score;
+                    final Move temp = this.bestMove;
+                    this.bestMove = this.scratchMove;
+                    this.scratchMove = temp;
+                    break;
+                } else {
+                    if (bestScore < score) {
+                        bestScore = score;
+                        final Move temp = this.bestMove;
+                        this.bestMove = this.scratchMove;
+                        this.scratchMove = temp;
+                    }
+                }
+            }
+        }
+
+        if (bestScore == -1) {
+            return null;
+        }
+
+        return this.bestMove;
+    }
+
+    private Move queenMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+        int bestScore = -1;
+        for (int moveType = 0; moveType < 8; ++moveType) {
+            final int UP_VERTICAL_MOVE_TYPE = 0;
+            final int DOWN_VERTICAL_MOVE_TYPE = 1;
+            final int RIGHT_HORIZONTAL_MOVE_TYPE = 2;
+            final int LEFT_HORIZONTAL_MOVE_TYPE = 3;
+            final int UP_RIGHT_CROSS_MOVE_TYPE = 4;
+            final int UP_LEFT_CROSS_MOVE_TYPE = 5;
+            final int DOWN_RIGHT_CROSS_MOVE_TYPE = 6;
+            final int DOWN_LEFT_CROSS_MOVE_TYPE = 7;
+
+            for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
+                final int queenMoveOffsetX;
+                final int queenMoveOffsetY;
+                switch (moveType) {
+                    case UP_VERTICAL_MOVE_TYPE:
+                        queenMoveOffsetX = 0;
+                        queenMoveOffsetY = moveSize;
+                        break;
+                    case DOWN_VERTICAL_MOVE_TYPE:
+                        queenMoveOffsetX = 0;
+                        queenMoveOffsetY = -moveSize;
+                        break;
+                    case RIGHT_HORIZONTAL_MOVE_TYPE:
+                        queenMoveOffsetX = moveSize;
+                        queenMoveOffsetY = 0;
+                        break;
+                    case LEFT_HORIZONTAL_MOVE_TYPE:
+                        queenMoveOffsetX = -moveSize;
+                        queenMoveOffsetY = 0;
+                        break;
+                    case UP_RIGHT_CROSS_MOVE_TYPE:
+                        queenMoveOffsetX = moveSize;
+                        queenMoveOffsetY = moveSize;
+                        break;
+                    case UP_LEFT_CROSS_MOVE_TYPE:
+                        queenMoveOffsetX = -moveSize;
+                        queenMoveOffsetY = moveSize;
+                        break;
+                    case DOWN_RIGHT_CROSS_MOVE_TYPE:
+                        queenMoveOffsetX = moveSize;
+                        queenMoveOffsetY = -moveSize;
+                        break;
+                    case DOWN_LEFT_CROSS_MOVE_TYPE:
+                        queenMoveOffsetX = -moveSize;
+                        queenMoveOffsetY = -moveSize;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown queen move type");
+                }
+
+                final int toX = fromX + queenMoveOffsetX;
+                final int toY = fromY + queenMoveOffsetY;
+                if (isMoveValid(board, player, fromX, fromY, toX, toY)) {
+                    this.scratchMove.fromX = fromX;
+                    this.scratchMove.fromY = fromY;
+                    this.scratchMove.toX = toX;
+                    this.scratchMove.toY = toY;
+
+                    final char attackedPiece = board[toY][toX];
+                    final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
+                    if (score == Integer.MAX_VALUE) {
+                        bestScore = score;
+                        final Move temp = this.bestMove;
+                        this.bestMove = this.scratchMove;
+                        this.scratchMove = temp;
+                        break;
+                    } else {
+                        if (bestScore < score) {
+                            bestScore = score;
+                            final Move temp = this.bestMove;
+                            this.bestMove = this.scratchMove;
+                            this.scratchMove = temp;
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if (bestScore == -1) {
+            return null;
+        }
+
+        return this.bestMove;
+    }
+
+    private Move rookMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+        int bestScore = -1;
+        for (int moveType = 0; moveType < 4; ++moveType) {
+            final int UP_VERTICAL_MOVE_TYPE = 0;
+            final int DOWN_VERTICAL_MOVE_TYPE = 1;
+            final int RIGHT_HORIZONTAL_MOVE_TYPE = 2;
+            final int LEFT_HORIZONTAL_MOVE_TYPE = 3;
+
+            for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
+                final int rookMoveOffsetX;
+                final int rookMoveOffsetY;
+                switch (moveType) {
+                    case UP_VERTICAL_MOVE_TYPE:
+                        rookMoveOffsetX = 0;
+                        rookMoveOffsetY = moveSize;
+                        break;
+                    case DOWN_VERTICAL_MOVE_TYPE:
+                        rookMoveOffsetX = 0;
+                        rookMoveOffsetY = -moveSize;
+                        break;
+                    case RIGHT_HORIZONTAL_MOVE_TYPE:
+                        rookMoveOffsetX = moveSize;
+                        rookMoveOffsetY = 0;
+                        break;
+                    case LEFT_HORIZONTAL_MOVE_TYPE:
+                        rookMoveOffsetX = -moveSize;
+                        rookMoveOffsetY = 0;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown queen move type");
+                }
+
+                final int toX = fromX + rookMoveOffsetX;
+                final int toY = fromY + rookMoveOffsetY;
+
+                if (isMoveValid(board, player, fromX, fromY, toX, toY)) {
+                    this.scratchMove.fromX = fromX;
+                    this.scratchMove.fromY = fromY;
+                    this.scratchMove.toX = toX;
+                    this.scratchMove.toY = toY;
+
+                    final char attackedPiece = board[toY][toX];
+                    final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
+                    if (score == Integer.MAX_VALUE) {
+                        bestScore = score;
+                        final Move temp = this.bestMove;
+                        this.bestMove = this.scratchMove;
+                        this.scratchMove = temp;
+                        break;
+                    } else {
+                        if (bestScore < score) {
+                            bestScore = score;
+                            final Move temp = this.bestMove;
+                            this.bestMove = this.scratchMove;
+                            this.scratchMove = temp;
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if (bestScore == -1) {
+            return null;
+        }
+
+        return this.bestMove;
+    }
+
+    private Move bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+        int bestScore = -1;
+        for (int moveType = 0; moveType < 4; ++moveType) {
+            final int UP_RIGHT_CROSS_MOVE_TYPE = 0;
+            final int UP_LEFT_CROSS_MOVE_TYPE = 1;
+            final int DOWN_RIGHT_CROSS_MOVE_TYPE = 2;
+            final int DOWN_LEFT_CROSS_MOVE_TYPE = 3;
+
+            for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
+                final int bishopMoveOffsetX;
+                final int bishopMoveOffsetY;
+                switch (moveType) {
+                    case UP_RIGHT_CROSS_MOVE_TYPE:
+                        bishopMoveOffsetX = moveSize;
+                        bishopMoveOffsetY = moveSize;
+                        break;
+                    case UP_LEFT_CROSS_MOVE_TYPE:
+                        bishopMoveOffsetX = -moveSize;
+                        bishopMoveOffsetY = moveSize;
+                        break;
+                    case DOWN_RIGHT_CROSS_MOVE_TYPE:
+                        bishopMoveOffsetX = moveSize;
+                        bishopMoveOffsetY = -moveSize;
+                        break;
+                    case DOWN_LEFT_CROSS_MOVE_TYPE:
+                        bishopMoveOffsetX = -moveSize;
+                        bishopMoveOffsetY = -moveSize;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown queen move type");
+                }
+
+                final int toX = fromX + bishopMoveOffsetX;
+                final int toY = fromY + bishopMoveOffsetY;
+
+                if (isMoveValid(board, player, fromX, fromY, toX, toY)) {
+                    this.scratchMove.fromX = fromX;
+                    this.scratchMove.fromY = fromY;
+                    this.scratchMove.toX = toX;
+                    this.scratchMove.toY = toY;
+
+                    final char attackedPiece = board[toY][toX];
+                    final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
+                    if (score == Integer.MAX_VALUE) {
+                        bestScore = score;
+                        final Move temp = this.bestMove;
+                        this.bestMove = this.scratchMove;
+                        this.scratchMove = temp;
+                        break;
+                    } else {
+                        if (bestScore < score) {
+                            bestScore = score;
+                            final Move temp = this.bestMove;
+                            this.bestMove = this.scratchMove;
+                            this.scratchMove = temp;
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if (bestScore == -1) {
+            return null;
+        }
+
+        return this.bestMove;
+    }
+
+    private Move knightMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+        int bestScore = -1;
+        for (final int[] knightMoveOffset : KNIGHT_MOVE_OFFSETS) {
+            final int toX = fromX + knightMoveOffset[0];
+            final int toY = fromY + knightMoveOffset[1];
+
+            if (isMoveValid(board, player, fromX, fromY, toX, toY)) {
+                this.scratchMove.fromX = fromX;
+                this.scratchMove.fromY = fromY;
+                this.scratchMove.toX = toX;
+                this.scratchMove.toY = toY;
+
+                final char attackedPiece = board[toY][toX];
+                final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
+                if (score == Integer.MAX_VALUE) {
+                    bestScore = score;
+                    final Move temp = this.bestMove;
+                    this.bestMove = this.scratchMove;
+                    this.scratchMove = temp;
+                    break;
+                } else {
+                    if (bestScore < score) {
+                        bestScore = score;
+                        final Move temp = this.bestMove;
+                        this.bestMove = this.scratchMove;
+                        this.scratchMove = temp;
+                    }
+                }
+            }
+
+        }
+
+        if (bestScore == -1) {
+            return null;
+        }
+
+        return this.bestMove;
+    }
+
+    private static boolean hasWon(final char[][] board, final EColor player) {
+        for (int y = 0; y < BOARD_SIZE; ++y) {
+            for (int x = 0; x < BOARD_SIZE; ++x) {
+                if ((player == EColor.WHITE) == Character.isUpperCase(board[y][x])) {
+                    // opponent piece
+                    if (Character.toLowerCase(board[y][x]) == 'k') {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static ScoreMove getMaxScoreMove(final ArrayList<ScoreMove> moves) {
+        assert (!moves.isEmpty());
+
+        ScoreMove bestMove = moves.get(0);
+        for (int i = 1; i < moves.size(); ++i) {
+            if (moves.get(i).score > bestMove.score) {
+                bestMove = moves.get(i);
+            }
+        }
+
+        return bestMove;
+    }
+
+    private static ScoreMove getMinScoreMove(final ArrayList<ScoreMove> moves) {
+        assert (!moves.isEmpty());
+
+        ScoreMove bestMove = moves.get(0);
+        for (final ScoreMove move : moves) {
+            if (move.score < bestMove.score) {
+                bestMove = move;
+            }
+        }
+
+        return bestMove;
+    }
+
+    private static int calculateBoardPoint(final char[][] board, final EColor player) {
+        int score = 0;
+        for (int y = 0; y < BOARD_SIZE; ++y) {
+            for (int x = 0; x < BOARD_SIZE; ++x) {
+                if ((player == EColor.WHITE) == Character.isLowerCase(board[y][x])) {
+                    // my piece
+                    score += getPieceScore(Character.toLowerCase(board[y][x]));
+                } else {
+                    // opponent piece
+                    score -= getPieceScore(Character.toLowerCase(board[y][x]));
+                }
+            }
+        }
+
+        return score;
+    }
+
+    private static boolean isMoveValid(char[][] board, EColor player, final int fromX, final int fromY, final int toX, final int toY) {
         if (fromX >= BOARD_SIZE || fromX < 0
                 || fromY >= BOARD_SIZE || fromY < 0) {
             return false;
         }
 
-        final char symbol = (char) (board[fromY][fromX] >> 4);
-        assert (this.isOpponentPiece(symbol) || this.isMyPiece(symbol));
+        final char symbol = board[fromY][fromX];
 
         if (symbol == 0) {
             return false;
         }
 
-        if ((this.isWhite() && Character.isUpperCase(symbol))
-                || this.isWhite() == false && Character.isLowerCase(symbol)) {
+        if ((player == EColor.WHITE && !Character.isLowerCase(symbol))
+                || player != EColor.WHITE && Character.isLowerCase(symbol)) {
             return false;
         }
 
@@ -664,113 +649,51 @@ public class Player extends PlayerBase {
             return false;
         }
 
-        final char toSymbol = (char) (board[toY][toX] >> 4);
-        if (Character.isLowerCase(symbol) && Character.isLowerCase(toSymbol)
-                || Character.isUpperCase(symbol) && Character.isUpperCase(toSymbol)) {
-            return false;
-        }
-
         char symbolInvariant = Character.toLowerCase(symbol);
 
         switch (symbolInvariant) {
             case 'p':
-                return isPawnMoveValid(fromX, fromY, toX, toY);
+                return isPawnMoveValid(board, fromX, fromY, toX, toY);
 
             case 'n':
-                return isKnightMoveValid(fromX, fromY, toX, toY);
+                return isKnightMoveValid(board, fromX, fromY, toX, toY);
 
             case 'b':
-                return isBishopMoveValid(fromX, fromY, toX, toY);
+                return isBishopMoveValid(board, fromX, fromY, toX, toY);
 
             case 'r':
-                return isRookMoveValid(fromX, fromY, toX, toY);
+                return isRookMoveValid(board, fromX, fromY, toX, toY);
 
             case 'q':
-                return isQueenMoveValid(fromX, fromY, toX, toY);
+                return isQueenMoveValid(board, fromX, fromY, toX, toY);
 
             case 'k':
-                return isKingMoveValid(fromX, fromY, toX, toY);
+                return isKingMoveValid(board, fromX, fromY, toX, toY);
 
             default:
                 throw new IllegalArgumentException("Unknown piece symbol");
         }
     }
 
-    private void setPiecesPositionsHashMaps(final boolean isWhite, final char piece, final char position) {
-        if (this.isWhite() == isWhite) {
-//            this.myPiecesFromPositions.put(position, piece);
-            this.myPositionsFromPieces.put(piece, position);
-        } else {
-//            this.opponentPiecesFromPositions.put(position, piece);
-            this.opponentPositionsFromPieces.put(piece, position);
+    private static char[][] createCopy(final char[][] board) {
+        assert (board.length == BOARD_SIZE);
+        assert (board[0].length == BOARD_SIZE);
+
+//        boardNum++;
+        final char[][] copy = new char[BOARD_SIZE][BOARD_SIZE];
+
+        for (int i = 0; i < BOARD_SIZE; ++i) {
+            for (int j = 0; j < BOARD_SIZE; ++j) {
+                copy[i][j] = board[i][j];
+            }
         }
+
+        return copy;
     }
 
-    private char[][] createNewBoard() {
-        final char[][] board = new char[BOARD_SIZE][BOARD_SIZE];
-
-        // White pieces
-        char y = BOARD_SIZE - 1;
-        board[y][0] = 'r' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(true, board[y][0], (char) (y << 4)); // y << 4 ^ 0
-        board[y][1] = 'n' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(true, board[y][1], (char) (y << 4 ^ 1));
-        board[y][2] = 'b' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(true, board[y][2], (char) (y << 4 ^ 2));
-
-        board[y][3] = 'k' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(true, board[y][3], (char) (y << 4 ^ 3));
-        board[y][4] = 'q' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(true, board[y][4], (char) (y << 4 ^ 4));
-
-        board[y][5] = 'b' << 4 ^ 2;
-        this.setPiecesPositionsHashMaps(true, board[y][5], (char) (y << 4 ^ 5));
-        board[y][6] = 'n' << 4 ^ 2;
-        this.setPiecesPositionsHashMaps(true, board[y][6], (char) (y << 4 ^ 6));
-        board[y][7] = 'r' << 4 ^ 2;
-        this.setPiecesPositionsHashMaps(true, board[y][7], (char) (y << 4 ^ 7));
-
-        // White pawns
-        y -= 1;
-        for (char x = 0; x < BOARD_SIZE; ++x) {
-            board[y][x] = (char) ('p' << 4 ^ x + 1);
-            this.setPiecesPositionsHashMaps(true, board[y][x], (char) (y << 4 ^ x));
-        }
-
-        // Black pawns
-        y = 1;
-        for (int x = 0; x < BOARD_SIZE; ++x) {
-            board[y][x] = (char) ('P' << 4 ^ x + 1);
-            this.setPiecesPositionsHashMaps(false, board[y][x], (char) (y << 4 ^ x));
-        }
-
-        // Black pieces
-        y = 0;
-        board[y][0] = 'R' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(false, board[y][0], (char) (0)); // y << 4 ^ 0
-        board[y][1] = 'N' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(false, board[y][1], (char) (1)); // y << 4 ^ 1
-        board[y][2] = 'B' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(false, board[y][2], (char) (2)); // y << 4 ^ 2
-
-        board[y][3] = 'K' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(false, board[y][3], (char) (3)); // y << 4 ^ 3
-        board[y][4] = 'Q' << 4 ^ 1;
-        this.setPiecesPositionsHashMaps(false, board[y][4], (char) (4)); // y << 4 ^ 4
-
-        board[y][5] = 'B' << 4 ^ 2;
-        this.setPiecesPositionsHashMaps(false, board[y][5], (char) (5)); // y << 4 ^ 5
-        board[y][6] = 'N' << 4 ^ 2;
-        this.setPiecesPositionsHashMaps(false, board[y][6], (char) (6)); // y << 4 ^ 6
-        board[y][7] = 'R' << 4 ^ 2;
-        this.setPiecesPositionsHashMaps(false, board[y][7], (char) (7)); // y << 4 ^ 7
-
-        return board;
-    }
-
-    private boolean isBishopMoveValid(final int fromX, final int fromY, final int toX, final int toY) {
-        char fromPiece = (char) (board[fromY][fromX] >> 4);
-        char toPiece = (char) (board[toY][toX] >> 4);
+    private static boolean isBishopMoveValid(char[][] board, final int fromX, final int fromY, final int toX, final int toY) {
+        char fromPiece = board[fromY][fromX];
+        char toPiece = board[toY][toX];
 
         if (toPiece != 0 && Character.isLowerCase(fromPiece) == Character.isLowerCase(toPiece)) {
             return false;
@@ -787,7 +710,7 @@ public class Player extends PlayerBase {
         int y = fromY + yIncrement;
 
         while (x != toX && y != toY) {
-            if (board[y][x] != 0) {
+            if (board[y][x] != 0 && x != toX && y != toY) {
                 return false;
             }
 
@@ -798,9 +721,9 @@ public class Player extends PlayerBase {
         return true;
     }
 
-    private boolean isRookMoveValid(final int fromX, final int fromY, final int toX, final int toY) {
-        char fromPiece = (char) (board[fromY][fromX] >> 4);
-        char toPiece = (char) (board[toY][toX] >> 4);
+    private static boolean isRookMoveValid(char[][] board, final int fromX, final int fromY, final int toX, final int toY) {
+        char fromPiece = board[fromY][fromX];
+        char toPiece = board[toY][toX];
 
         if (toPiece != 0 && Character.isLowerCase(fromPiece) == Character.isLowerCase(toPiece)) {
             return false;
@@ -840,9 +763,9 @@ public class Player extends PlayerBase {
         return false;
     }
 
-    private boolean isKnightMoveValid(final int fromX, final int fromY, final int toX, final int toY) {
-        char fromPiece = (char) (board[fromY][fromX] >> 4);
-        char toPiece = (char) (board[toY][toX] >> 4);
+    private static boolean isKnightMoveValid(char[][] board, final int fromX, final int fromY, final int toX, final int toY) {
+        char fromPiece = board[fromY][fromX];
+        char toPiece = board[toY][toX];
 
         if (toPiece != 0 && Character.isLowerCase(fromPiece) == Character.isLowerCase(toPiece)) {
             return false;
@@ -857,20 +780,20 @@ public class Player extends PlayerBase {
         return false;
     }
 
-    private boolean isQueenMoveValid(final int fromX, final int fromY, final int toX, final int toY) {
-        return isBishopMoveValid(fromX, fromY, toX, toY) || isRookMoveValid(fromX, fromY, toX, toY);
+    private static boolean isQueenMoveValid(char[][] board, final int fromX, final int fromY, final int toX, final int toY) {
+        return isBishopMoveValid(board, fromX, fromY, toX, toY) || isRookMoveValid(board, fromX, fromY, toX, toY);
     }
 
-    private boolean isKingMoveValid(final int fromX, final int fromY, final int toX, final int toY) {
-        char fromPiece = (char) (board[fromY][fromX] >> 4);
-        char toPiece = (char) (board[toY][toX] >> 4);
+    private static boolean isKingMoveValid(char[][] board, final int fromX, final int fromY, final int toX, final int toY) {
+        char fromPiece = board[fromY][fromX];
+        char toPiece = board[toY][toX];
 
         if (toPiece != 0 && Character.isLowerCase(fromPiece) == Character.isLowerCase(toPiece)) {
             return false;
         }
 
-        for (int i = 0; i < KING_MOVE_OFFSETS.length; ++i) {
-            if (fromX + KING_MOVE_OFFSETS[i][0] == toX && fromY + KING_MOVE_OFFSETS[i][1] == toY) {
+        for (int i = 0; i < KNIGHT_MOVE_OFFSETS.length; ++i) {
+            if (fromX + KNIGHT_MOVE_OFFSETS[i][0] == toX && fromY + KNIGHT_MOVE_OFFSETS[i][1] == toY) {
                 return true;
             }
         }
@@ -878,9 +801,9 @@ public class Player extends PlayerBase {
         return false;
     }
 
-    private boolean isPawnMoveValid(final int fromX, final int fromY, final int toX, final int toY) {
-        char fromPiece = (char) (board[fromY][fromX] >> 4);
-        char toPiece = (char) (board[toY][toX] >> 4);
+    private static boolean isPawnMoveValid(char[][] board, final int fromX, final int fromY, final int toX, final int toY) {
+        char fromPiece = board[fromY][fromX];
+        char toPiece = board[toY][toX];
 
         boolean isFromPieceWhite = Character.isLowerCase(fromPiece);
         boolean isToPieceWhite = Character.isLowerCase(toPiece);
