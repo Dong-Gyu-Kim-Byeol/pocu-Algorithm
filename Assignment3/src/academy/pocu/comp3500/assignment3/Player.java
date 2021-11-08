@@ -602,9 +602,17 @@ public final class Player extends PlayerBase {
         assert (!moves.isEmpty());
 
         ScoreMove bestMove = moves.get(0);
-        for (int i = 1; i < moves.size(); ++i) {
-            if (moves.get(i).score > bestMove.score) {
-                bestMove = moves.get(i);
+        for (final ScoreMove move : moves) {
+            if (move.toX == -1) {
+                continue;
+            }
+
+            if (bestMove.toX == -1) {
+                bestMove = move;
+            }
+
+            if (move.score > bestMove.score) {
+                bestMove = move;
             }
         }
 
@@ -616,6 +624,14 @@ public final class Player extends PlayerBase {
 
         ScoreMove bestMove = moves.get(0);
         for (final ScoreMove move : moves) {
+            if (move.toX == -1) {
+                continue;
+            }
+
+            if (bestMove.toX == -1) {
+                bestMove = move;
+            }
+
             if (move.score < bestMove.score) {
                 bestMove = move;
             }
