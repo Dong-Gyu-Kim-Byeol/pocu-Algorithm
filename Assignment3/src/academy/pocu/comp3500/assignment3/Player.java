@@ -41,7 +41,7 @@ public final class Player extends PlayerBase {
             {1, 1}
     };
 
-    private static final int KING_SCORE = 10000;
+    private static final int KING_SCORE = 100000000;
     private static final int QUEEN_SCORE = 1000;
     private static final int ROOK_SCORE = 700;
     private static final int BISHOP_SCORE = 500;
@@ -56,8 +56,8 @@ public final class Player extends PlayerBase {
 //    public static int boardNum;
 
     private final EColor color;
-    private Move scratchMove;
-    private Move bestMove;
+    private ScoreMove scratchMove;
+    private ScoreMove bestMove;
     private Move resultMove;
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
@@ -69,8 +69,8 @@ public final class Player extends PlayerBase {
 //        boardNum = 0;
 
         this.color = isWhite ? EColor.WHITE : EColor.BLACK;
-        this.scratchMove = new Move();
-        this.bestMove = new Move();
+        this.scratchMove = new ScoreMove();
+        this.bestMove = new ScoreMove();
         this.resultMove = new Move();
     }
 
@@ -110,12 +110,12 @@ public final class Player extends PlayerBase {
 
         if (hasWon(board, opponent)) {
 //            scoreMoveNum++;
-            return new ScoreMove(-1, -1, -1, -1, -10000);
+            return new ScoreMove(-1, -1, -1, -1, -KING_SCORE);
         }
 
         if (hasWon(board, player)) {
 //            scoreMoveNum++;
-            return new ScoreMove(-1, -1, -1, -1, 10000);
+            return new ScoreMove(-1, -1, -1, -1, KING_SCORE);
         }
 
         final ArrayList<Move> canMoveList = getCanMoveList(board, player);
@@ -177,7 +177,7 @@ public final class Player extends PlayerBase {
 //        movesArrayListNum++;
         ArrayList<Move> moves = new ArrayList<>();
 
-        Move move;
+        ScoreMove move;
         for (int y = 0; y < BOARD_SIZE; ++y) {
             for (int x = 0; x < BOARD_SIZE; ++x) {
                 if (board[y][x] == 0) {
@@ -213,6 +213,13 @@ public final class Player extends PlayerBase {
                 }
 
                 assert (isMoveValid(board, player, move.fromX, move.fromY, move.toX, move.toY));
+
+                if (move.score == KING_SCORE) {
+                    moves.clear();
+                    moves.add(new Move(move.fromX, move.fromY, move.toX, move.toY));
+                    return moves;
+                }
+
 //                moveNum++;
                 moves.add(new Move(move.fromX, move.fromY, move.toX, move.toY));
             }
@@ -221,8 +228,9 @@ public final class Player extends PlayerBase {
         return moves;
     }
 
-    private Move pawnMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+    private ScoreMove pawnMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
         int bestScore = -1;
+        force_break:
         for (final int[] pawnAttackOffset : PAWN_MOVE_OFFSETS) {
             final int toX = fromX + pawnAttackOffset[0];
             final int toY = fromY + pawnAttackOffset[1];
@@ -235,16 +243,16 @@ public final class Player extends PlayerBase {
 
                 final char attackedPiece = board[toY][toX];
                 final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                if (score == Integer.MAX_VALUE) {
+                if (score == KING_SCORE) {
                     bestScore = score;
-                    final Move temp = this.bestMove;
+                    final ScoreMove temp = this.bestMove;
                     this.bestMove = this.scratchMove;
                     this.scratchMove = temp;
-                    break;
+                    break force_break;
                 } else {
                     if (bestScore < score) {
                         bestScore = score;
-                        final Move temp = this.bestMove;
+                        final ScoreMove temp = this.bestMove;
                         this.bestMove = this.scratchMove;
                         this.scratchMove = temp;
                     }
@@ -256,11 +264,13 @@ public final class Player extends PlayerBase {
             return null;
         }
 
+        this.bestMove.score = bestScore;
         return this.bestMove;
     }
 
-    private Move kingMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+    private ScoreMove kingMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
         int bestScore = -1;
+        force_break:
         for (final int[] kingMoveOffset : KING_MOVE_OFFSETS) {
             final int toX = fromX + kingMoveOffset[0];
             final int toY = fromY + kingMoveOffset[1];
@@ -273,16 +283,16 @@ public final class Player extends PlayerBase {
 
                 final char attackedPiece = board[toY][toX];
                 final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                if (score == Integer.MAX_VALUE) {
+                if (score == KING_SCORE) {
                     bestScore = score;
-                    final Move temp = this.bestMove;
+                    final ScoreMove temp = this.bestMove;
                     this.bestMove = this.scratchMove;
                     this.scratchMove = temp;
-                    break;
+                    break force_break;
                 } else {
                     if (bestScore < score) {
                         bestScore = score;
-                        final Move temp = this.bestMove;
+                        final ScoreMove temp = this.bestMove;
                         this.bestMove = this.scratchMove;
                         this.scratchMove = temp;
                     }
@@ -293,12 +303,13 @@ public final class Player extends PlayerBase {
         if (bestScore == -1) {
             return null;
         }
-
+        this.bestMove.score = bestScore;
         return this.bestMove;
     }
 
-    private Move queenMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+    private ScoreMove queenMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
         int bestScore = -1;
+        force_break:
         for (int moveType = 0; moveType < 8; ++moveType) {
             final int UP_VERTICAL_MOVE_TYPE = 0;
             final int DOWN_VERTICAL_MOVE_TYPE = 1;
@@ -359,16 +370,16 @@ public final class Player extends PlayerBase {
 
                     final char attackedPiece = board[toY][toX];
                     final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                    if (score == Integer.MAX_VALUE) {
+                    if (score == KING_SCORE) {
                         bestScore = score;
-                        final Move temp = this.bestMove;
+                        final ScoreMove temp = this.bestMove;
                         this.bestMove = this.scratchMove;
                         this.scratchMove = temp;
-                        break;
+                        break force_break;
                     } else {
                         if (bestScore < score) {
                             bestScore = score;
-                            final Move temp = this.bestMove;
+                            final ScoreMove temp = this.bestMove;
                             this.bestMove = this.scratchMove;
                             this.scratchMove = temp;
                         }
@@ -383,11 +394,13 @@ public final class Player extends PlayerBase {
             return null;
         }
 
+        this.bestMove.score = bestScore;
         return this.bestMove;
     }
 
-    private Move rookMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+    private ScoreMove rookMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
         int bestScore = -1;
+        force_break:
         for (int moveType = 0; moveType < 4; ++moveType) {
             final int UP_VERTICAL_MOVE_TYPE = 0;
             final int DOWN_VERTICAL_MOVE_TYPE = 1;
@@ -429,16 +442,16 @@ public final class Player extends PlayerBase {
 
                     final char attackedPiece = board[toY][toX];
                     final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                    if (score == Integer.MAX_VALUE) {
+                    if (score == KING_SCORE) {
                         bestScore = score;
-                        final Move temp = this.bestMove;
+                        final ScoreMove temp = this.bestMove;
                         this.bestMove = this.scratchMove;
                         this.scratchMove = temp;
-                        break;
+                        break force_break;
                     } else {
                         if (bestScore < score) {
                             bestScore = score;
-                            final Move temp = this.bestMove;
+                            final ScoreMove temp = this.bestMove;
                             this.bestMove = this.scratchMove;
                             this.scratchMove = temp;
                         }
@@ -453,11 +466,13 @@ public final class Player extends PlayerBase {
             return null;
         }
 
+        this.bestMove.score = bestScore;
         return this.bestMove;
     }
 
-    private Move bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+    private ScoreMove bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
         int bestScore = -1;
+        force_break:
         for (int moveType = 0; moveType < 4; ++moveType) {
             final int UP_RIGHT_CROSS_MOVE_TYPE = 0;
             final int UP_LEFT_CROSS_MOVE_TYPE = 1;
@@ -499,16 +514,16 @@ public final class Player extends PlayerBase {
 
                     final char attackedPiece = board[toY][toX];
                     final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                    if (score == Integer.MAX_VALUE) {
+                    if (score == KING_SCORE) {
                         bestScore = score;
-                        final Move temp = this.bestMove;
+                        final ScoreMove temp = this.bestMove;
                         this.bestMove = this.scratchMove;
                         this.scratchMove = temp;
-                        break;
+                        break force_break;
                     } else {
                         if (bestScore < score) {
                             bestScore = score;
-                            final Move temp = this.bestMove;
+                            final ScoreMove temp = this.bestMove;
                             this.bestMove = this.scratchMove;
                             this.scratchMove = temp;
                         }
@@ -523,11 +538,13 @@ public final class Player extends PlayerBase {
             return null;
         }
 
+        this.bestMove.score = bestScore;
         return this.bestMove;
     }
 
-    private Move knightMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
+    private ScoreMove knightMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor player) {
         int bestScore = -1;
+        force_break:
         for (final int[] knightMoveOffset : KNIGHT_MOVE_OFFSETS) {
             final int toX = fromX + knightMoveOffset[0];
             final int toY = fromY + knightMoveOffset[1];
@@ -540,16 +557,16 @@ public final class Player extends PlayerBase {
 
                 final char attackedPiece = board[toY][toX];
                 final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                if (score == Integer.MAX_VALUE) {
+                if (score == KING_SCORE) {
                     bestScore = score;
-                    final Move temp = this.bestMove;
+                    final ScoreMove temp = this.bestMove;
                     this.bestMove = this.scratchMove;
                     this.scratchMove = temp;
-                    break;
+                    break force_break;
                 } else {
                     if (bestScore < score) {
                         bestScore = score;
-                        final Move temp = this.bestMove;
+                        final ScoreMove temp = this.bestMove;
                         this.bestMove = this.scratchMove;
                         this.scratchMove = temp;
                     }
@@ -562,6 +579,7 @@ public final class Player extends PlayerBase {
             return null;
         }
 
+        this.bestMove.score = bestScore;
         return this.bestMove;
     }
 
