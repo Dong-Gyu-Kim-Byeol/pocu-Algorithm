@@ -42,10 +42,10 @@ public final class Player extends PlayerBase {
     };
 
     private static final int KING_SCORE = 100000000;
-    private static final int QUEEN_SCORE = 1000;
-    private static final int ROOK_SCORE = 700;
-    private static final int BISHOP_SCORE = 500;
-    private static final int KNIGHT_SCORE = 300;
+    private static final int QUEEN_SCORE = 10000;
+    private static final int ROOK_SCORE = 8000;
+    private static final int BISHOP_SCORE = 5000;
+    private static final int KNIGHT_SCORE = 500;
     private static final int PAWN_SCORE = 100;
 
     private static final int DEPTH = 4;
