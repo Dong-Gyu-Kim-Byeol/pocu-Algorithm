@@ -88,7 +88,7 @@ public final class Player extends PlayerBase {
                 this.color,
                 opponent,
                 this.color,
-                1,
+                0,
                 Player.DEPTH);
 
         resultMove.fromX = move.fromX;
@@ -110,12 +110,12 @@ public final class Player extends PlayerBase {
 
         if (hasWon(board, opponent)) {
 //            scoreMoveNum++;
-            return new ScoreMove(-1, -1, -1, -1, -KING_SCORE);
+            return new ScoreMove(-1, -1, -1, -1, -KING_SCORE * 2);
         }
 
         if (hasWon(board, player)) {
 //            scoreMoveNum++;
-            return new ScoreMove(-1, -1, -1, -1, KING_SCORE);
+            return new ScoreMove(-1, -1, -1, -1, KING_SCORE * 2);
         }
 
         final ArrayList<Move> canMoveList = getCanMoveList(board, player);
@@ -148,10 +148,10 @@ public final class Player extends PlayerBase {
         }
 
         if (turn == player) {
-            return getMaxScoreMove(moves);
+            return getMaxScoreMove(moves, turnCount);
         }
 
-        return getMinScoreMove(moves);
+        return getMinScoreMove(moves, turnCount);
     }
 
     private static int getPieceScore(final char attackedPiece) {
@@ -598,16 +598,16 @@ public final class Player extends PlayerBase {
         return true;
     }
 
-    private static ScoreMove getMaxScoreMove(final ArrayList<ScoreMove> moves) {
+    private static ScoreMove getMaxScoreMove(final ArrayList<ScoreMove> moves, final int turnCount) {
         assert (!moves.isEmpty());
 
         ScoreMove bestMove = moves.get(0);
         for (final ScoreMove move : moves) {
-            if (move.toX == -1) {
+            if (turnCount == 0 && move.toX == -1) {
                 continue;
             }
 
-            if (bestMove.toX == -1) {
+            if (turnCount == 0 && bestMove.toX == -1) {
                 bestMove = move;
             }
 
@@ -619,16 +619,16 @@ public final class Player extends PlayerBase {
         return bestMove;
     }
 
-    private static ScoreMove getMinScoreMove(final ArrayList<ScoreMove> moves) {
+    private static ScoreMove getMinScoreMove(final ArrayList<ScoreMove> moves, final int turnCount) {
         assert (!moves.isEmpty());
 
         ScoreMove bestMove = moves.get(0);
         for (final ScoreMove move : moves) {
-            if (move.toX == -1) {
+            if (turnCount == 0 && move.toX == -1) {
                 continue;
             }
 
-            if (bestMove.toX == -1) {
+            if (turnCount == 0 && bestMove.toX == -1) {
                 bestMove = move;
             }
 
