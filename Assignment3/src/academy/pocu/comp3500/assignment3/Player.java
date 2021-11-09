@@ -9,16 +9,10 @@ public class Player extends PlayerBase {
     private static final int DEPTH = 4;
 
     // DEPTH = 4
-//    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 55300;
-//    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 159800;
-//    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52600;
-//    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1600;
-//    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 22200;
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 60000 + 800000;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 170000;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 60000;
-    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 2000;
-    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 30000;
+    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 55240;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 159745;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52528;
+    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1515;
 
     protected final EColor color;
     protected final Move resultMove;
@@ -26,8 +20,7 @@ public class Player extends PlayerBase {
     protected final MemoryPool<CompactMove> compactMoveMemoryPool;
     protected final MemoryPool<ScoreMove> scoreMoveMemoryPool;
     private final ManualMemoryPool<char[][]> boardMemoryPool;
-//    private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
-//    private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
+    private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -42,8 +35,8 @@ public class Player extends PlayerBase {
             this.boardMemoryPool = new ManualMemoryPool<char[][]>();
             ManualMemoryPool.init(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE, BOARD_MEMORY_POOL_DEFAULT_SIZE);
 
-//            this.compactMoveListMemoryPool = new ManualMemoryPool<ArrayList<CompactMove>>();
-//            ManualMemoryPool.initCompactMoveList(this.compactMoveListMemoryPool, Chess.TOTAL_CASE, COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
+            this.compactMoveListMemoryPool = new ManualMemoryPool<ArrayList<CompactMove>>();
+            ManualMemoryPool.initCompactMoveList(this.compactMoveListMemoryPool, Chess.TOTAL_CASE, COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
@@ -54,8 +47,7 @@ public class Player extends PlayerBase {
         System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
         System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
         System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
-//        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
-//        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
+        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
         System.out.println();
     }
 
@@ -70,8 +62,7 @@ public class Player extends PlayerBase {
         this.compactMoveMemoryPool.resetNextIndex();
         this.scoreMoveMemoryPool.resetNextIndex();
         this.boardMemoryPool.resetNextIndex();
-//        this.compactMoveListMemoryPool.resetNextIndex();
-//        this.scoreMoveListMemoryPool.resetNextIndex();
+        this.compactMoveListMemoryPool.resetNextIndex();
 
         final EColor opponent = this.color == EColor.WHITE ? EColor.BLACK : EColor.WHITE;
 
@@ -151,10 +142,8 @@ public class Player extends PlayerBase {
         return Chess.getMinScoreMove(scoreMoves);
     }
 
-
     protected final ArrayList<CompactMove> getCanMoveList(final char[][] board, final EColor turn) {
-        final ArrayList<CompactMove> outMoves = new ArrayList<CompactMove>(Chess.TOTAL_CASE);
-//        final ArrayList<CompactMove> outMoves = ManualMemoryPool.getNextCompactMoveList(this.compactMoveListMemoryPool, Chess.TOTAL_CASE);
+        final ArrayList<CompactMove> outMoves = ManualMemoryPool.getNextCompactMoveList(this.compactMoveListMemoryPool, Chess.TOTAL_CASE);
 
         ArrayList<ScoreMove> temps;
         for (int y = 0; y < Chess.BOARD_SIZE; ++y) {
