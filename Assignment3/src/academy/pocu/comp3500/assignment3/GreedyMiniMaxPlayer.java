@@ -8,11 +8,12 @@ import java.util.ArrayList;
 public final class GreedyMiniMaxPlayer extends PlayerBase {
     private static final int DEPTH = 6;
 
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 18000;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 34000;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 18000;
-    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1700;
-    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1700;
+    // DEPTH = 6;
+    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 315300;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 605100;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 315300;
+    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 25500;
+    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 25500;
 
     private final EColor color;
     private final Move resultMove;
@@ -24,6 +25,15 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
     private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
 
+    public void print(){
+        System.out.println("GreedyMiniMaxPlayer");
+        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
+        System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
+        System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
+        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
+        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
+        System.out.println();
+    }
 
     public GreedyMiniMaxPlayer(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -40,10 +50,10 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             ManualMemoryPool.init(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE, BOARD_MEMORY_POOL_DEFAULT_SIZE);
 
             this.compactMoveListMemoryPool = new ManualMemoryPool<ArrayList<CompactMove>>();
-            ManualMemoryPool.getNextCompactMoveList(this.compactMoveListMemoryPool, COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
+            ManualMemoryPool.initCompactMoveList(this.compactMoveListMemoryPool, Chess.TOTAL_CASE, COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
 
             this.scoreMoveListMemoryPool = new ManualMemoryPool<ArrayList<ScoreMove>>();
-            ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
+            ManualMemoryPool.initScoreMoveList(this.scoreMoveListMemoryPool, Chess.TOTAL_CASE, SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }

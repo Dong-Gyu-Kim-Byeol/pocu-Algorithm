@@ -8,12 +8,17 @@ import java.util.ArrayList;
 public final class Player extends PlayerBase {
     private static final int DEPTH = 4;
 
-    // DEPTH = 5
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 3000000;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 9000000;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 3000000;
-    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 800000;
-    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1250000;
+    // DEPTH = 4
+//    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 55300;
+//    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 159800;
+//    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52600;
+//    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1600;
+//    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 22200;
+    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 60000;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 170000;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 60000;
+    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 2000;
+    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 30000;
 
     private final EColor color;
     private final Move resultMove;
@@ -24,7 +29,8 @@ public final class Player extends PlayerBase {
     private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
     private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
 
-    public void print(){
+    public void print() {
+        System.out.println("Player");
         System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
         System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
         System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
@@ -32,7 +38,6 @@ public final class Player extends PlayerBase {
         System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
         System.out.println();
     }
-
 
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
