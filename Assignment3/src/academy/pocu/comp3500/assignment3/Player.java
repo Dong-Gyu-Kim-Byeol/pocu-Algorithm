@@ -8,6 +8,12 @@ import java.util.ArrayList;
 public class Player extends PlayerBase {
     private static final int DEPTH = 4;
 
+    // DEPTH = 4
+//    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 55300;
+//    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 159800;
+//    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52600;
+//    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1600;
+//    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 22200;
     private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 60000;
     private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 170000;
     private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 60000;
@@ -19,6 +25,9 @@ public class Player extends PlayerBase {
 
     protected final MemoryPool<CompactMove> compactMoveMemoryPool;
     protected final MemoryPool<ScoreMove> scoreMoveMemoryPool;
+    private final ManualMemoryPool<char[][]> boardMemoryPool;
+//    private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
+//    private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -28,15 +37,23 @@ public class Player extends PlayerBase {
 
         try {
             this.compactMoveMemoryPool = new MemoryPool<CompactMove>(CompactMove.class.getDeclaredConstructor(), COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("can not getDeclaredConstructor");
-        }
-
-        try {
             this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
+
+            this.boardMemoryPool = new ManualMemoryPool<char[][]>();
+            ManualMemoryPool.init(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE, BOARD_MEMORY_POOL_DEFAULT_SIZE);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
+    }
+
+    public void printMemoryPoolSize() {
+        System.out.println("Player");
+        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
+        System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
+        System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
+//        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
+//        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
+        System.out.println();
     }
 
     public final Move getNextMove(final char[][] board) {
@@ -47,10 +64,11 @@ public class Player extends PlayerBase {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
 
-//        assert (this.compactMoveMemoryPool.getNextIndex() < COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
         this.compactMoveMemoryPool.resetNextIndex();
-//        assert (this.scoreMoveMemoryPool.getNextIndex() < SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
         this.scoreMoveMemoryPool.resetNextIndex();
+        this.boardMemoryPool.resetNextIndex();
+//        this.compactMoveListMemoryPool.resetNextIndex();
+//        this.scoreMoveListMemoryPool.resetNextIndex();
 
         final EColor opponent = this.color == EColor.WHITE ? EColor.BLACK : EColor.WHITE;
 
@@ -59,7 +77,7 @@ public class Player extends PlayerBase {
                 opponent,
                 this.color,
                 1,
-                this.DEPTH);
+                DEPTH);
 
         resultMove.fromX = move.fromX();
         resultMove.fromY = move.fromY();
@@ -102,8 +120,9 @@ public class Player extends PlayerBase {
         final ArrayList<ScoreMove> scoreMoves = new ArrayList<ScoreMove>(Chess.TOTAL_CASE);
 
         for (final CompactMove canMove : canMoveList) {
-            final char[][] newBoard = Chess.createNewBoard();
+            final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE);
             Chess.copyBoard(board, newBoard);
+
             newBoard[canMove.toY()][canMove.toX()] = newBoard[canMove.fromY()][canMove.fromX()];
             newBoard[canMove.fromY()][canMove.fromX()] = 0;
 
@@ -121,8 +140,6 @@ public class Player extends PlayerBase {
             newScoreMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, newBoard[canMove.toY()][canMove.toX()]);
             scoreMoves.add(newScoreMove);
         }
-
-//        System.out.println("scoreMoves.size() : " + scoreMoves.size());
 
         if (turn == player) {
             return Chess.getMaxScoreMove(scoreMoves);

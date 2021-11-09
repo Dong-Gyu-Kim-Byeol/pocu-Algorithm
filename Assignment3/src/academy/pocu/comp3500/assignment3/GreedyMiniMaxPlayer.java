@@ -9,16 +9,11 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private static final int DEPTH = 6;
 
     // DEPTH = 6;
-//    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 315300;
-//    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 605100;
-//    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 315300;
-//    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 25500;
-//    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 25500;
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 0;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 0;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 0;
-    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 0;
-    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 0;
+    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 315300;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 605100;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 315300;
+    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 25500;
+    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 25500;
 
     private final EColor color;
     private final Move resultMove;
