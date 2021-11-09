@@ -1,24 +1,142 @@
 package academy.pocu.comp3500.assignment3;
 
+import academy.pocu.comp3500.assignment3.chess.Move;
+import academy.pocu.comp3500.assignment3.chess.PlayerBase;
+
 import java.util.ArrayList;
 
-public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
+public final class GreedyMiniMaxPlayer extends PlayerBase {
     private static final int DEPTH = 4;
 
+    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 3000;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 4000;
+
+    private final EColor color;
+    private final Move resultMove;
+
     private final ScoreMove bestScratchScoreMove;
+    private final MemoryPool<CompactMove> compactMoveMemoryPool;
+    private final MemoryPool<ScoreMove> scoreMoveMemoryPool;
+
 
     public GreedyMiniMaxPlayer(final boolean isWhite, final int maxMoveTimeMilliseconds) {
-        super(isWhite, maxMoveTimeMilliseconds, DEPTH);
+        super(isWhite, maxMoveTimeMilliseconds);
         this.bestScratchScoreMove = new ScoreMove(-1, -1, -1, -1, 0, (char) 0);
+
+        this.color = isWhite ? EColor.WHITE : EColor.BLACK;
+        this.resultMove = new Move();
+
+        try {
+            this.compactMoveMemoryPool = new MemoryPool<CompactMove>(CompactMove.class.getDeclaredConstructor(), COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("can not getDeclaredConstructor");
+        }
+
+        try {
+            this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("can not getDeclaredConstructor");
+        }
     }
 
-    @Override
-    protected ArrayList<CompactMove> getCanMoveList(final char[][] board, final EColor turn) {
-        ArrayList<CompactMove> moves = new ArrayList<CompactMove>(TOTAL_CASE);
+    public final Move getNextMove(final char[][] board) {
+        return getNextMove(board, null);
+    }
+
+    public final Move getNextMove(final char[][] board, final Move opponentMove) {
+        assert (board.length == Chess.BOARD_SIZE);
+        assert (board[0].length == Chess.BOARD_SIZE);
+
+//        assert (this.compactMoveMemoryPool.getNextIndex() < COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
+        this.compactMoveMemoryPool.resetNextIndex();
+//        assert (this.scoreMoveMemoryPool.getNextIndex() < SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
+        this.scoreMoveMemoryPool.resetNextIndex();
+
+        final EColor opponent = this.color == EColor.WHITE ? EColor.BLACK : EColor.WHITE;
+
+        ScoreMove move = getBestMoveRecursive(board,
+                this.color,
+                opponent,
+                this.color,
+                1,
+                this.DEPTH);
+
+        resultMove.fromX = move.fromX();
+        resultMove.fromY = move.fromY();
+        resultMove.toX = move.toX();
+        resultMove.toY = move.toY();
+
+        return resultMove;
+    }
+
+    private final ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
+        assert (board.length == Chess.BOARD_SIZE);
+        assert (board[0].length == Chess.BOARD_SIZE);
+        assert (turnCount >= 1);
+
+        if (turnCount >= maxTurnCount) {
+            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
+            newScoreMove.init(-1, -1, -1, -1, Chess.calculateBoardPoint(board, player));
+            return newScoreMove;
+        }
+
+        if (Chess.hasWon(board, opponent)) {
+            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
+            newScoreMove.init(-1, -1, -1, -1, -Chess.KING_SCORE);
+            return newScoreMove;
+        }
+
+        if (Chess.hasWon(board, player)) {
+            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
+            newScoreMove.init(-1, -1, -1, -1, Chess.KING_SCORE);
+            return newScoreMove;
+        }
+
+        final ArrayList<CompactMove> canMoveList = getCanMoveList(board, turn);
+        if (canMoveList.isEmpty()) {
+            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
+            newScoreMove.init(-1, -1, -1, -1, 0);
+            return newScoreMove;
+        }
+
+        final ArrayList<ScoreMove> scoreMoves = new ArrayList<ScoreMove>(Chess.TOTAL_CASE);
+
+        for (final CompactMove canMove : canMoveList) {
+            final char[][] newBoard = Chess.createCopy(board);
+            newBoard[canMove.toY()][canMove.toX()] = newBoard[canMove.fromY()][canMove.fromX()];
+            newBoard[canMove.fromY()][canMove.fromX()] = 0;
+
+            final EColor nextPlayer = turn == player
+                    ? opponent : player;
+
+            int score = getBestMoveRecursive(newBoard,
+                    player,
+                    opponent,
+                    nextPlayer,
+                    turnCount + 1,
+                    maxTurnCount).score();
+
+            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
+            newScoreMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, newBoard[canMove.toY()][canMove.toX()]);
+            scoreMoves.add(newScoreMove);
+        }
+
+//        System.out.println("scoreMoves.size() : " + scoreMoves.size());
+
+        if (turn == player) {
+            return Chess.getMaxScoreMove(scoreMoves);
+        }
+
+        return Chess.getMinScoreMove(scoreMoves);
+    }
+
+
+    private ArrayList<CompactMove> getCanMoveList(final char[][] board, final EColor turn) {
+        ArrayList<CompactMove> moves = new ArrayList<CompactMove>(Chess.TOTAL_CASE);
 
         ScoreMove temp;
-        for (int y = 0; y < BOARD_SIZE; ++y) {
-            for (int x = 0; x < BOARD_SIZE; ++x) {
+        for (int y = 0; y < Chess.BOARD_SIZE; ++y) {
+            for (int x = 0; x < Chess.BOARD_SIZE; ++x) {
                 if (board[y][x] == 0) {
                     continue;
                 }
@@ -55,12 +173,12 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
                     continue;
                 }
 
-                assert (isMoveValid(board, turn, temp.fromX(), temp.fromY(), temp.toX(), temp.toY()));
+                assert (Chess.isMoveValid(board, turn, temp.fromX(), temp.fromY(), temp.toX(), temp.toY()));
 
                 final CompactMove newMove = this.compactMoveMemoryPool.getNext();
                 newMove.init(temp.fromX(), temp.fromY(), temp.toX(), temp.toY());
 
-                if (temp.score() == KING_SCORE) {
+                if (temp.score() == Chess.KING_SCORE) {
                     moves.clear();
                     moves.add(newMove);
                     return moves;
@@ -70,7 +188,7 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
             }
         }
 
-        assert (moves.size() <= TOTAL_CASE);
+        assert (moves.size() <= Chess.TOTAL_CASE);
 
         return moves;
     }
@@ -79,17 +197,17 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
     private ScoreMove pawnMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
-        for (final int[] pawnAttackOffset : PAWN_MOVE_OFFSETS) {
+        for (final int[] pawnAttackOffset : Chess.PAWN_MOVE_OFFSETS) {
             final int toX = fromX + pawnAttackOffset[0];
             final int toY = fromY + pawnAttackOffset[1];
 
-            if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
+            if (Chess.isMoveValid(board, turn, fromX, fromY, toX, toY)) {
                 final char attackedPiece = board[toY][toX];
-                final int score = ChessPlayerBase.getPieceScore(attackedPiece);
+                final int score = Chess.getPieceScore(attackedPiece);
                 if (bestScore <= score) {
                     bestScore = score;
                     this.bestScratchScoreMove.init(fromX, fromY, toX, toY, score, board[fromY][fromX]);
-                    if (score == KING_SCORE) {
+                    if (score == Chess.KING_SCORE) {
                         break force_break;
                     }
                 }
@@ -107,17 +225,17 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
     private ScoreMove kingMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
-        for (final int[] kingMoveOffset : KING_MOVE_OFFSETS) {
+        for (final int[] kingMoveOffset : Chess.KING_MOVE_OFFSETS) {
             final int toX = fromX + kingMoveOffset[0];
             final int toY = fromY + kingMoveOffset[1];
 
-            if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
+            if (Chess.isMoveValid(board, turn, fromX, fromY, toX, toY)) {
                 final char attackedPiece = board[toY][toX];
-                final int score = GreedyMiniMaxPlayer.getPieceScore(attackedPiece);
+                final int score = Chess.getPieceScore(attackedPiece);
                 if (bestScore < score) {
                     bestScore = score;
                     this.bestScratchScoreMove.init(fromX, fromY, toX, toY, score, board[fromY][fromX]);
-                    if (score == KING_SCORE) {
+                    if (score == Chess.KING_SCORE) {
                         break force_break;
                     }
                 }
@@ -144,7 +262,7 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
             final int DOWN_RIGHT_CROSS_MOVE_TYPE = 6;
             final int DOWN_LEFT_CROSS_MOVE_TYPE = 7;
 
-            for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
+            for (int moveSize = 1; moveSize < Chess.BOARD_SIZE; ++moveSize) {
                 final int queenMoveOffsetX;
                 final int queenMoveOffsetY;
                 switch (moveType) {
@@ -186,13 +304,13 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
 
                 final int toX = fromX + queenMoveOffsetX;
                 final int toY = fromY + queenMoveOffsetY;
-                if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
+                if (Chess.isMoveValid(board, turn, fromX, fromY, toX, toY)) {
                     final char attackedPiece = board[toY][toX];
-                    final int score = GreedyMiniMaxPlayer.getPieceScore(Character.toLowerCase(attackedPiece));
+                    final int score = Chess.getPieceScore(Character.toLowerCase(attackedPiece));
                     if (bestScore < score) {
                         bestScore = score;
                         this.bestScratchScoreMove.init(fromX, fromY, toX, toY, score, board[fromY][fromX]);
-                        if (score == KING_SCORE) {
+                        if (score == Chess.KING_SCORE) {
                             break force_break;
                         }
                     }
@@ -218,7 +336,7 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
             final int RIGHT_HORIZONTAL_MOVE_TYPE = 2;
             final int LEFT_HORIZONTAL_MOVE_TYPE = 3;
 
-            for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
+            for (int moveSize = 1; moveSize < Chess.BOARD_SIZE; ++moveSize) {
                 final int rookMoveOffsetX;
                 final int rookMoveOffsetY;
                 switch (moveType) {
@@ -245,13 +363,13 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
                 final int toX = fromX + rookMoveOffsetX;
                 final int toY = fromY + rookMoveOffsetY;
 
-                if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
+                if (Chess.isMoveValid(board, turn, fromX, fromY, toX, toY)) {
                     final char attackedPiece = board[toY][toX];
-                    final int score = GreedyMiniMaxPlayer.getPieceScore(Character.toLowerCase(attackedPiece));
+                    final int score = Chess.getPieceScore(Character.toLowerCase(attackedPiece));
                     if (bestScore < score) {
                         bestScore = score;
                         this.bestScratchScoreMove.init(fromX, fromY, toX, toY, score, board[fromY][fromX]);
-                        if (score == KING_SCORE) {
+                        if (score == Chess.KING_SCORE) {
                             break force_break;
                         }
                     }
@@ -277,7 +395,7 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
             final int DOWN_RIGHT_CROSS_MOVE_TYPE = 2;
             final int DOWN_LEFT_CROSS_MOVE_TYPE = 3;
 
-            for (int moveSize = 1; moveSize < BOARD_SIZE; ++moveSize) {
+            for (int moveSize = 1; moveSize < Chess.BOARD_SIZE; ++moveSize) {
                 final int bishopMoveOffsetX;
                 final int bishopMoveOffsetY;
                 switch (moveType) {
@@ -304,14 +422,14 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
                 final int toX = fromX + bishopMoveOffsetX;
                 final int toY = fromY + bishopMoveOffsetY;
 
-                if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
+                if (Chess.isMoveValid(board, turn, fromX, fromY, toX, toY)) {
                     final char attackedPiece = board[toY][toX];
-                    final int score = GreedyMiniMaxPlayer.getPieceScore(Character.toLowerCase(attackedPiece));
-                    if (score == KING_SCORE)
+                    final int score = Chess.getPieceScore(Character.toLowerCase(attackedPiece));
+                    if (score == Chess.KING_SCORE)
                         if (bestScore < score) {
                             bestScore = score;
                             this.bestScratchScoreMove.init(fromX, fromY, toX, toY, score, board[fromY][fromX]);
-                            if (score == KING_SCORE) {
+                            if (score == Chess.KING_SCORE) {
                                 break force_break;
                             }
                         }
@@ -332,17 +450,17 @@ public final class GreedyMiniMaxPlayer extends ChessPlayerBase {
     private ScoreMove knightMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
-        for (final int[] knightMoveOffset : KNIGHT_MOVE_OFFSETS) {
+        for (final int[] knightMoveOffset : Chess.KNIGHT_MOVE_OFFSETS) {
             final int toX = fromX + knightMoveOffset[0];
             final int toY = fromY + knightMoveOffset[1];
 
-            if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
+            if (Chess.isMoveValid(board, turn, fromX, fromY, toX, toY)) {
                 final char attackedPiece = board[toY][toX];
-                final int score = GreedyMiniMaxPlayer.getPieceScore(Character.toLowerCase(attackedPiece));
+                final int score = Chess.getPieceScore(Character.toLowerCase(attackedPiece));
                 if (bestScore < score) {
                     bestScore = score;
                     this.bestScratchScoreMove.init(fromX, fromY, toX, toY, score, board[fromY][fromX]);
-                    if (score == KING_SCORE) {
+                    if (score == Chess.KING_SCORE) {
                         break force_break;
                     }
                 }
