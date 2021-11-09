@@ -10,10 +10,6 @@ public class ManualMemoryPool<T> {
         this.pool = new ArrayList<T>();
     }
 
-    public final void addPool(final T object) {
-        this.pool.add(object);
-    }
-
     public int poolSize() {
         return this.pool.size();
     }
@@ -26,6 +22,10 @@ public class ManualMemoryPool<T> {
         }
 
         return next;
+    }
+
+    private void addPool(final T object) {
+        this.pool.add(object);
     }
 
     public final int getNextIndex() {
@@ -41,13 +41,12 @@ public class ManualMemoryPool<T> {
         this.pool.clear();
     }
 
-
+    // init
     public static void init(final ManualMemoryPool<char[][]> manualMemoryPool, final int arrayRowSize, final int arrayColumnSize, final int size) {
         for (int i = 0; i < size; ++i) {
             manualMemoryPool.addPool(new char[arrayRowSize][arrayColumnSize]);
         }
     }
-
 
     public static void initCompactMoveList(final ManualMemoryPool<ArrayList<CompactMove>> manualMemoryPool, final int arrayListCapacity, final int size) {
         for (int i = 0; i < size; ++i) {
@@ -61,7 +60,7 @@ public class ManualMemoryPool<T> {
         }
     }
 
-
+    // getNext
     public static char[][] getNext(final ManualMemoryPool<char[][]> manualMemoryPool, final int arrayRowSize, final int arrayColumnSize) {
         char[][] temp = manualMemoryPool.getNextOrNull();
         if (temp == null) {
