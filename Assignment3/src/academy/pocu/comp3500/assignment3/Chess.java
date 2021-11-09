@@ -8,14 +8,6 @@ public final class Chess {
 
     public static final int BOARD_SIZE = 8;
 
-    public static final int PAWN_CASE = 4;
-    public static final int KING_CASE = 8;
-    public static final int QUEEN_CASE = 32;
-    public static final int ROOK_CASE = 16;
-    public static final int BISHOP_CASE = 16;
-    public static final int KNIGHT_CASE = 8;
-    public static final int TOTAL_CASE = PAWN_CASE * 8 + KING_CASE + QUEEN_CASE + ROOK_CASE * 2 + BISHOP_CASE * 2 + KNIGHT_CASE * 2;
-
     public static final int[][] KING_MOVE_OFFSETS = {
             {-1, 1},
             {-1, 0},
@@ -48,6 +40,14 @@ public final class Chess {
             {-1, 1},
             {1, 1}
     };
+
+    public static final int PAWN_CASE = PAWN_MOVE_OFFSETS.length;
+    public static final int KING_CASE = KING_MOVE_OFFSETS.length;
+    public static final int QUEEN_CASE = 32;
+    public static final int ROOK_CASE = 16;
+    public static final int BISHOP_CASE = 16;
+    public static final int KNIGHT_CASE = KNIGHT_MOVE_OFFSETS.length;
+    public static final int TOTAL_CASE = PAWN_CASE * 8 + KING_CASE + QUEEN_CASE + ROOK_CASE * 2 + BISHOP_CASE * 2 + KNIGHT_CASE * 2;
 
     public static final int KING_SCORE = 100;
     public static final int QUEEN_SCORE = 20;
@@ -135,7 +135,7 @@ public final class Chess {
         return true;
     }
 
-    public static void createCopy(final char[][] board, final char[][] outCopy) {
+    public static void copyBoard(final char[][] board, final char[][] outCopy) {
         assert (board.length == BOARD_SIZE);
         assert (board[0].length == BOARD_SIZE);
         assert (outCopy.length == BOARD_SIZE);

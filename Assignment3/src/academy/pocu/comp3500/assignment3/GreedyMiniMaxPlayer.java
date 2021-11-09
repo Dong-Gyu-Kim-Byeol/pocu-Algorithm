@@ -129,7 +129,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
 
         for (final CompactMove canMove : canMoveList) {
             final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE);
-            Chess.createCopy(board, newBoard);
+            Chess.copyBoard(board, newBoard);
 
             newBoard[canMove.toY()][canMove.toX()] = newBoard[canMove.fromY()][canMove.fromX()];
             newBoard[canMove.fromY()][canMove.fromX()] = 0;
