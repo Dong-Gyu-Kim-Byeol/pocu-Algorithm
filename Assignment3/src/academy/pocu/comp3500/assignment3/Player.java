@@ -27,7 +27,7 @@ public class Player extends PlayerBase {
     protected final MemoryPool<ScoreMove> scoreMoveMemoryPool;
     private final ManualMemoryPool<char[][]> boardMemoryPool;
 //    private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
-//    private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
+    private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -41,6 +41,9 @@ public class Player extends PlayerBase {
 
             this.boardMemoryPool = new ManualMemoryPool<char[][]>();
             ManualMemoryPool.init(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE, BOARD_MEMORY_POOL_DEFAULT_SIZE);
+
+            this.scoreMoveListMemoryPool = new ManualMemoryPool<ArrayList<ScoreMove>>();
+            ManualMemoryPool.initScoreMoveList(this.scoreMoveListMemoryPool, Chess.TOTAL_CASE, SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
@@ -52,7 +55,7 @@ public class Player extends PlayerBase {
         System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
         System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
 //        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
-//        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
+        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
         System.out.println();
     }
 
@@ -68,7 +71,7 @@ public class Player extends PlayerBase {
         this.scoreMoveMemoryPool.resetNextIndex();
         this.boardMemoryPool.resetNextIndex();
 //        this.compactMoveListMemoryPool.resetNextIndex();
-//        this.scoreMoveListMemoryPool.resetNextIndex();
+        this.scoreMoveListMemoryPool.resetNextIndex();
 
         final EColor opponent = this.color == EColor.WHITE ? EColor.BLACK : EColor.WHITE;
 
@@ -117,7 +120,7 @@ public class Player extends PlayerBase {
             return newScoreMove;
         }
 
-        final ArrayList<ScoreMove> scoreMoves = new ArrayList<ScoreMove>(Chess.TOTAL_CASE);
+        final ArrayList<ScoreMove> scoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.TOTAL_CASE);
 
         for (final CompactMove canMove : canMoveList) {
             final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE);
@@ -214,7 +217,7 @@ public class Player extends PlayerBase {
     }
 
     private ArrayList<ScoreMove> pawnMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.PAWN_CASE);
+        final ArrayList<ScoreMove> outScoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.PAWN_CASE);
 
         for (final int[] pawnAttackOffset : Chess.PAWN_MOVE_OFFSETS) {
             final int toX = fromX + pawnAttackOffset[0];
@@ -243,7 +246,7 @@ public class Player extends PlayerBase {
     }
 
     private ArrayList<ScoreMove> kingMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.KING_CASE);
+        final ArrayList<ScoreMove> outScoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.KING_CASE);
 
         for (final int[] kingMoveOffset : Chess.KING_MOVE_OFFSETS) {
             final int toX = fromX + kingMoveOffset[0];
@@ -272,7 +275,7 @@ public class Player extends PlayerBase {
     }
 
     private ArrayList<ScoreMove> queenMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.QUEEN_CASE);
+        final ArrayList<ScoreMove> outScoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.QUEEN_CASE);
 
         for (int moveType = 0; moveType < 8; ++moveType) {
             final int UP_VERTICAL_MOVE_TYPE = 0;
@@ -352,7 +355,7 @@ public class Player extends PlayerBase {
     }
 
     private ArrayList<ScoreMove> rookMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.ROOK_CASE);
+        final ArrayList<ScoreMove> outScoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.ROOK_CASE);
 
         for (int moveType = 0; moveType < 4; ++moveType) {
             final int UP_VERTICAL_MOVE_TYPE = 0;
@@ -413,7 +416,7 @@ public class Player extends PlayerBase {
     }
 
     private ArrayList<ScoreMove> bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.BISHOP_CASE);
+        final ArrayList<ScoreMove> outScoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.BISHOP_CASE);
 
         for (int moveType = 0; moveType < 4; ++moveType) {
             final int UP_RIGHT_CROSS_MOVE_TYPE = 0;
@@ -474,7 +477,7 @@ public class Player extends PlayerBase {
     }
 
     private ArrayList<ScoreMove> knightMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.KNIGHT_CASE);
+        final ArrayList<ScoreMove> outScoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.KNIGHT_CASE);
 
         for (final int[] knightMoveOffset : Chess.KNIGHT_MOVE_OFFSETS) {
             final int toX = fromX + knightMoveOffset[0];
