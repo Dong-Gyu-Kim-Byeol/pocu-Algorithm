@@ -14,6 +14,10 @@ public class ManualMemoryPool<T> {
         this.pool.add(object);
     }
 
+    public int poolSize() {
+        return this.pool.size();
+    }
+
     private T getNextOrNull() {
         T next = null;
         if (nextIndex < this.pool.size()) {

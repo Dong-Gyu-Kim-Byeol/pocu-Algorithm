@@ -33,14 +33,18 @@ public class Program {
             blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
         }
 
-//        whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
-//        blackPlayer = new GreedyMiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
 
-//        whitePlayer = new GreedyMiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
-//        blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
+        whitePlayer = new GreedyMiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
+        blackPlayer = new GreedyMiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
 
-//        whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
-//        blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
+        whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
+        blackPlayer = new GreedyMiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
+
+        whitePlayer = new GreedyMiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
+        blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
+
+        whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
+        blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
 
         {
             final char[][] board = new char[8][8];
@@ -106,10 +110,9 @@ public class Program {
             }
         }
 
+        whitePlayer.print();
+        blackPlayer.print();
 
-
-//        int i = Player.boardNum;
-//        int d = 1;
     }
 
     public static void pause(long milliseconds) {

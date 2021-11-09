@@ -4,6 +4,9 @@ public abstract class PlayerBase {
     private final boolean isWhite;
     private final int maxMoveTimeMilliseconds;
 
+    public void print(){
+    }
+
     public PlayerBase(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         this.isWhite = isWhite;
         this.maxMoveTimeMilliseconds = maxMoveTimeMilliseconds;

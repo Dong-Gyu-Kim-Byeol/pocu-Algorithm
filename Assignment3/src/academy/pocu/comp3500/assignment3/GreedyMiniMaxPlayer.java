@@ -6,10 +6,13 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 import java.util.ArrayList;
 
 public final class GreedyMiniMaxPlayer extends PlayerBase {
-    private static final int DEPTH = 5;
+    private static final int DEPTH = 6;
 
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 3000;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 4000;
+    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 18000;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 34000;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 18000;
+    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1700;
+    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1700;
 
     private final EColor color;
     private final Move resultMove;
@@ -32,9 +35,15 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         try {
             this.compactMoveMemoryPool = new MemoryPool<CompactMove>(CompactMove.class.getDeclaredConstructor(), COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
             this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
+
             this.boardMemoryPool = new ManualMemoryPool<char[][]>();
+            ManualMemoryPool.init(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE, BOARD_MEMORY_POOL_DEFAULT_SIZE);
+
             this.compactMoveListMemoryPool = new ManualMemoryPool<ArrayList<CompactMove>>();
+            ManualMemoryPool.getNextCompactMoveList(this.compactMoveListMemoryPool, COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
+
             this.scoreMoveListMemoryPool = new ManualMemoryPool<ArrayList<ScoreMove>>();
+            ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
@@ -124,8 +133,6 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             newScoreMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, newBoard[canMove.toY()][canMove.toX()]);
             scoreMoves.add(newScoreMove);
         }
-
-//        System.out.println("scoreMoves.size() : " + scoreMoves.size());
 
         if (turn == player) {
             return Chess.getMaxScoreMove(scoreMoves);
