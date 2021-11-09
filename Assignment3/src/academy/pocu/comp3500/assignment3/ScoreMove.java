@@ -4,12 +4,12 @@ public final class ScoreMove {
     private static final int MIN_POSITION = -1;
     private static final int MAX_POSITION = 8;
 
-    private short score;
-    private char piece;
-
     // position : y << 4 ^ x
     private byte from;
     private byte to;
+
+    private short score;
+    private char piece;
 
     public ScoreMove() {
         this(-1, -1, -1, -1, 0, (char) 0);
