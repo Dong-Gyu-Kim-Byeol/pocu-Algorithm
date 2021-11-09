@@ -86,13 +86,13 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
 
         if (Chess.hasWon(board, opponent)) {
             final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
-            newScoreMove.init(-1, -1, -1, -1, -Chess.KING_SCORE);
+            newScoreMove.init(-1, -1, -1, -1, -Chess.KING_SCORE * 2);
             return newScoreMove;
         }
 
         if (Chess.hasWon(board, player)) {
             final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
-            newScoreMove.init(-1, -1, -1, -1, Chess.KING_SCORE);
+            newScoreMove.init(-1, -1, -1, -1, Chess.KING_SCORE * 2);
             return newScoreMove;
         }
 
@@ -183,6 +183,8 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
                 outMoves.add(pieceMove);
             }
         }
+
+        assert (outMoves.isEmpty() == false);
 
         if (this.outMovesMaxSizeInGetCanMoveList < outMoves.size()) {
             this.outMovesMaxSizeInGetCanMoveList = outMoves.size();
