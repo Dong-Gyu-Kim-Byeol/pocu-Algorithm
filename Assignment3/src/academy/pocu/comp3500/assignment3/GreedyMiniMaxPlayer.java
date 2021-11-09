@@ -6,7 +6,7 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 import java.util.ArrayList;
 
 public final class GreedyMiniMaxPlayer extends PlayerBase {
-    private static final int DEPTH = 6;
+    private static final int DEPTH = 8;
 
     // DEPTH = 6;
     private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 315300;
@@ -25,7 +25,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
     private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
 
-    public void print(){
+    public void print() {
         System.out.println("GreedyMiniMaxPlayer");
         System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
         System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
