@@ -33,8 +33,8 @@ public class Program {
             whitePlayer = new GreedyMiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
             blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
 
-            whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
-            blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
+//            whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
+//            blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
         } else {
             if (IS_WHITE_KEYBOARD_PLAYER) {
                 whitePlayer = new KeyboardPlayer(true);
@@ -86,6 +86,9 @@ public class Program {
                 }
             }
         }
+
+        whitePlayer.printMemoryPoolSize();
+        blackPlayer.printMemoryPoolSize();
     }
 
     public static void pause(long milliseconds) {
