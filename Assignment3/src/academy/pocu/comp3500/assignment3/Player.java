@@ -14,7 +14,7 @@ public class Player extends PlayerBase {
 //    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52600;
 //    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1600;
 //    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 22200;
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 60000;
+    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 60000 + 736000;
     private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 170000;
     private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 60000;
     private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 2000;
