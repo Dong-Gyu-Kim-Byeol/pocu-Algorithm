@@ -1,5 +1,7 @@
 package academy.pocu.comp3500.assignment3.app;
 
+import academy.pocu.comp3500.assignment3.GreedyMiniMaxPlayer;
+import academy.pocu.comp3500.assignment3.MiniMaxPlayer;
 import academy.pocu.comp3500.assignment3.Player;
 import academy.pocu.comp3500.assignment3.chess.Move;
 import academy.pocu.comp3500.assignment3.chess.PlayerBase;
@@ -24,13 +26,25 @@ public class Program {
         if (IS_WHITE_KEYBOARD_PLAYER) {
             whitePlayer = new KeyboardPlayer(true);
         } else {
-            whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
+            whitePlayer = new MiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
         }
         if (IS_BLACK_KEYBOARD_PLAYER) {
             blackPlayer = new KeyboardPlayer(false);
         } else {
-            blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
+            blackPlayer = new GreedyMiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
         }
+
+//        whitePlayer = new MiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
+//        blackPlayer = new GreedyMiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
+
+//        whitePlayer = new GreedyMiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
+//        blackPlayer = new MiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
+
+        whitePlayer = new MiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
+        blackPlayer = new MiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
+
+        whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
+        blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
 
         {
             final char[][] board = new char[8][8];
