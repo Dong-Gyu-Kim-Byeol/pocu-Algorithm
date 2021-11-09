@@ -1,6 +1,7 @@
 package academy.pocu.comp3500.assignment3.app;
 
 import academy.pocu.comp3500.assignment3.Player;
+import academy.pocu.comp3500.assignment3.chess.Move;
 import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 
 import java.io.BufferedReader;
@@ -31,30 +32,71 @@ public class Program {
             blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
         }
 
-        Game game = new Game(whitePlayer, blackPlayer, MAX_MOVE_TIME_MILLISECONDS);
+        {
+            final char[][] board = new char[8][8];
+            board[3][3] = 'K';
+            board[4][4] = 'k';
 
-        System.out.println("Let the game begin!");
-        System.out.println(game.toString());
+            Move move = whitePlayer.getNextMove(board);
+            assert (move.toX == 3 && move.toY == 3);
 
-        for (int i = 0; i < 50; ++i) {
-            if (game.isNextTurnWhite() && IS_BLACK_KEYBOARD_PLAYER
-                    || !game.isNextTurnWhite() && IS_WHITE_KEYBOARD_PLAYER) {
-                if (IS_AUTO_PLAY) {
-                    pause(AUTO_PLAY_TURN_DURATION_IN_MILLISECONDS);
-                } else {
-                    continueOnEnter();
-                }
-            }
+        }
 
-            game.nextTurn();
+        {
+//            Game game = new Game(whitePlayer, blackPlayer, MAX_MOVE_TIME_MILLISECONDS);
+//
+//            System.out.println("Let the game begin!");
+//            System.out.println(game.toString());
+//
+//            for (int i = 0; i < 50; ++i) {
+//                if (game.isNextTurnWhite() && IS_BLACK_KEYBOARD_PLAYER
+//                        || !game.isNextTurnWhite() && IS_WHITE_KEYBOARD_PLAYER) {
+//                    if (IS_AUTO_PLAY) {
+//                        pause(AUTO_PLAY_TURN_DURATION_IN_MILLISECONDS);
+//                    } else {
+//                        continueOnEnter();
+//                    }
+//                }
+//
+//                game.nextTurn();
+//
+//                clearConsole();
+//                System.out.println(game.toString());
+//
+//                if (game.isGameOver()) {
+//                    break;
+//                }
+//            }
+        }
 
-            clearConsole();
+        {
+            Game game = new Game(whitePlayer, blackPlayer, MAX_MOVE_TIME_MILLISECONDS);
+
+            System.out.println("Let the game begin!");
             System.out.println(game.toString());
 
-            if (game.isGameOver()) {
-                break;
+            while (!game.isGameOver()) {
+                if (game.isNextTurnWhite() && IS_BLACK_KEYBOARD_PLAYER
+                        || !game.isNextTurnWhite() && IS_WHITE_KEYBOARD_PLAYER) {
+                    if (IS_AUTO_PLAY) {
+                        pause(AUTO_PLAY_TURN_DURATION_IN_MILLISECONDS);
+                    } else {
+                        continueOnEnter();
+                    }
+                }
+
+                game.nextTurn();
+
+                clearConsole();
+                System.out.println(game.toString());
+
+                if (game.isGameOver()) {
+                    break;
+                }
             }
         }
+
+
 
 //        int i = Player.boardNum;
 //        int d = 1;

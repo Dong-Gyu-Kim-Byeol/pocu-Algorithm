@@ -56,9 +56,8 @@ public final class Player extends PlayerBase {
 //    public static int boardNum;
 
     private final EColor color;
-    private ScoreMove scratchMove;
-    private ScoreMove bestMove;
-    private Move resultMove;
+    private final ScoreMove bestScratchScoreMove;
+    private final Move resultMove;
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -69,8 +68,7 @@ public final class Player extends PlayerBase {
 //        boardNum = 0;
 
         this.color = isWhite ? EColor.WHITE : EColor.BLACK;
-        this.scratchMove = new ScoreMove();
-        this.bestMove = new ScoreMove();
+        this.bestScratchScoreMove = new ScoreMove();
         this.resultMove = new Move();
     }
 
@@ -111,12 +109,12 @@ public final class Player extends PlayerBase {
 
         if (hasWon(board, opponent)) {
 //            scoreMoveNum++;
-            return new ScoreMove(-1, -1, -1, -1, -KING_SCORE * 2);
+            return new ScoreMove(-1, -1, -1, -1, -KING_SCORE);
         }
 
         if (hasWon(board, player)) {
 //            scoreMoveNum++;
-            return new ScoreMove(-1, -1, -1, -1, KING_SCORE * 2);
+            return new ScoreMove(-1, -1, -1, -1, KING_SCORE);
         }
 
         final ArrayList<Move> canMoveList = getCanMoveList(board, turn);
@@ -144,7 +142,7 @@ public final class Player extends PlayerBase {
                     maxTurnCount).score;
 
 //            scoreMoveNum++;
-            ScoreMove move = new ScoreMove(canMove.fromX, canMove.fromY, canMove.toX, canMove.toY, score);
+            ScoreMove move = new ScoreMove(canMove.fromX, canMove.fromY, canMove.toX, canMove.toY, score, newBoard[canMove.toY][canMove.toX]);
             moves.add(move);
         }
 
@@ -179,7 +177,8 @@ public final class Player extends PlayerBase {
 
         ScoreMove bestMove = moves.get(0);
         for (final ScoreMove move : moves) {
-            if (move.score > bestMove.score) {
+            if ((move.score == bestMove.score && Character.toLowerCase(move.piece) == 'p')
+                    || (move.score > bestMove.score)) {
                 bestMove = move;
             }
         }
@@ -192,7 +191,8 @@ public final class Player extends PlayerBase {
 
         ScoreMove bestMove = moves.get(0);
         for (final ScoreMove move : moves) {
-            if (move.score < bestMove.score) {
+            if ((move.score == bestMove.score && Character.toLowerCase(move.piece) == 'p')
+                    || move.score < bestMove.score) {
                 bestMove = move;
             }
         }
@@ -221,51 +221,55 @@ public final class Player extends PlayerBase {
 //        movesArrayListNum++;
         ArrayList<Move> moves = new ArrayList<>();
 
-        ScoreMove move;
+        ScoreMove scoreMove;
         for (int y = 0; y < BOARD_SIZE; ++y) {
             for (int x = 0; x < BOARD_SIZE; ++x) {
                 if (board[y][x] == 0) {
                     continue;
                 }
 
+                if ((turn == EColor.WHITE) != Character.isLowerCase(board[y][x])) {
+                    continue;
+                }
+
                 final char symbol = board[y][x];
                 switch (Character.toLowerCase(symbol)) {
                     case 'p':
-                        move = pawnMoveOrNull(board, x, y, turn);
+                        scoreMove = pawnMoveOrNull(board, x, y, turn);
                         break;
                     case 'k':
-                        move = kingMoveOrNull(board, x, y, turn);
+                        scoreMove = kingMoveOrNull(board, x, y, turn);
                         break;
                     case 'q':
-                        move = queenMoveOrNull(board, x, y, turn);
+                        scoreMove = queenMoveOrNull(board, x, y, turn);
                         break;
                     case 'r':
-                        move = rookMoveOrNull(board, x, y, turn);
+                        scoreMove = rookMoveOrNull(board, x, y, turn);
                         break;
                     case 'b':
-                        move = bishopMoveOrNull(board, x, y, turn);
+                        scoreMove = bishopMoveOrNull(board, x, y, turn);
                         break;
                     case 'n':
-                        move = knightMoveOrNull(board, x, y, turn);
+                        scoreMove = knightMoveOrNull(board, x, y, turn);
                         break;
                     default:
                         throw new IllegalArgumentException("Unknown piece symbol");
                 }
 
-                if (move == null) {
+                if (scoreMove == null) {
                     continue;
                 }
 
-                assert (isMoveValid(board, turn, move.fromX, move.fromY, move.toX, move.toY));
+                assert (isMoveValid(board, turn, scoreMove.fromX, scoreMove.fromY, scoreMove.toX, scoreMove.toY));
 
-                if (move.score == KING_SCORE) {
+                if (scoreMove.score == KING_SCORE) {
                     moves.clear();
-                    moves.add(new Move(move.fromX, move.fromY, move.toX, move.toY));
+                    moves.add(new Move(scoreMove.fromX, scoreMove.fromY, scoreMove.toX, scoreMove.toY));
                     return moves;
                 }
 
 //                moveNum++;
-                moves.add(new Move(move.fromX, move.fromY, move.toX, move.toY));
+                moves.add(new Move(scoreMove.fromX, scoreMove.fromY, scoreMove.toX, scoreMove.toY));
             }
         }
 
@@ -280,25 +284,16 @@ public final class Player extends PlayerBase {
             final int toY = fromY + pawnAttackOffset[1];
 
             if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
-                this.scratchMove.fromX = fromX;
-                this.scratchMove.fromY = fromY;
-                this.scratchMove.toX = toX;
-                this.scratchMove.toY = toY;
-
                 final char attackedPiece = board[toY][toX];
                 final int score = Player.getPieceScore(attackedPiece);
-                if (score == KING_SCORE) {
+                if (bestScore <= score) {
                     bestScore = score;
-                    final ScoreMove temp = this.bestMove;
-                    this.bestMove = this.scratchMove;
-                    this.scratchMove = temp;
-                    break force_break;
-                } else {
-                    if (bestScore < score) {
-                        bestScore = score;
-                        final ScoreMove temp = this.bestMove;
-                        this.bestMove = this.scratchMove;
-                        this.scratchMove = temp;
+                    this.bestScratchScoreMove.fromX = fromX;
+                    this.bestScratchScoreMove.fromY = fromY;
+                    this.bestScratchScoreMove.toX = toX;
+                    this.bestScratchScoreMove.toY = toY;
+                    if (score == KING_SCORE) {
+                        break force_break;
                     }
                 }
             }
@@ -308,8 +303,9 @@ public final class Player extends PlayerBase {
             return null;
         }
 
-        this.bestMove.score = bestScore;
-        return this.bestMove;
+        this.bestScratchScoreMove.piece = board[bestScratchScoreMove.toY][bestScratchScoreMove.toX];
+        this.bestScratchScoreMove.score = bestScore;
+        return this.bestScratchScoreMove;
     }
 
     private ScoreMove kingMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
@@ -320,25 +316,16 @@ public final class Player extends PlayerBase {
             final int toY = fromY + kingMoveOffset[1];
 
             if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
-                this.scratchMove.fromX = fromX;
-                this.scratchMove.fromY = fromY;
-                this.scratchMove.toX = toX;
-                this.scratchMove.toY = toY;
-
                 final char attackedPiece = board[toY][toX];
                 final int score = Player.getPieceScore(attackedPiece);
-                if (score == KING_SCORE) {
+                if (bestScore < score) {
                     bestScore = score;
-                    final ScoreMove temp = this.bestMove;
-                    this.bestMove = this.scratchMove;
-                    this.scratchMove = temp;
-                    break force_break;
-                } else {
-                    if (bestScore < score) {
-                        bestScore = score;
-                        final ScoreMove temp = this.bestMove;
-                        this.bestMove = this.scratchMove;
-                        this.scratchMove = temp;
+                    this.bestScratchScoreMove.fromX = fromX;
+                    this.bestScratchScoreMove.fromY = fromY;
+                    this.bestScratchScoreMove.toX = toX;
+                    this.bestScratchScoreMove.toY = toY;
+                    if (score == KING_SCORE) {
+                        break force_break;
                     }
                 }
             }
@@ -347,8 +334,10 @@ public final class Player extends PlayerBase {
         if (bestScore == -1) {
             return null;
         }
-        this.bestMove.score = bestScore;
-        return this.bestMove;
+
+        this.bestScratchScoreMove.piece = board[bestScratchScoreMove.toY][bestScratchScoreMove.toX];
+        this.bestScratchScoreMove.score = bestScore;
+        return this.bestScratchScoreMove;
     }
 
     private ScoreMove queenMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
@@ -407,25 +396,16 @@ public final class Player extends PlayerBase {
                 final int toX = fromX + queenMoveOffsetX;
                 final int toY = fromY + queenMoveOffsetY;
                 if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
-                    this.scratchMove.fromX = fromX;
-                    this.scratchMove.fromY = fromY;
-                    this.scratchMove.toX = toX;
-                    this.scratchMove.toY = toY;
-
                     final char attackedPiece = board[toY][toX];
                     final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                    if (score == KING_SCORE) {
+                    if (bestScore < score) {
                         bestScore = score;
-                        final ScoreMove temp = this.bestMove;
-                        this.bestMove = this.scratchMove;
-                        this.scratchMove = temp;
-                        break force_break;
-                    } else {
-                        if (bestScore < score) {
-                            bestScore = score;
-                            final ScoreMove temp = this.bestMove;
-                            this.bestMove = this.scratchMove;
-                            this.scratchMove = temp;
+                        this.bestScratchScoreMove.fromX = fromX;
+                        this.bestScratchScoreMove.fromY = fromY;
+                        this.bestScratchScoreMove.toX = toX;
+                        this.bestScratchScoreMove.toY = toY;
+                        if (score == KING_SCORE) {
+                            break force_break;
                         }
                     }
                 } else {
@@ -438,8 +418,9 @@ public final class Player extends PlayerBase {
             return null;
         }
 
-        this.bestMove.score = bestScore;
-        return this.bestMove;
+        this.bestScratchScoreMove.piece = board[bestScratchScoreMove.toY][bestScratchScoreMove.toX];
+        this.bestScratchScoreMove.score = bestScore;
+        return this.bestScratchScoreMove;
     }
 
     private ScoreMove rookMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
@@ -479,25 +460,16 @@ public final class Player extends PlayerBase {
                 final int toY = fromY + rookMoveOffsetY;
 
                 if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
-                    this.scratchMove.fromX = fromX;
-                    this.scratchMove.fromY = fromY;
-                    this.scratchMove.toX = toX;
-                    this.scratchMove.toY = toY;
-
                     final char attackedPiece = board[toY][toX];
                     final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                    if (score == KING_SCORE) {
+                    if (bestScore < score) {
                         bestScore = score;
-                        final ScoreMove temp = this.bestMove;
-                        this.bestMove = this.scratchMove;
-                        this.scratchMove = temp;
-                        break force_break;
-                    } else {
-                        if (bestScore < score) {
-                            bestScore = score;
-                            final ScoreMove temp = this.bestMove;
-                            this.bestMove = this.scratchMove;
-                            this.scratchMove = temp;
+                        this.bestScratchScoreMove.fromX = fromX;
+                        this.bestScratchScoreMove.fromY = fromY;
+                        this.bestScratchScoreMove.toX = toX;
+                        this.bestScratchScoreMove.toY = toY;
+                        if (score == KING_SCORE) {
+                            break force_break;
                         }
                     }
                 } else {
@@ -510,8 +482,9 @@ public final class Player extends PlayerBase {
             return null;
         }
 
-        this.bestMove.score = bestScore;
-        return this.bestMove;
+        this.bestScratchScoreMove.piece = board[bestScratchScoreMove.toY][bestScratchScoreMove.toX];
+        this.bestScratchScoreMove.score = bestScore;
+        return this.bestScratchScoreMove;
     }
 
     private ScoreMove bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
@@ -551,27 +524,19 @@ public final class Player extends PlayerBase {
                 final int toY = fromY + bishopMoveOffsetY;
 
                 if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
-                    this.scratchMove.fromX = fromX;
-                    this.scratchMove.fromY = fromY;
-                    this.scratchMove.toX = toX;
-                    this.scratchMove.toY = toY;
-
                     final char attackedPiece = board[toY][toX];
                     final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                    if (score == KING_SCORE) {
-                        bestScore = score;
-                        final ScoreMove temp = this.bestMove;
-                        this.bestMove = this.scratchMove;
-                        this.scratchMove = temp;
-                        break force_break;
-                    } else {
+                    if (score == KING_SCORE)
                         if (bestScore < score) {
                             bestScore = score;
-                            final ScoreMove temp = this.bestMove;
-                            this.bestMove = this.scratchMove;
-                            this.scratchMove = temp;
+                            this.bestScratchScoreMove.fromX = fromX;
+                            this.bestScratchScoreMove.fromY = fromY;
+                            this.bestScratchScoreMove.toX = toX;
+                            this.bestScratchScoreMove.toY = toY;
+                            if (score == KING_SCORE) {
+                                break force_break;
+                            }
                         }
-                    }
                 } else {
                     break;
                 }
@@ -582,8 +547,9 @@ public final class Player extends PlayerBase {
             return null;
         }
 
-        this.bestMove.score = bestScore;
-        return this.bestMove;
+        this.bestScratchScoreMove.piece = board[bestScratchScoreMove.toY][bestScratchScoreMove.toX];
+        this.bestScratchScoreMove.score = bestScore;
+        return this.bestScratchScoreMove;
     }
 
     private ScoreMove knightMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
@@ -594,37 +560,28 @@ public final class Player extends PlayerBase {
             final int toY = fromY + knightMoveOffset[1];
 
             if (isMoveValid(board, turn, fromX, fromY, toX, toY)) {
-                this.scratchMove.fromX = fromX;
-                this.scratchMove.fromY = fromY;
-                this.scratchMove.toX = toX;
-                this.scratchMove.toY = toY;
-
                 final char attackedPiece = board[toY][toX];
                 final int score = Player.getPieceScore(Character.toLowerCase(attackedPiece));
-                if (score == KING_SCORE) {
+                if (bestScore < score) {
                     bestScore = score;
-                    final ScoreMove temp = this.bestMove;
-                    this.bestMove = this.scratchMove;
-                    this.scratchMove = temp;
-                    break force_break;
-                } else {
-                    if (bestScore < score) {
-                        bestScore = score;
-                        final ScoreMove temp = this.bestMove;
-                        this.bestMove = this.scratchMove;
-                        this.scratchMove = temp;
+                    this.bestScratchScoreMove.fromX = fromX;
+                    this.bestScratchScoreMove.fromY = fromY;
+                    this.bestScratchScoreMove.toX = toX;
+                    this.bestScratchScoreMove.toY = toY;
+                    if (score == KING_SCORE) {
+                        break force_break;
                     }
                 }
             }
-
         }
 
         if (bestScore == -1) {
             return null;
         }
 
-        this.bestMove.score = bestScore;
-        return this.bestMove;
+        this.bestScratchScoreMove.piece = board[bestScratchScoreMove.toY][bestScratchScoreMove.toX];
+        this.bestScratchScoreMove.score = bestScore;
+        return this.bestScratchScoreMove;
     }
 
     private static boolean hasWon(final char[][] board, final EColor player) {
@@ -642,7 +599,6 @@ public final class Player extends PlayerBase {
         return true;
     }
 
-
     private static boolean isMoveValid(char[][] board, EColor player, final int fromX, final int fromY, final int toX, final int toY) {
         if (fromX >= BOARD_SIZE || fromX < 0
                 || fromY >= BOARD_SIZE || fromY < 0) {
@@ -652,11 +608,13 @@ public final class Player extends PlayerBase {
         final char symbol = board[fromY][fromX];
 
         if (symbol == 0) {
+            assert (false);
             return false;
         }
 
         if ((player == EColor.WHITE && !Character.isLowerCase(symbol))
                 || player != EColor.WHITE && Character.isLowerCase(symbol)) {
+            assert (false);
             return false;
         }
 
@@ -666,6 +624,7 @@ public final class Player extends PlayerBase {
         }
 
         if (fromX == toX && fromY == toY) {
+            assert (false);
             return false;
         }
 
@@ -674,22 +633,16 @@ public final class Player extends PlayerBase {
         switch (symbolInvariant) {
             case 'p':
                 return isPawnMoveValid(board, fromX, fromY, toX, toY);
-
             case 'n':
                 return isKnightMoveValid(board, fromX, fromY, toX, toY);
-
             case 'b':
                 return isBishopMoveValid(board, fromX, fromY, toX, toY);
-
             case 'r':
                 return isRookMoveValid(board, fromX, fromY, toX, toY);
-
             case 'q':
                 return isQueenMoveValid(board, fromX, fromY, toX, toY);
-
             case 'k':
                 return isKingMoveValid(board, fromX, fromY, toX, toY);
-
             default:
                 throw new IllegalArgumentException("Unknown piece symbol");
         }
@@ -812,8 +765,8 @@ public final class Player extends PlayerBase {
             return false;
         }
 
-        for (int i = 0; i < KNIGHT_MOVE_OFFSETS.length; ++i) {
-            if (fromX + KNIGHT_MOVE_OFFSETS[i][0] == toX && fromY + KNIGHT_MOVE_OFFSETS[i][1] == toY) {
+        for (int i = 0; i < KING_MOVE_OFFSETS.length; ++i) {
+            if (fromX + KING_MOVE_OFFSETS[i][0] == toX && fromY + KING_MOVE_OFFSETS[i][1] == toY) {
                 return true;
             }
         }
