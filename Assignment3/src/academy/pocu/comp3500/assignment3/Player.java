@@ -5,24 +5,22 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 
 import java.util.ArrayList;
 
-public class Player extends PlayerBase {
+public final class Player extends PlayerBase {
     private static final int DEPTH = 4;
 
     // DEPTH = 4
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 55240;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 159745;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 107217;
     private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52528;
 
     private int outMovesMaxSizeInGetCanMoveList = 52;
     private int outScoreMovesMaxSizeInQueenMoveOrNull = 24;
     private int outScoreMovesMaxSizeInRookMoveOrNull = 14;
-    private int outScoreMovesMaxSizeInBishopMoveOrNull = 12;
+    private int outScoreMovesMaxSizeInBishopMoveOrNull = 13;
 
-    protected final EColor color;
-    protected final Move resultMove;
+    private final EColor color;
+    private final Move resultMove;
 
-    protected final MemoryPool<CompactMove> compactMoveMemoryPool;
-    protected final MemoryPool<ScoreMove> scoreMoveMemoryPool;
+    private final MemoryPool<ScoreMove> scoreMoveMemoryPool;
     private final ManualMemoryPool<char[][]> boardMemoryPool;
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
@@ -32,7 +30,6 @@ public class Player extends PlayerBase {
         this.resultMove = new Move();
 
         try {
-            this.compactMoveMemoryPool = new MemoryPool<CompactMove>(CompactMove.class.getDeclaredConstructor(), COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
             this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
 
             this.boardMemoryPool = new ManualMemoryPool<char[][]>();
@@ -44,21 +41,19 @@ public class Player extends PlayerBase {
 
     public void printMemoryPoolSize() {
         System.out.println("Player");
-        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
         System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
         System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
         System.out.println();
     }
 
-    public final Move getNextMove(final char[][] board) {
+    public Move getNextMove(final char[][] board) {
         return getNextMove(board, null);
     }
 
-    public final Move getNextMove(final char[][] board, final Move opponentMove) {
+    public Move getNextMove(final char[][] board, final Move opponentMove) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
 
-        this.compactMoveMemoryPool.resetNextIndex();
         this.scoreMoveMemoryPool.resetNextIndex();
         this.boardMemoryPool.resetNextIndex();
 
@@ -79,7 +74,7 @@ public class Player extends PlayerBase {
         return resultMove;
     }
 
-    protected final ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
+    private ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
         assert (turnCount >= 1);
@@ -102,16 +97,14 @@ public class Player extends PlayerBase {
             return newScoreMove;
         }
 
-        final ArrayList<CompactMove> canMoveList = getCanMoveList(board, turn);
+        final ArrayList<ScoreMove> canMoveList = getCanMoveList(board, turn);
         if (canMoveList.isEmpty()) {
             final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
             newScoreMove.init(-1, -1, -1, -1, 0);
             return newScoreMove;
         }
 
-        final ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(canMoveList.size());
-
-        for (final CompactMove canMove : canMoveList) {
+        for (final ScoreMove canMove : canMoveList) {
             final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE);
             Chess.copyBoard(board, newBoard);
 
@@ -121,27 +114,25 @@ public class Player extends PlayerBase {
             final EColor nextPlayer = turn == player
                     ? opponent : player;
 
-            int score = getBestMoveRecursive(newBoard,
+            final int score = getBestMoveRecursive(newBoard,
                     player,
                     opponent,
                     nextPlayer,
                     turnCount + 1,
                     maxTurnCount).score();
 
-            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
-            newScoreMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, newBoard[canMove.toY()][canMove.toX()]);
-            outScoreMoves.add(newScoreMove);
+            canMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, canMove.piece());
         }
 
         if (turn == player) {
-            return Chess.getMaxScoreMove(outScoreMoves);
+            return Chess.getMaxScoreMove(canMoveList);
         }
 
-        return Chess.getMinScoreMove(outScoreMoves);
+        return Chess.getMinScoreMove(canMoveList);
     }
 
-    protected final ArrayList<CompactMove> getCanMoveList(final char[][] board, final EColor turn) {
-        final ArrayList<CompactMove> outMoves = new ArrayList<CompactMove>(this.outMovesMaxSizeInGetCanMoveList);
+    private ArrayList<ScoreMove> getCanMoveList(final char[][] board, final EColor turn) {
+        final ArrayList<ScoreMove> outMoves = new ArrayList<ScoreMove>(this.outMovesMaxSizeInGetCanMoveList);
 
         ArrayList<ScoreMove> temps;
         for (int y = 0; y < Chess.BOARD_SIZE; ++y) {
@@ -185,16 +176,13 @@ public class Player extends PlayerBase {
                 for (ScoreMove temp : temps) {
                     assert (Chess.isMoveValid(board, turn, temp.fromX(), temp.fromY(), temp.toX(), temp.toY()));
 
-                    final CompactMove newMove = this.compactMoveMemoryPool.getNext();
-                    newMove.init(temp.fromX(), temp.fromY(), temp.toX(), temp.toY());
-
                     if (temp.score() == Chess.KING_SCORE) {
                         outMoves.clear();
-                        outMoves.add(newMove);
+                        outMoves.add(temp);
                         return outMoves;
                     }
 
-                    outMoves.add(newMove);
+                    outMoves.add(temp);
                 }
             }
         }
@@ -408,7 +396,6 @@ public class Player extends PlayerBase {
 
         return outScoreMoves;
     }
-
 
     private ArrayList<ScoreMove> bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(this.outScoreMovesMaxSizeInBishopMoveOrNull);

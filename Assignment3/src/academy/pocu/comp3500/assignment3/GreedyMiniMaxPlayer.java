@@ -9,8 +9,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private static final int DEPTH = 6;
 
     // DEPTH = 6;
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 315273;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 605065;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 605069;
     private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 315269;
 
     private int outMovesMaxSizeInGetCanMoveList = 14;
@@ -19,7 +18,6 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private final Move resultMove;
 
     private final ScoreMove bestScratchScoreMove;
-    private final MemoryPool<CompactMove> compactMoveMemoryPool;
     private final MemoryPool<ScoreMove> scoreMoveMemoryPool;
     private final ManualMemoryPool<char[][]> boardMemoryPool;
 
@@ -31,7 +29,6 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         this.resultMove = new Move();
 
         try {
-            this.compactMoveMemoryPool = new MemoryPool<CompactMove>(CompactMove.class.getDeclaredConstructor(), COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
             this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
 
             this.boardMemoryPool = new ManualMemoryPool<char[][]>();
@@ -43,7 +40,6 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
 
     public void printMemoryPoolSize() {
         System.out.println("GreedyMiniMaxPlayer");
-        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
         System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
         System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
         System.out.println();
@@ -57,7 +53,6 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
 
-        this.compactMoveMemoryPool.resetNextIndex();
         this.scoreMoveMemoryPool.resetNextIndex();
         this.boardMemoryPool.resetNextIndex();
 
@@ -101,16 +96,14 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return newScoreMove;
         }
 
-        final ArrayList<CompactMove> canMoveList = getCanMoveList(board, turn);
+        final ArrayList<ScoreMove> canMoveList = getCanMoveList(board, turn);
         if (canMoveList.isEmpty()) {
             final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
             newScoreMove.init(-1, -1, -1, -1, 0);
             return newScoreMove;
         }
 
-        final ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(canMoveList.size());
-
-        for (final CompactMove canMove : canMoveList) {
+        for (final ScoreMove canMove : canMoveList) {
             final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE);
             Chess.copyBoard(board, newBoard);
 
@@ -120,27 +113,25 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             final EColor nextPlayer = turn == player
                     ? opponent : player;
 
-            int score = getBestMoveRecursive(newBoard,
+            final int score = getBestMoveRecursive(newBoard,
                     player,
                     opponent,
                     nextPlayer,
                     turnCount + 1,
                     maxTurnCount).score();
 
-            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
-            newScoreMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, newBoard[canMove.toY()][canMove.toX()]);
-            outScoreMoves.add(newScoreMove);
+            canMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, canMove.piece());
         }
 
         if (turn == player) {
-            return Chess.getMaxScoreMove(outScoreMoves);
+            return Chess.getMaxScoreMove(canMoveList);
         }
 
-        return Chess.getMinScoreMove(outScoreMoves);
+        return Chess.getMinScoreMove(canMoveList);
     }
 
-    private ArrayList<CompactMove> getCanMoveList(final char[][] board, final EColor turn) {
-        final ArrayList<CompactMove> outMoves = new ArrayList<CompactMove>(this.outMovesMaxSizeInGetCanMoveList);
+    private ArrayList<ScoreMove> getCanMoveList(final char[][] board, final EColor turn) {
+        final ArrayList<ScoreMove> outMoves = new ArrayList<ScoreMove>(this.outMovesMaxSizeInGetCanMoveList);
 
         ScoreMove pieceMove;
         for (int y = 0; y < Chess.BOARD_SIZE; ++y) {
@@ -183,16 +174,13 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
 
                 assert (Chess.isMoveValid(board, turn, pieceMove.fromX(), pieceMove.fromY(), pieceMove.toX(), pieceMove.toY()));
 
-                final CompactMove newMove = this.compactMoveMemoryPool.getNext();
-                newMove.init(pieceMove.fromX(), pieceMove.fromY(), pieceMove.toX(), pieceMove.toY());
-
                 if (pieceMove.score() == Chess.KING_SCORE) {
                     outMoves.clear();
-                    outMoves.add(newMove);
+                    outMoves.add(pieceMove);
                     return outMoves;
                 }
 
-                outMoves.add(newMove);
+                outMoves.add(pieceMove);
             }
         }
 
@@ -228,7 +216,9 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return null;
         }
 
-        return this.bestScratchScoreMove;
+        final ScoreMove out = this.scoreMoveMemoryPool.getNext();
+        out.init(this.bestScratchScoreMove);
+        return out;
     }
 
     @SuppressWarnings("UnnecessaryLabelOnBreakStatement")
@@ -256,7 +246,9 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return null;
         }
 
-        return this.bestScratchScoreMove;
+        final ScoreMove out = this.scoreMoveMemoryPool.getNext();
+        out.init(this.bestScratchScoreMove);
+        return out;
     }
 
     private ScoreMove queenMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
@@ -334,7 +326,9 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return null;
         }
 
-        return this.bestScratchScoreMove;
+        final ScoreMove out = this.scoreMoveMemoryPool.getNext();
+        out.init(this.bestScratchScoreMove);
+        return out;
     }
 
     private ScoreMove rookMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
@@ -393,7 +387,9 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return null;
         }
 
-        return this.bestScratchScoreMove;
+        final ScoreMove out = this.scoreMoveMemoryPool.getNext();
+        out.init(this.bestScratchScoreMove);
+        return out;
     }
 
     private ScoreMove bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
@@ -453,7 +449,9 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return null;
         }
 
-        return this.bestScratchScoreMove;
+        final ScoreMove out = this.scoreMoveMemoryPool.getNext();
+        out.init(this.bestScratchScoreMove);
+        return out;
     }
 
     @SuppressWarnings("UnnecessaryLabelOnBreakStatement")
@@ -481,6 +479,8 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return null;
         }
 
-        return this.bestScratchScoreMove;
+        final ScoreMove out = this.scoreMoveMemoryPool.getNext();
+        out.init(this.bestScratchScoreMove);
+        return out;
     }
 }
