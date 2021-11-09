@@ -86,10 +86,6 @@ public class Program {
                 }
             }
         }
-
-        whitePlayer.printMemoryPoolSize();
-        blackPlayer.printMemoryPoolSize();
-
     }
 
     public static void pause(long milliseconds) {

@@ -54,16 +54,6 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         }
     }
 
-    public void printMemoryPoolSize() {
-        System.out.println("GreedyMiniMaxPlayer");
-        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
-        System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
-        System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
-        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
-        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
-        System.out.println();
-    }
-
     public Move getNextMove(final char[][] board) {
         return getNextMove(board, null);
     }

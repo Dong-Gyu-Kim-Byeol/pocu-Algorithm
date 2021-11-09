@@ -8,17 +8,11 @@ import java.util.ArrayList;
 public final class Player extends PlayerBase {
     private static final int DEPTH = 4;
 
-    // DEPTH = 4
-//    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 55300;
-//    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 159800;
-//    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52600;
-//    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1600;
-//    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 22200;
-    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 60000;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 170000;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 60000;
-    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 2000;
-    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 30000;
+    private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 0;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 0;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 0;
+    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 0;
+    private static final int SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 0;
 
     private final EColor color;
     private final Move resultMove;
@@ -52,21 +46,11 @@ public final class Player extends PlayerBase {
         }
     }
 
-    public void printMemoryPoolSize() {
-        System.out.println("Player");
-        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
-        System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
-        System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
-        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
-        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
-        System.out.println();
-    }
-
-    public Move getNextMove(final char[][] board) {
+    public final Move getNextMove(final char[][] board) {
         return getNextMove(board, null);
     }
 
-    public Move getNextMove(final char[][] board, final Move opponentMove) {
+    public final Move getNextMove(final char[][] board, final Move opponentMove) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
 
