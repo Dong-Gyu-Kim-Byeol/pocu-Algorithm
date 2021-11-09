@@ -135,6 +135,11 @@ public final class Chess {
         return true;
     }
 
+    public static char[][] createNewBoard() {
+        final char[][] board = new char[BOARD_SIZE][BOARD_SIZE];
+        return board;
+    }
+
     public static void copyBoard(final char[][] board, final char[][] outCopy) {
         assert (board.length == BOARD_SIZE);
         assert (board[0].length == BOARD_SIZE);
