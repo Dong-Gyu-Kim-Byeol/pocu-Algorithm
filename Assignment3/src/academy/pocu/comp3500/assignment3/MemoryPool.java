@@ -1,12 +1,9 @@
 package academy.pocu.comp3500.assignment3;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 
-public final class MemoryPool<T> {
+public final class MemoryPool<T> extends ManualMemoryPool<T> {
     private final Constructor<T> constructor;
-    private int nextIndex;
-    private final ArrayList<T> pool;
 
     public MemoryPool(final Constructor<T> constructor) {
         this(constructor, 0);
@@ -14,11 +11,9 @@ public final class MemoryPool<T> {
 
     public MemoryPool(final Constructor<T> constructor, final int startSize) {
         this.constructor = constructor;
-        this.pool = new ArrayList<T>();
-
         for (int i = 0; i < startSize; ++i) {
             try {
-                this.pool.add((T) constructor.newInstance());
+                this.pool.add(this.constructor.newInstance());
             } catch (Exception e) {
                 assert (false);
             }
@@ -31,7 +26,7 @@ public final class MemoryPool<T> {
             next = this.pool.get(nextIndex);
         } else {
             try {
-                next = (T) constructor.newInstance();
+                next = constructor.newInstance();
                 this.pool.add(next);
             } catch (Exception e) {
                 assert (false);
@@ -42,18 +37,5 @@ public final class MemoryPool<T> {
 
         nextIndex++;
         return next;
-    }
-
-    public int getNextIndex() {
-        return nextIndex;
-    }
-
-    public void resetNextIndex() {
-        this.nextIndex = 0;
-    }
-
-    public void clear() {
-        this.resetNextIndex();
-        this.pool.clear();
     }
 }

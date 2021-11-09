@@ -33,8 +33,8 @@ public class Program {
             blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
         }
 
-        whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
-        blackPlayer = new GreedyMiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
+//        whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
+//        blackPlayer = new GreedyMiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
 
 //        whitePlayer = new GreedyMiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
 //        blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);

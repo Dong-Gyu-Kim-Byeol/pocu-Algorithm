@@ -6,7 +6,7 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 import java.util.ArrayList;
 
 public final class GreedyMiniMaxPlayer extends PlayerBase {
-    private static final int DEPTH = 4;
+    private static final int DEPTH = 5;
 
     private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 3000;
     private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 4000;
@@ -17,6 +17,9 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private final ScoreMove bestScratchScoreMove;
     private final MemoryPool<CompactMove> compactMoveMemoryPool;
     private final MemoryPool<ScoreMove> scoreMoveMemoryPool;
+    private final ManualMemoryPool<char[][]> boardMemoryPool;
+    private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
+    private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
 
 
     public GreedyMiniMaxPlayer(final boolean isWhite, final int maxMoveTimeMilliseconds) {
@@ -28,29 +31,28 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
 
         try {
             this.compactMoveMemoryPool = new MemoryPool<CompactMove>(CompactMove.class.getDeclaredConstructor(), COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("can not getDeclaredConstructor");
-        }
-
-        try {
             this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
+            this.boardMemoryPool = new ManualMemoryPool<char[][]>();
+            this.compactMoveListMemoryPool = new ManualMemoryPool<ArrayList<CompactMove>>();
+            this.scoreMoveListMemoryPool = new ManualMemoryPool<ArrayList<ScoreMove>>();
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
     }
 
-    public final Move getNextMove(final char[][] board) {
+    public Move getNextMove(final char[][] board) {
         return getNextMove(board, null);
     }
 
-    public final Move getNextMove(final char[][] board, final Move opponentMove) {
+    public Move getNextMove(final char[][] board, final Move opponentMove) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
 
-//        assert (this.compactMoveMemoryPool.getNextIndex() < COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
         this.compactMoveMemoryPool.resetNextIndex();
-//        assert (this.scoreMoveMemoryPool.getNextIndex() < SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
         this.scoreMoveMemoryPool.resetNextIndex();
+        this.boardMemoryPool.resetNextIndex();
+        this.compactMoveListMemoryPool.resetNextIndex();
+        this.scoreMoveListMemoryPool.resetNextIndex();
 
         final EColor opponent = this.color == EColor.WHITE ? EColor.BLACK : EColor.WHITE;
 
@@ -59,7 +61,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
                 opponent,
                 this.color,
                 1,
-                this.DEPTH);
+                DEPTH);
 
         resultMove.fromX = move.fromX();
         resultMove.fromY = move.fromY();
@@ -69,7 +71,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         return resultMove;
     }
 
-    private final ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
+    private ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
         assert (turnCount >= 1);
@@ -99,10 +101,12 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return newScoreMove;
         }
 
-        final ArrayList<ScoreMove> scoreMoves = new ArrayList<ScoreMove>(Chess.TOTAL_CASE);
+        final ArrayList<ScoreMove> scoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.TOTAL_CASE);
 
         for (final CompactMove canMove : canMoveList) {
-            final char[][] newBoard = Chess.createCopy(board);
+            final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool);
+            Chess.createCopy(board, newBoard);
+
             newBoard[canMove.toY()][canMove.toX()] = newBoard[canMove.fromY()][canMove.fromX()];
             newBoard[canMove.fromY()][canMove.fromX()] = 0;
 
@@ -130,11 +134,10 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         return Chess.getMinScoreMove(scoreMoves);
     }
 
-
     private ArrayList<CompactMove> getCanMoveList(final char[][] board, final EColor turn) {
-        ArrayList<CompactMove> moves = new ArrayList<CompactMove>(Chess.TOTAL_CASE);
+        final ArrayList<CompactMove> outMoves = ManualMemoryPool.getNextCompactMoveList(this.compactMoveListMemoryPool, Chess.TOTAL_CASE);
 
-        ScoreMove temp;
+        ScoreMove pieceMove;
         for (int y = 0; y < Chess.BOARD_SIZE; ++y) {
             for (int x = 0; x < Chess.BOARD_SIZE; ++x) {
                 if (board[y][x] == 0) {
@@ -148,49 +151,49 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
                 final char symbol = board[y][x];
                 switch (Character.toLowerCase(symbol)) {
                     case 'p':
-                        temp = pawnMoveOrNull(board, x, y, turn);
+                        pieceMove = pawnMoveOrNull(board, x, y, turn);
                         break;
                     case 'k':
-                        temp = kingMoveOrNull(board, x, y, turn);
+                        pieceMove = kingMoveOrNull(board, x, y, turn);
                         break;
                     case 'q':
-                        temp = queenMoveOrNull(board, x, y, turn);
+                        pieceMove = queenMoveOrNull(board, x, y, turn);
                         break;
                     case 'r':
-                        temp = rookMoveOrNull(board, x, y, turn);
+                        pieceMove = rookMoveOrNull(board, x, y, turn);
                         break;
                     case 'b':
-                        temp = bishopMoveOrNull(board, x, y, turn);
+                        pieceMove = bishopMoveOrNull(board, x, y, turn);
                         break;
                     case 'n':
-                        temp = knightMoveOrNull(board, x, y, turn);
+                        pieceMove = knightMoveOrNull(board, x, y, turn);
                         break;
                     default:
                         throw new IllegalArgumentException("Unknown piece symbol");
                 }
 
-                if (temp == null) {
+                if (pieceMove == null) {
                     continue;
                 }
 
-                assert (Chess.isMoveValid(board, turn, temp.fromX(), temp.fromY(), temp.toX(), temp.toY()));
+                assert (Chess.isMoveValid(board, turn, pieceMove.fromX(), pieceMove.fromY(), pieceMove.toX(), pieceMove.toY()));
 
                 final CompactMove newMove = this.compactMoveMemoryPool.getNext();
-                newMove.init(temp.fromX(), temp.fromY(), temp.toX(), temp.toY());
+                newMove.init(pieceMove.fromX(), pieceMove.fromY(), pieceMove.toX(), pieceMove.toY());
 
-                if (temp.score() == Chess.KING_SCORE) {
-                    moves.clear();
-                    moves.add(newMove);
-                    return moves;
+                if (pieceMove.score() == Chess.KING_SCORE) {
+                    outMoves.clear();
+                    outMoves.add(newMove);
+                    return outMoves;
                 }
 
-                moves.add(newMove);
+                outMoves.add(newMove);
             }
         }
 
-        assert (moves.size() <= Chess.TOTAL_CASE);
+        assert (outMoves.size() <= Chess.TOTAL_CASE);
 
-        return moves;
+        return outMoves;
     }
 
     @SuppressWarnings("UnnecessaryLabelOnBreakStatement")

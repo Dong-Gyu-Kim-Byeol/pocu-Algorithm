@@ -132,19 +132,17 @@ public final class Chess {
         return true;
     }
 
-    public static char[][] createCopy(final char[][] board) {
+    public static void createCopy(final char[][] board, final char[][] outCopy) {
         assert (board.length == BOARD_SIZE);
         assert (board[0].length == BOARD_SIZE);
-
-        final char[][] copy = new char[BOARD_SIZE][BOARD_SIZE];
+        assert (outCopy.length == BOARD_SIZE);
+        assert (outCopy[0].length == BOARD_SIZE);
 
         for (int i = 0; i < BOARD_SIZE; ++i) {
             for (int j = 0; j < BOARD_SIZE; ++j) {
-                copy[i][j] = board[i][j];
+                outCopy[i][j] = board[i][j];
             }
         }
-
-        return copy;
     }
 
     public static boolean isMoveValid(char[][] board, EColor player, final int fromX, final int fromY, final int toX, final int toY) {
