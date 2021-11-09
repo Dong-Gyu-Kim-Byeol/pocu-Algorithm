@@ -5,6 +5,7 @@ public final class ScoreMove extends CompactMove {
     private char piece;
 
     public ScoreMove() {
+        this(-1, -1, -1, -1, 0, (char) 0);
     }
 
     public ScoreMove(final int fromX, final int fromY, final int toX, final int toY, final int score) {

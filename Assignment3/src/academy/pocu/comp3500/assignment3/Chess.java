@@ -3,6 +3,9 @@ package academy.pocu.comp3500.assignment3;
 import java.util.ArrayList;
 
 public final class Chess {
+    private Chess() {
+    }
+
     public static final int BOARD_SIZE = 8;
 
     public static final int PAWN_CASE = 4;

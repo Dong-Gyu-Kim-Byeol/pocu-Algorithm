@@ -9,6 +9,7 @@ public class CompactMove {
     private byte to;
 
     public CompactMove() {
+        init(-1, -1, -1, -1);
     }
 
     public CompactMove(final int fromX, final int fromY, final int toX, final int toY) {

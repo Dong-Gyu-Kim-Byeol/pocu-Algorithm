@@ -62,11 +62,11 @@ public final class Player extends PlayerBase {
         System.out.println();
     }
 
-    public final Move getNextMove(final char[][] board) {
+    public Move getNextMove(final char[][] board) {
         return getNextMove(board, null);
     }
 
-    public final Move getNextMove(final char[][] board, final Move opponentMove) {
+    public Move getNextMove(final char[][] board, final Move opponentMove) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
 

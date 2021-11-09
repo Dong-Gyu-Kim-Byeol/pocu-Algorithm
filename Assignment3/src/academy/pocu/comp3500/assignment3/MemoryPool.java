@@ -5,10 +5,6 @@ import java.lang.reflect.Constructor;
 public final class MemoryPool<T> extends ManualMemoryPool<T> {
     private final Constructor<T> constructor;
 
-    public MemoryPool(final Constructor<T> constructor) {
-        this(constructor, 0);
-    }
-
     public MemoryPool(final Constructor<T> constructor, final int startSize) {
         this.constructor = constructor;
         for (int i = 0; i < startSize; ++i) {
