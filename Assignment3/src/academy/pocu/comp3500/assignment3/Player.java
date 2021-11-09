@@ -6,11 +6,15 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 import java.util.ArrayList;
 
 public final class Player extends PlayerBase {
-    private static final int DEPTH = 4;
+    private static final int DEPTH = 5;
 
     // DEPTH = 4
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 107217;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52528;
+//    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 107217;
+//    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52528;
+
+    // DEPTH = 5
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 4804072;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 2414890;
 
     private int outMovesMaxSizeInGetCanMoveList = 52;
     private int outScoreMovesMaxSizeInQueenMoveOrNull = 24;
