@@ -6,7 +6,7 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 import java.util.ArrayList;
 
 public final class GreedyMiniMaxPlayer extends PlayerBase {
-    private static final int DEPTH = 8;
+    private static final int DEPTH = 6;
 
     // DEPTH = 6;
     private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 315300;
@@ -24,16 +24,6 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private final ManualMemoryPool<char[][]> boardMemoryPool;
     private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
     private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
-
-    public void print() {
-        System.out.println("GreedyMiniMaxPlayer");
-        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
-        System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
-        System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
-        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
-        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
-        System.out.println();
-    }
 
     public GreedyMiniMaxPlayer(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -57,6 +47,16 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
+    }
+
+    public void printMemoryPoolSize() {
+        System.out.println("GreedyMiniMaxPlayer");
+        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
+        System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
+        System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
+        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
+        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
+        System.out.println();
     }
 
     public Move getNextMove(final char[][] board) {

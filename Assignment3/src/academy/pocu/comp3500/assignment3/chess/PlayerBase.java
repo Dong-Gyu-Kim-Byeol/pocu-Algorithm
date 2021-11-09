@@ -4,7 +4,7 @@ public abstract class PlayerBase {
     private final boolean isWhite;
     private final int maxMoveTimeMilliseconds;
 
-    public void print() {
+    public void printMemoryPoolSize() {
     }
 
     public PlayerBase(final boolean isWhite, final int maxMoveTimeMilliseconds) {

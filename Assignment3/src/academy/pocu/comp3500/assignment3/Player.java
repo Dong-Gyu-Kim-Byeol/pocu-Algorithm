@@ -29,17 +29,6 @@ public final class Player extends PlayerBase {
     private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
     private final ManualMemoryPool<ArrayList<ScoreMove>> scoreMoveListMemoryPool;
 
-    public void print() {
-        System.out.println("Player");
-        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
-        System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
-        System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
-        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
-        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
-        System.out.println();
-    }
-
-
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
 
@@ -61,6 +50,16 @@ public final class Player extends PlayerBase {
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
+    }
+
+    public void printMemoryPoolSize() {
+        System.out.println("Player");
+        System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
+        System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
+        System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
+        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
+        System.out.println("scoreMoveListMemoryPool.poolSize() : " + scoreMoveListMemoryPool.poolSize());
+        System.out.println();
     }
 
     public final Move getNextMove(final char[][] board) {
@@ -147,8 +146,6 @@ public final class Player extends PlayerBase {
             newScoreMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, newBoard[canMove.toY()][canMove.toX()]);
             scoreMoves.add(newScoreMove);
         }
-
-//        System.out.println("scoreMoves.size() : " + scoreMoves.size());
 
         if (turn == player) {
             return Chess.getMaxScoreMove(scoreMoves);
