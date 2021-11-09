@@ -12,7 +12,11 @@ public class Player extends PlayerBase {
     private static final int COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE = 55240;
     private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 159745;
     private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52528;
-    private static final int COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE = 1515;
+
+    private int outMovesMaxSizeInGetCanMoveList = 52;
+    private int outScoreMovesMaxSizeInQueenMoveOrNull = 24;
+    private int outScoreMovesMaxSizeInRookMoveOrNull = 14;
+    private int outScoreMovesMaxSizeInBishopMoveOrNull = 12;
 
     protected final EColor color;
     protected final Move resultMove;
@@ -20,7 +24,6 @@ public class Player extends PlayerBase {
     protected final MemoryPool<CompactMove> compactMoveMemoryPool;
     protected final MemoryPool<ScoreMove> scoreMoveMemoryPool;
     private final ManualMemoryPool<char[][]> boardMemoryPool;
-    private final ManualMemoryPool<ArrayList<CompactMove>> compactMoveListMemoryPool;
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -34,9 +37,6 @@ public class Player extends PlayerBase {
 
             this.boardMemoryPool = new ManualMemoryPool<char[][]>();
             ManualMemoryPool.init(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE, BOARD_MEMORY_POOL_DEFAULT_SIZE);
-
-            this.compactMoveListMemoryPool = new ManualMemoryPool<ArrayList<CompactMove>>();
-            ManualMemoryPool.initCompactMoveList(this.compactMoveListMemoryPool, Chess.TOTAL_CASE, COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
@@ -47,7 +47,6 @@ public class Player extends PlayerBase {
         System.out.println("compactMoveMemoryPool.poolSize() : " + compactMoveMemoryPool.poolSize());
         System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
         System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
-        System.out.println("compactMoveListMemoryPool.poolSize() : " + compactMoveListMemoryPool.poolSize());
         System.out.println();
     }
 
@@ -62,7 +61,6 @@ public class Player extends PlayerBase {
         this.compactMoveMemoryPool.resetNextIndex();
         this.scoreMoveMemoryPool.resetNextIndex();
         this.boardMemoryPool.resetNextIndex();
-        this.compactMoveListMemoryPool.resetNextIndex();
 
         final EColor opponent = this.color == EColor.WHITE ? EColor.BLACK : EColor.WHITE;
 
@@ -111,7 +109,7 @@ public class Player extends PlayerBase {
             return newScoreMove;
         }
 
-        final ArrayList<ScoreMove> scoreMoves = new ArrayList<ScoreMove>(Chess.TOTAL_CASE);
+        final ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(canMoveList.size());
 
         for (final CompactMove canMove : canMoveList) {
             final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE);
@@ -132,18 +130,18 @@ public class Player extends PlayerBase {
 
             final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
             newScoreMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), score, newBoard[canMove.toY()][canMove.toX()]);
-            scoreMoves.add(newScoreMove);
+            outScoreMoves.add(newScoreMove);
         }
 
         if (turn == player) {
-            return Chess.getMaxScoreMove(scoreMoves);
+            return Chess.getMaxScoreMove(outScoreMoves);
         }
 
-        return Chess.getMinScoreMove(scoreMoves);
+        return Chess.getMinScoreMove(outScoreMoves);
     }
 
     protected final ArrayList<CompactMove> getCanMoveList(final char[][] board, final EColor turn) {
-        final ArrayList<CompactMove> outMoves = ManualMemoryPool.getNextCompactMoveList(this.compactMoveListMemoryPool, Chess.TOTAL_CASE);
+        final ArrayList<CompactMove> outMoves = new ArrayList<CompactMove>(this.outMovesMaxSizeInGetCanMoveList);
 
         ArrayList<ScoreMove> temps;
         for (int y = 0; y < Chess.BOARD_SIZE; ++y) {
@@ -201,13 +199,15 @@ public class Player extends PlayerBase {
             }
         }
 
-        assert (outMoves.size() <= Chess.TOTAL_CASE);
+        if (this.outMovesMaxSizeInGetCanMoveList < outMoves.size()) {
+            this.outMovesMaxSizeInGetCanMoveList = outMoves.size();
+        }
 
         return outMoves;
     }
 
     private ArrayList<ScoreMove> pawnMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.PAWN_CASE);
+        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.PAWN_MOVE_OFFSETS.length);
 
         for (final int[] pawnAttackOffset : Chess.PAWN_MOVE_OFFSETS) {
             final int toX = fromX + pawnAttackOffset[0];
@@ -230,13 +230,13 @@ public class Player extends PlayerBase {
             }
         }
 
-        assert (outScoreMoves.size() <= Chess.PAWN_CASE);
+        assert (outScoreMoves.size() <= Chess.PAWN_MOVE_OFFSETS.length);
 
         return outScoreMoves;
     }
 
     private ArrayList<ScoreMove> kingMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.KING_CASE);
+        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.KING_MOVE_OFFSETS.length);
 
         for (final int[] kingMoveOffset : Chess.KING_MOVE_OFFSETS) {
             final int toX = fromX + kingMoveOffset[0];
@@ -259,13 +259,13 @@ public class Player extends PlayerBase {
             }
         }
 
-        assert (outScoreMoves.size() <= Chess.KING_CASE);
+        assert (outScoreMoves.size() <= Chess.KING_MOVE_OFFSETS.length);
 
         return outScoreMoves;
     }
 
     private ArrayList<ScoreMove> queenMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.QUEEN_CASE);
+        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(this.outScoreMovesMaxSizeInQueenMoveOrNull);
 
         for (int moveType = 0; moveType < 8; ++moveType) {
             final int UP_VERTICAL_MOVE_TYPE = 0;
@@ -339,13 +339,15 @@ public class Player extends PlayerBase {
             }
         }
 
-        assert (outScoreMoves.size() <= Chess.QUEEN_CASE);
+        if (this.outScoreMovesMaxSizeInQueenMoveOrNull < outScoreMoves.size()) {
+            this.outScoreMovesMaxSizeInQueenMoveOrNull = outScoreMoves.size();
+        }
 
         return outScoreMoves;
     }
 
     private ArrayList<ScoreMove> rookMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.ROOK_CASE);
+        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(this.outScoreMovesMaxSizeInRookMoveOrNull);
 
         for (int moveType = 0; moveType < 4; ++moveType) {
             final int UP_VERTICAL_MOVE_TYPE = 0;
@@ -400,13 +402,16 @@ public class Player extends PlayerBase {
             }
         }
 
-        assert (outScoreMoves.size() <= Chess.ROOK_CASE);
+        if (this.outScoreMovesMaxSizeInRookMoveOrNull < outScoreMoves.size()) {
+            this.outScoreMovesMaxSizeInRookMoveOrNull = outScoreMoves.size();
+        }
 
         return outScoreMoves;
     }
 
+
     private ArrayList<ScoreMove> bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.BISHOP_CASE);
+        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(this.outScoreMovesMaxSizeInBishopMoveOrNull);
 
         for (int moveType = 0; moveType < 4; ++moveType) {
             final int UP_RIGHT_CROSS_MOVE_TYPE = 0;
@@ -461,13 +466,15 @@ public class Player extends PlayerBase {
             }
         }
 
-        assert (outScoreMoves.size() <= Chess.BISHOP_CASE);
+        if (this.outScoreMovesMaxSizeInBishopMoveOrNull < outScoreMoves.size()) {
+            this.outScoreMovesMaxSizeInBishopMoveOrNull = outScoreMoves.size();
+        }
 
         return outScoreMoves;
     }
 
     private ArrayList<ScoreMove> knightMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
-        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.KNIGHT_CASE);
+        ArrayList<ScoreMove> outScoreMoves = new ArrayList<ScoreMove>(Chess.KNIGHT_MOVE_OFFSETS.length);
 
         for (final int[] knightMoveOffset : Chess.KNIGHT_MOVE_OFFSETS) {
             final int toX = fromX + knightMoveOffset[0];
@@ -490,7 +497,7 @@ public class Player extends PlayerBase {
             }
         }
 
-        assert (outScoreMoves.size() <= Chess.KNIGHT_CASE);
+        assert (outScoreMoves.size() <= Chess.KNIGHT_MOVE_OFFSETS.length);
 
         return outScoreMoves;
     }

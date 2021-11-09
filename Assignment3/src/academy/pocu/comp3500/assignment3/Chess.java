@@ -41,14 +41,6 @@ public final class Chess {
             {1, 1}
     };
 
-    public static final int PAWN_CASE = PAWN_MOVE_OFFSETS.length;
-    public static final int KING_CASE = KING_MOVE_OFFSETS.length;
-    public static final int QUEEN_CASE = 32;
-    public static final int ROOK_CASE = 16;
-    public static final int BISHOP_CASE = 16;
-    public static final int KNIGHT_CASE = KNIGHT_MOVE_OFFSETS.length;
-    public static final int TOTAL_CASE = PAWN_CASE * 8 + KING_CASE + QUEEN_CASE + ROOK_CASE * 2 + BISHOP_CASE * 2 + KNIGHT_CASE * 2;
-
     public static final int KING_SCORE = 100;
     public static final int QUEEN_SCORE = 20;
     public static final int ROOK_SCORE = 15;
@@ -133,11 +125,6 @@ public final class Chess {
         }
 
         return true;
-    }
-
-    public static char[][] createNewBoard() {
-        final char[][] board = new char[BOARD_SIZE][BOARD_SIZE];
-        return board;
     }
 
     public static void copyBoard(final char[][] board, final char[][] outCopy) {
