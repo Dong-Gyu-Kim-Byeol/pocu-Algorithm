@@ -33,9 +33,15 @@ public final class Player extends PlayerBase {
         try {
             this.compactMoveMemoryPool = new MemoryPool<CompactMove>(CompactMove.class.getDeclaredConstructor(), COMPACT_MOVE_MEMORY_POOL_DEFAULT_SIZE);
             this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
+
             this.boardMemoryPool = new ManualMemoryPool<char[][]>();
+            ManualMemoryPool.init(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE, BOARD_MEMORY_POOL_DEFAULT_SIZE);
+
             this.compactMoveListMemoryPool = new ManualMemoryPool<ArrayList<CompactMove>>();
+            ManualMemoryPool.getNextCompactMoveList(this.compactMoveListMemoryPool, COMPACT_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
+
             this.scoreMoveListMemoryPool = new ManualMemoryPool<ArrayList<ScoreMove>>();
+            ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, SCORE_MOVE_LIST_MEMORY_POOL_DEFAULT_SIZE);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
@@ -105,7 +111,7 @@ public final class Player extends PlayerBase {
         final ArrayList<ScoreMove> scoreMoves = ManualMemoryPool.getNextScoreMoveList(this.scoreMoveListMemoryPool, Chess.TOTAL_CASE);
 
         for (final CompactMove canMove : canMoveList) {
-            final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool);
+            final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE);
             Chess.createCopy(board, newBoard);
 
             newBoard[canMove.toY()][canMove.toX()] = newBoard[canMove.fromY()][canMove.fromX()];

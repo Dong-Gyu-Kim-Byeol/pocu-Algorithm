@@ -38,36 +38,56 @@ public class ManualMemoryPool<T> {
     }
 
 
-    public static char[][] getNext(final ManualMemoryPool<char[][]> manualMemoryPool) {
+    public static void init(final ManualMemoryPool<char[][]> manualMemoryPool, final int arrayRowSize, final int arrayColumnSize, final int size) {
+        for (int i = 0; i < size; ++i) {
+            manualMemoryPool.addPool(new char[arrayRowSize][arrayColumnSize]);
+        }
+    }
+
+
+    public static void initCompactMoveList(final ManualMemoryPool<ArrayList<CompactMove>> manualMemoryPool, final int arrayListCapacity, final int size) {
+        for (int i = 0; i < size; ++i) {
+            manualMemoryPool.addPool(new ArrayList<CompactMove>(arrayListCapacity));
+        }
+    }
+
+    public static void initScoreMoveList(final ManualMemoryPool<ArrayList<ScoreMove>> manualMemoryPool, final int arrayListCapacity, final int size) {
+        for (int i = 0; i < size; ++i) {
+            manualMemoryPool.addPool(new ArrayList<ScoreMove>(arrayListCapacity));
+        }
+    }
+
+
+    public static char[][] getNext(final ManualMemoryPool<char[][]> manualMemoryPool, final int arrayRowSize, final int arrayColumnSize) {
         char[][] temp = manualMemoryPool.getNextOrNull();
         if (temp == null) {
-            manualMemoryPool.addPool(new char[Chess.BOARD_SIZE][Chess.BOARD_SIZE]);
+            manualMemoryPool.addPool(new char[arrayRowSize][arrayColumnSize]);
             temp = manualMemoryPool.getNextOrNull();
         }
 
         return temp;
     }
 
-    public static ArrayList<CompactMove> getNextCompactMoveList(final ManualMemoryPool<ArrayList<CompactMove>> manualMemoryPool, final int capacity) {
+    public static ArrayList<CompactMove> getNextCompactMoveList(final ManualMemoryPool<ArrayList<CompactMove>> manualMemoryPool, final int arrayListCapacity) {
         ArrayList<CompactMove> temp = manualMemoryPool.getNextOrNull();
         if (temp == null) {
-            manualMemoryPool.addPool(new ArrayList<CompactMove>(capacity));
+            manualMemoryPool.addPool(new ArrayList<CompactMove>(arrayListCapacity));
             temp = manualMemoryPool.getNextOrNull();
         }
         temp.clear();
-        temp.ensureCapacity(capacity);
+        temp.ensureCapacity(arrayListCapacity);
 
         return temp;
     }
 
-    public static ArrayList<ScoreMove> getNextScoreMoveList(final ManualMemoryPool<ArrayList<ScoreMove>> manualMemoryPool, final int capacity) {
+    public static ArrayList<ScoreMove> getNextScoreMoveList(final ManualMemoryPool<ArrayList<ScoreMove>> manualMemoryPool, final int arrayListCapacity) {
         ArrayList<ScoreMove> temp = manualMemoryPool.getNextOrNull();
         if (temp == null) {
-            manualMemoryPool.addPool(new ArrayList<ScoreMove>(capacity));
+            manualMemoryPool.addPool(new ArrayList<ScoreMove>(arrayListCapacity));
             temp = manualMemoryPool.getNextOrNull();
         }
         temp.clear();
-        temp.ensureCapacity(capacity);
+        temp.ensureCapacity(arrayListCapacity);
 
         return temp;
     }
