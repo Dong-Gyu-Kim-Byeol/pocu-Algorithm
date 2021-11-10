@@ -31,7 +31,7 @@ public final class Player extends PlayerBase {
             this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
 
             this.boardMemoryPool = new ManualMemoryPool<char[][]>();
-            ManualMemoryPool.init(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE, BOARD_MEMORY_POOL_DEFAULT_SIZE);
+            this.initBoardMemoryPool(BOARD_MEMORY_POOL_DEFAULT_SIZE);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
@@ -106,7 +106,7 @@ public final class Player extends PlayerBase {
         }
 
         for (final ScoreMove canMove : canMoveList) {
-            final char[][] newBoard = ManualMemoryPool.getNext(this.boardMemoryPool, Chess.BOARD_SIZE, Chess.BOARD_SIZE);
+            final char[][] newBoard = this.getNextBoard();
             Chess.copyBoard(board, newBoard);
 
             newBoard[canMove.toY()][canMove.toX()] = newBoard[canMove.fromY()][canMove.fromX()];
@@ -490,6 +490,25 @@ public final class Player extends PlayerBase {
         assert (outScoreMoves.size() <= Chess.KNIGHT_MOVE_OFFSETS.length);
 
         return outScoreMoves;
+    }
+
+    // init ManualMemoryPool<char[][]>
+    private void initBoardMemoryPool(final int size) {
+        for (int i = 0; i < size; ++i) {
+            this.boardMemoryPool.addPool(new char[Chess.BOARD_SIZE][Chess.BOARD_SIZE]);
+        }
+    }
+
+    // getNext ManualMemoryPool<char[][]>
+    private char[][] getNextBoard() {
+        char[][] temp = this.boardMemoryPool.getNextOrNull();
+        if (temp == null) {
+            this.boardMemoryPool.addPool(new char[Chess.BOARD_SIZE][Chess.BOARD_SIZE]);
+            temp = this.boardMemoryPool.getNextOrNull();
+        }
+
+        assert (temp != null);
+        return temp;
     }
 }
 
