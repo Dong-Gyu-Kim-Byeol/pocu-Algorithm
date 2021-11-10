@@ -361,7 +361,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
                         rookMoveOffsetY = 0;
                         break;
                     default:
-                        throw new IllegalArgumentException("Unknown queen move type");
+                        throw new IllegalArgumentException("Unknown rook move type");
                 }
 
                 final int toX = fromX + rookMoveOffsetX;
@@ -422,7 +422,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
                         bishopMoveOffsetY = -moveSize;
                         break;
                     default:
-                        throw new IllegalArgumentException("Unknown queen move type");
+                        throw new IllegalArgumentException("Unknown bishop move type");
                 }
 
                 final int toX = fromX + bishopMoveOffsetX;
