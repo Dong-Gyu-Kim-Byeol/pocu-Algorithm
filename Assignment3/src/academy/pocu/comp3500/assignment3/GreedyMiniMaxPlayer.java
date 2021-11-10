@@ -6,16 +6,15 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 import java.util.ArrayList;
 
 public final class GreedyMiniMaxPlayer extends PlayerBase {
-    private static final int DEPTH = 6;
+    private static final int MINI_MAX_DEPTH = 6;
 
     // DEPTH = 6;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 605069;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 315269;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 0; // 605069;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 0; // 315269;
 
-    private int outMovesMaxSizeInGetCanMoveList = 14;
+    private static int outMovesMaxSizeInGetCanMoves = 14;
 
     private final EColor color;
-    private final Move resultMove;
 
     private final ScoreMove bestScratchScoreMove;
     private final MemoryPool<ScoreMove> scoreMoveMemoryPool;
@@ -26,7 +25,6 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         this.bestScratchScoreMove = new ScoreMove(-1, -1, -1, -1, 0, (char) 0);
 
         this.color = isWhite ? EColor.WHITE : EColor.BLACK;
-        this.resultMove = new Move();
 
         try {
             this.scoreMoveMemoryPool = new MemoryPool<ScoreMove>(ScoreMove.class.getDeclaredConstructor(), SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE);
@@ -42,6 +40,9 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         System.out.println("GreedyMiniMaxPlayer");
         System.out.println("scoreMoveMemoryPool.poolSize() : " + scoreMoveMemoryPool.poolSize());
         System.out.println("boardMemoryPool.poolSize() : " + boardMemoryPool.poolSize());
+
+        System.out.println("outMovesMaxSizeInGetCanMoves : " + outMovesMaxSizeInGetCanMoves);
+
         System.out.println();
     }
 
@@ -52,9 +53,8 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     public Move getNextMove(final char[][] board, final Move opponentMove) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
-
-        this.scoreMoveMemoryPool.resetNextIndex();
-        this.boardMemoryPool.resetNextIndex();
+        assert (this.scoreMoveMemoryPool.getNextIndex() == 0);
+        assert (this.boardMemoryPool.getNextIndex() == 0);
 
         final EColor opponent = this.color == EColor.WHITE ? EColor.BLACK : EColor.WHITE;
 
@@ -63,14 +63,12 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
                 opponent,
                 this.color,
                 1,
-                DEPTH);
+                MINI_MAX_DEPTH);
 
-        resultMove.fromX = move.fromX();
-        resultMove.fromY = move.fromY();
-        resultMove.toX = move.toX();
-        resultMove.toY = move.toY();
+        this.scoreMoveMemoryPool.resetNextIndex();
+        this.boardMemoryPool.resetNextIndex();
 
-        return resultMove;
+        return new Move(move.fromX(), move.fromY(), move.toX(), move.toY());
     }
 
     private ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
@@ -96,7 +94,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             return newScoreMove;
         }
 
-        final ArrayList<ScoreMove> canMoveList = getCanMoveList(board, turn);
+        final ArrayList<ScoreMove> canMoveList = getBestMoves(board, turn);
         if (canMoveList.isEmpty()) {
             final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
             newScoreMove.init(-1, -1, -1, -1, 0);
@@ -130,8 +128,8 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         return Chess.getMinScoreMove(canMoveList);
     }
 
-    private ArrayList<ScoreMove> getCanMoveList(final char[][] board, final EColor turn) {
-        final ArrayList<ScoreMove> outMoves = new ArrayList<ScoreMove>(this.outMovesMaxSizeInGetCanMoveList);
+    private ArrayList<ScoreMove> getBestMoves(final char[][] board, final EColor turn) {
+        final ArrayList<ScoreMove> outMoves = new ArrayList<ScoreMove>(GreedyMiniMaxPlayer.outMovesMaxSizeInGetCanMoves);
 
         ScoreMove pieceMove;
         for (int y = 0; y < Chess.BOARD_SIZE; ++y) {
@@ -147,22 +145,22 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
                 final char symbol = board[y][x];
                 switch (Character.toLowerCase(symbol)) {
                     case 'p':
-                        pieceMove = pawnMoveOrNull(board, x, y, turn);
+                        pieceMove = getPawnBestMoveOrNull(board, x, y, turn);
                         break;
                     case 'k':
-                        pieceMove = kingMoveOrNull(board, x, y, turn);
+                        pieceMove = getKingCanMoveOrNull(board, x, y, turn);
                         break;
                     case 'q':
-                        pieceMove = queenMoveOrNull(board, x, y, turn);
+                        pieceMove = getQueenCanMoveOrNull(board, x, y, turn);
                         break;
                     case 'r':
-                        pieceMove = rookMoveOrNull(board, x, y, turn);
+                        pieceMove = getRookCanMoveOrNull(board, x, y, turn);
                         break;
                     case 'b':
-                        pieceMove = bishopMoveOrNull(board, x, y, turn);
+                        pieceMove = getBishopCanMoveOrNull(board, x, y, turn);
                         break;
                     case 'n':
-                        pieceMove = knightMoveOrNull(board, x, y, turn);
+                        pieceMove = getKnightCanMoveOrNull(board, x, y, turn);
                         break;
                     default:
                         throw new IllegalArgumentException("Unknown piece symbol");
@@ -186,15 +184,15 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
 
         assert (outMoves.isEmpty() == false);
 
-        if (this.outMovesMaxSizeInGetCanMoveList < outMoves.size()) {
-            this.outMovesMaxSizeInGetCanMoveList = outMoves.size();
+        if (GreedyMiniMaxPlayer.outMovesMaxSizeInGetCanMoves < outMoves.size()) {
+            GreedyMiniMaxPlayer.outMovesMaxSizeInGetCanMoves = outMoves.size();
         }
 
         return outMoves;
     }
 
     @SuppressWarnings("UnnecessaryLabelOnBreakStatement")
-    private ScoreMove pawnMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
+    private ScoreMove getPawnBestMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
         for (final int[] pawnAttackOffset : Chess.PAWN_MOVE_OFFSETS) {
@@ -224,7 +222,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     }
 
     @SuppressWarnings("UnnecessaryLabelOnBreakStatement")
-    private ScoreMove kingMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
+    private ScoreMove getKingCanMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
         for (final int[] kingMoveOffset : Chess.KING_MOVE_OFFSETS) {
@@ -253,7 +251,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         return out;
     }
 
-    private ScoreMove queenMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
+    private ScoreMove getQueenCanMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
         for (int moveType = 0; moveType < 8; ++moveType) {
@@ -333,7 +331,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         return out;
     }
 
-    private ScoreMove rookMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
+    private ScoreMove getRookCanMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
         for (int moveType = 0; moveType < 4; ++moveType) {
@@ -394,7 +392,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         return out;
     }
 
-    private ScoreMove bishopMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
+    private ScoreMove getBishopCanMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
         for (int moveType = 0; moveType < 4; ++moveType) {
@@ -457,7 +455,7 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     }
 
     @SuppressWarnings("UnnecessaryLabelOnBreakStatement")
-    private ScoreMove knightMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
+    private ScoreMove getKnightCanMoveOrNull(final char[][] board, final int fromX, final int fromY, final EColor turn) {
         int bestScore = -1;
         force_break:
         for (final int[] knightMoveOffset : Chess.KNIGHT_MOVE_OFFSETS) {

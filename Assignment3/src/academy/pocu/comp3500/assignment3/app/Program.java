@@ -65,7 +65,7 @@ public class Program {
             System.out.println("Let the game begin!");
             System.out.println(game.toString());
 
-            final int turnCount = IS_LIMIT_TURN_COUNT ? 100 : Integer.MAX_VALUE;
+            final int turnCount = IS_LIMIT_TURN_COUNT ? 200 : Integer.MAX_VALUE;
 
             for (int i = 0; i < turnCount; ++i) {
                 if (game.isNextTurnWhite() && IS_BLACK_KEYBOARD_PLAYER
