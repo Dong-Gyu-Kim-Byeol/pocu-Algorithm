@@ -28,12 +28,25 @@ public final class MazeSolver {
             final Path nowPath = pathBfsQueue.dequeue();
 
             final Point nowPos = nowPath.getNowPosition();
+            isVisit[nowPos.getY()][nowPos.getX()] = true;
+
+            switch (maze[nowPos.getY()][nowPos.getX()]) {
+                case 'E':
+                    return nowPath.getPath();
+                case ' ':
+                    break;
+                case 'x':
+                    continue;
+                default:
+                    throw new IllegalArgumentException("Unknown type");
+            }
+
+
             for (int moveType = 0; moveType < 4; ++moveType) {
                 final int UP_MOVE_TYPE = 0;
                 final int DOWN_MOVE_TYPE = 1;
                 final int RIGHT_MOVE_TYPE = 2;
                 final int LEFT_MOVE_TYPE = 3;
-
 
                 final int x;
                 final int y;
@@ -67,25 +80,11 @@ public final class MazeSolver {
                     continue;
                 }
 
+
                 final Point nextPos = new Point(x, y);
-                switch (maze[nextPos.getY()][nextPos.getX()]) {
-                    case 'E':
-                        isVisit[nextPos.getY()][nextPos.getX()] = true;
-                        nowPath.move(nextPos);
-                        return nowPath.getPath();
-                    case ' ':
-                        isVisit[nextPos.getY()][nextPos.getX()] = true;
-
-                        final Path nextPath = new Path(nowPath);
-                        nextPath.move(nextPos);
-
-                        pathBfsQueue.enqueue(nextPath);
-                        break;
-                    case 'x':
-                        continue;
-                    default:
-                        throw new IllegalArgumentException("Unknown type");
-                }
+                final Path nextPath = new Path(nowPath);
+                nextPath.move(nextPos);
+                pathBfsQueue.enqueue(nextPath);
             }
         }
 
