@@ -6,7 +6,7 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 import java.util.ArrayList;
 
 public final class Player extends PlayerBase {
-    private static final int MINI_MAX_DEPTH = 3;
+    private static final int MINI_MAX_DEPTH = 2;
 
     // DEPTH = 3
     private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 56204;
