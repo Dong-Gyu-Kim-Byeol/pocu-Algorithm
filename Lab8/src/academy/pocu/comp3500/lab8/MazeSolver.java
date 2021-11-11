@@ -41,9 +41,9 @@ public final class MazeSolver {
         }
 
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
-        if (buildVisitCheckArrayAndCheckIsNoExit(maze, isVisit)) {
-            return new ArrayList<Point>(0);
-        }
+//        if (buildVisitCheckArrayAndCheckIsNoExit(maze, isVisit)) {
+//            return new ArrayList<Point>(0);
+//        }
 
 
         final CircularQueue<Path> pathBfsQueue = new CircularQueue<Path>(1);
@@ -108,7 +108,7 @@ public final class MazeSolver {
             }
         }
 
-        assert (false);
+//        assert (false);
         return new ArrayList<Point>(0);
     }
 
