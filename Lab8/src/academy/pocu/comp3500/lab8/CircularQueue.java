@@ -56,6 +56,38 @@ public class CircularQueue<T> {
         assert (this.size <= this.capacity());
     }
 
+    public void frontEnqueue(final T data) {
+        assert (this.capacity() >= this.size);
+        assert (this.array[this.front] == null);
+
+        if ((this.front - 1) % this.array.length == this.rear) {
+            final int newArrayCapacity = this.capacity() * CAPACITY_INCREASE_RATE + 1;
+            final Object[] newArray = new Object[newArrayCapacity];
+
+            int nowArrayIndex = (this.front + 1) % this.array.length;
+            for (int i = 0; i < newArray.length; ++i) {
+                if (this.array[nowArrayIndex] == null) {
+                    assert (i != 0);
+                    this.rear = i - 1;
+                    break;
+                }
+
+                newArray[i] = this.array[nowArrayIndex];
+                nowArrayIndex = (nowArrayIndex + 1) % this.array.length;
+            }
+
+            this.array = newArray;
+            this.front = newArray.length - 1;
+        }
+
+        this.front = (this.front - 1) % this.array.length;
+        assert (this.array[this.front] == null);
+        this.array[this.front] = data;
+
+        ++this.size;
+        assert (this.size <= this.capacity());
+    }
+
     @SuppressWarnings("unchecked")
     public T dequeue() {
         assert (this.capacity() >= this.size);

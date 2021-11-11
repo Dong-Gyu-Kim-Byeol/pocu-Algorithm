@@ -3,6 +3,7 @@ package academy.pocu.comp3500.lab8;
 import academy.pocu.comp3500.lab8.maze.Point;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public final class MazeSolver {
@@ -82,23 +83,18 @@ public final class MazeSolver {
         }
 
 
-        Stack<Point> reverse = new Stack<Point>(maze.length * maze[0].length);
+        final LinkedList<Point> outPath = new LinkedList<Point>();
 
         if (bfsQueue.size() == 1) {
             NowAndPrePosition nowAndPrePosition = bfsQueue.dequeue();
-            reverse.push(nowAndPrePosition.getNowPos());
+            outPath.addFirst(nowAndPrePosition.getNowPos());
 
             while (nowAndPrePosition.getPrePosOrNull() != null) {
                 final Point prePos = nowAndPrePosition.getPrePosOrNull().getNowPos();
-                reverse.push(prePos);
+                outPath.addFirst(prePos);
 
                 nowAndPrePosition = nowAndPrePosition.getPrePosOrNull();
             }
-        }
-
-        final ArrayList<Point> outPath = new ArrayList<Point>(reverse.size());
-        while (!reverse.isEmpty()) {
-            outPath.add(reverse.pop());
         }
 
         return outPath;
