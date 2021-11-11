@@ -35,7 +35,7 @@ public final class MazeSolver {
                 case ' ':
                     break;
                 case 'x':
-                    assert (false);
+                    continue;
                 default:
                     throw new IllegalArgumentException("Unknown type");
             }
