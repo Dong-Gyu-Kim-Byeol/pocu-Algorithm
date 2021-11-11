@@ -28,6 +28,11 @@ public final class MazeSolver {
             final Path nowPath = pathBfsQueue.dequeue();
 
             final Point nowPos = nowPath.getNowPosition();
+
+            if (isVisit[nowPos.getY()][nowPos.getX()]) {
+                continue;
+            }
+
             isVisit[nowPos.getY()][nowPos.getX()] = true;
 
             switch (maze[nowPos.getY()][nowPos.getX()]) {
@@ -36,7 +41,7 @@ public final class MazeSolver {
                 case ' ':
                     break;
                 case 'x':
-                    continue;
+                    assert (false);
                 default:
                     throw new IllegalArgumentException("Unknown type");
             }
@@ -73,6 +78,10 @@ public final class MazeSolver {
 
                 if (0 > y || y >= maze.length
                         || 0 > x || x >= maze[0].length) {
+                    continue;
+                }
+
+                if (maze[y][x] == 'x') {
                     continue;
                 }
 
