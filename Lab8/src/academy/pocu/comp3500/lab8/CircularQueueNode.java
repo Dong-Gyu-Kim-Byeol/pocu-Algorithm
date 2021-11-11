@@ -1,17 +1,17 @@
 package academy.pocu.comp3500.lab8;
 
-public class CircularQueue<T> {
+public class CircularQueueNode {
     private static final int CAPACITY_INCREASE_RATE = 2;
 
     private int size;
     private int front;
     private int rear;
 
-    private Object[] array;
+    private Node[] array;
 
-    public CircularQueue(final int capacity) {
+    public CircularQueueNode(final int capacity) {
         assert (capacity > 0);
-        this.array = new Object[capacity + 1];
+        this.array = new Node[capacity + 1];
     }
 
     public int size() {
@@ -24,13 +24,13 @@ public class CircularQueue<T> {
         return this.array.length - 1;
     }
 
-    public void enqueue(final T data) {
+    public void enqueue(final Node data) {
         assert (this.capacity() >= this.size);
         assert (this.array[this.front] == null);
 
         if ((this.rear + 1) % this.array.length == this.front) {
             final int newArrayCapacity = this.capacity() * CAPACITY_INCREASE_RATE + 1;
-            final Object[] newArray = new Object[newArrayCapacity];
+            final Node[] newArray = new Node[newArrayCapacity];
 
             int nowArrayIndex = (this.front + 1) % this.array.length;
             for (int i = 0; i < newArray.length; ++i) {
@@ -57,7 +57,7 @@ public class CircularQueue<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public T dequeue() {
+    public Node dequeue() {
         assert (this.capacity() >= this.size);
         assert (this.array[this.front] == null);
 
@@ -67,7 +67,7 @@ public class CircularQueue<T> {
         assert (this.size > 0);
 
         this.front = (this.front + 1) % this.array.length;
-        final T data = (T) this.array[this.front];
+        final Node data = this.array[this.front];
         this.array[this.front] = null;
 
         --this.size;

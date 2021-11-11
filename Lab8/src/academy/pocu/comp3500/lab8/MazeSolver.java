@@ -11,14 +11,14 @@ public final class MazeSolver {
 
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
 
-        final LinkedList<Node> bfsQueue = new LinkedList<Node>();
-        bfsQueue.add(new Node(start, null));
+        final CircularQueueNode bfsQueue = new CircularQueueNode(maze.length * maze[0].length);
+        bfsQueue.enqueue(new Node(start, null));
         isVisit[start.getY()][start.getX()] = true;
 
         // top left : (0, 0)
         force_break:
         while (bfsQueue.size() != 0) {
-            final Node nowNode = bfsQueue.poll();
+            final Node nowNode = bfsQueue.dequeue();
 
             final Point nowPos = nowNode.getNowPos();
 
@@ -78,10 +78,11 @@ public final class MazeSolver {
 
                 final Point nextPos = new Point(nextX, nextY);
                 final Node nextNowAndPrePosition = new Node(nextPos, nowNode);
-                bfsQueue.add(nextNowAndPrePosition);
+                bfsQueue.enqueue(nextNowAndPrePosition);
             }
         }
 
+        assert (bfsQueue.capacity() == maze.length * maze[0].length);
 
         final LinkedList<Point> outPath = new LinkedList<Point>();
 
