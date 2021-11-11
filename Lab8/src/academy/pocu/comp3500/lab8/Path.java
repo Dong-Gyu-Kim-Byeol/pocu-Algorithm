@@ -34,14 +34,6 @@ public class Path {
         return nowPosition;
     }
 
-    public Point getPrePositionOrNull() {
-        if (this.path.size() >= 2) {
-            return this.path.get(this.path.size() - 2);
-        } else {
-            return null;
-        }
-    }
-
     public ArrayList<Point> getPath() {
         return path;
     }

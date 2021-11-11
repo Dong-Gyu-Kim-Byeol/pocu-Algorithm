@@ -9,6 +9,21 @@ public class Program {
 
     public static void main(String[] args) {
 
+        {
+            char[][] maze8x7 = new char[][] {
+                    {' ', 'x', 'x', 'x', 'x', 'x', 'x', ' '},
+                    {' ', 'x', ' ', ' ', ' ', 'x', ' ', ' '},
+                    {' ', 'x', ' ', 'x', ' ', 'x', 'x', ' '},
+                    {' ', ' ', ' ', 'x', ' ', 'x', ' ', ' '},
+                    {' ', 'x', ' ', 'x', ' ', ' ', ' ', ' '},
+                    {' ', 'x', 'x', 'x', 'x', 'x', 'x', ' '}
+            };
+
+            List<Point>result = MazeSolver.findPath(maze8x7, new Point(1, 3));
+
+            assert (result.size() == 0);
+        }
+
         char[][] maze3x3 = new char[][]{
                 {'x', 'x', 'x'},
                 {'x', 'E', 'x'},

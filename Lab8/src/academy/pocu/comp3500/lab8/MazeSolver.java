@@ -11,12 +11,40 @@ public final class MazeSolver {
 //        return findPathDfs(maze, start);
     }
 
+    public static boolean buildVisitCheckArrayAndCheckIsNoExit(final char[][] maze, final boolean[][] checkArray) {
+        boolean isNoExit = true;
+        for (int y = 0; y < maze.length; ++y) {
+            for (int x = 0; x < maze[0].length; ++x) {
+                switch (maze[y][x]) {
+                    case 'E':
+                        isNoExit = false;
+                        break;
+                    case ' ':
+                        break;
+                    case 'x':
+                        checkArray[y][x] = true;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown type");
+                }
+            }
+        }
+
+        return isNoExit;
+    }
+
     public static List<Point> findPathBfs(final char[][] maze, final Point start) {
         if (maze[start.getY()][start.getX()] == 'E') {
             final ArrayList<Point> path = new ArrayList<Point>(1);
             path.add(start);
             return path;
         }
+
+        final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
+        if (buildVisitCheckArrayAndCheckIsNoExit(maze, isVisit)) {
+            return new ArrayList<Point>(0);
+        }
+
 
         final CircularQueue<Path> pathBfsQueue = new CircularQueue<Path>(1);
         pathBfsQueue.enqueue(new Path(start));
@@ -55,19 +83,18 @@ public final class MazeSolver {
                     continue;
                 }
 
-                final Point prePosOrNull = nowPath.getPrePositionOrNull();
-                if (prePosOrNull != null) {
-                    if (prePosOrNull.getX() == nextPos.getX() && prePosOrNull.getY() == nextPos.getY()) {
-                        continue;
-                    }
+                if (isVisit[nextPos.getY()][nextPos.getX()]) {
+                    continue;
                 }
-
 
                 switch (maze[nextPos.getY()][nextPos.getX()]) {
                     case 'E':
+                        isVisit[nextPos.getY()][nextPos.getX()] = true;
                         nowPath.move(nextPos);
                         return nowPath.getPath();
                     case ' ':
+                        isVisit[nextPos.getY()][nextPos.getX()] = true;
+
                         final Path nextPath = new Path(nowPath);
                         nextPath.move(nextPos);
 
@@ -86,6 +113,18 @@ public final class MazeSolver {
     }
 
     public static List<Point> findPathDfs(final char[][] maze, final Point start) {
+        if (maze[start.getY()][start.getX()] == 'E') {
+            final ArrayList<Point> path = new ArrayList<Point>(1);
+            path.add(start);
+            return path;
+        }
+
+        final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
+        if (buildVisitCheckArrayAndCheckIsNoExit(maze, isVisit)) {
+            return new ArrayList<Point>(0);
+        }
+
+
         final Stack<Point> pointOrNullDfsStack = new Stack<>(2);
 
         final ArrayList<Point> outPath = new ArrayList<>();
@@ -104,10 +143,14 @@ public final class MazeSolver {
 
             switch (maze[nowPos.getY()][nowPos.getX()]) {
                 case 'E':
+                    isVisit[nowPos.getY()][nowPos.getX()] = true;
+
                     pathIndex.push(outPath.size());
                     outPath.add(nowPos);
                     return outPath;
                 case ' ':
+                    isVisit[nowPos.getY()][nowPos.getX()] = true;
+
                     pathIndex.push(outPath.size());
                     outPath.add(nowPos);
                     break;
@@ -148,16 +191,12 @@ public final class MazeSolver {
                     continue;
                 }
 
-                if (maze[nextPos.getY()][nextPos.getX()] == 'x') {
+                if (isVisit[nextPos.getY()][nextPos.getX()]) {
                     continue;
                 }
 
-                assert (maze[nowPos.getY()][nowPos.getX()] == ' ');
-                if (outPath.size() >= 2) {
-                    final Point prePos = outPath.get(outPath.size() - 2);
-                    if (prePos.getX() == nextPos.getX() && prePos.getY() == nextPos.getY()) {
-                        continue;
-                    }
+                if (maze[nextPos.getY()][nextPos.getX()] == 'x') {
+                    continue;
                 }
 
                 pointOrNullDfsStack.push(nextPos);
