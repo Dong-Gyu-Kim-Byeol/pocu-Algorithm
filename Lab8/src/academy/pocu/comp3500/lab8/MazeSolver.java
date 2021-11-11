@@ -11,28 +11,6 @@ public final class MazeSolver {
 //        return findPathDfs(maze, start);
     }
 
-    public static boolean buildVisitCheckArrayAndCheckIsNoExit(final char[][] maze, final boolean[][] checkArray) {
-        boolean isNoExit = true;
-        for (int y = 0; y < maze.length; ++y) {
-            for (int x = 0; x < maze[0].length; ++x) {
-                switch (maze[y][x]) {
-                    case 'E':
-                        isNoExit = false;
-                        break;
-                    case ' ':
-                        break;
-                    case 'x':
-                        checkArray[y][x] = true;
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unknown type");
-                }
-            }
-        }
-
-        return isNoExit;
-    }
-
     public static List<Point> findPathBfs(final char[][] maze, final Point start) {
         if (maze[start.getY()][start.getX()] == 'E') {
             final ArrayList<Point> path = new ArrayList<Point>(1);
@@ -41,10 +19,6 @@ public final class MazeSolver {
         }
 
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
-//        if (buildVisitCheckArrayAndCheckIsNoExit(maze, isVisit)) {
-//            return new ArrayList<Point>(0);
-//        }
-
 
         final CircularQueue<Path> pathBfsQueue = new CircularQueue<Path>(1);
         pathBfsQueue.enqueue(new Path(start));
@@ -60,33 +34,40 @@ public final class MazeSolver {
                 final int RIGHT_MOVE_TYPE = 2;
                 final int LEFT_MOVE_TYPE = 3;
 
-                final Point nextPos;
+
+                final int x;
+                final int y;
                 switch (moveType) {
                     case DOWN_MOVE_TYPE:
-                        nextPos = new Point(nowPos.getX(), nowPos.getY() + 1);
+                        x = nowPos.getX();
+                        y = nowPos.getY() + 1;
                         break;
                     case UP_MOVE_TYPE:
-                        nextPos = new Point(nowPos.getX(), nowPos.getY() - 1);
+                        x = nowPos.getX();
+                        y = nowPos.getY() - 1;
                         break;
                     case LEFT_MOVE_TYPE:
-                        nextPos = new Point(nowPos.getX() - 1, nowPos.getY());
+                        x = nowPos.getX() - 1;
+                        y = nowPos.getY();
                         break;
                     case RIGHT_MOVE_TYPE:
-                        nextPos = new Point(nowPos.getX() + 1, nowPos.getY());
+                        x = nowPos.getX() + 1;
+                        y = nowPos.getY();
                         break;
                     default:
                         throw new IllegalArgumentException("Unknown move type");
                 }
 
-                if (0 > nextPos.getY() || nextPos.getY() >= maze.length
-                        || 0 > nextPos.getX() || nextPos.getX() >= maze[0].length) {
+                if (0 > y || y >= maze.length
+                        || 0 > x || x >= maze[0].length) {
                     continue;
                 }
 
-                if (isVisit[nextPos.getY()][nextPos.getX()]) {
+                if (isVisit[y][x]) {
                     continue;
                 }
 
+                final Point nextPos = new Point(x, y);
                 switch (maze[nextPos.getY()][nextPos.getX()]) {
                     case 'E':
                         isVisit[nextPos.getY()][nextPos.getX()] = true;
@@ -108,7 +89,6 @@ public final class MazeSolver {
             }
         }
 
-//        assert (false);
         return new ArrayList<Point>(0);
     }
 
@@ -120,17 +100,12 @@ public final class MazeSolver {
         }
 
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
-        if (buildVisitCheckArrayAndCheckIsNoExit(maze, isVisit)) {
-            return new ArrayList<Point>(0);
-        }
-
 
         final Stack<Point> pointOrNullDfsStack = new Stack<>(2);
 
         final ArrayList<Point> outPath = new ArrayList<>();
         final Stack<Integer> pathIndex = new Stack<>(2);
 
-        pointOrNullDfsStack.push(null);
         pointOrNullDfsStack.push(start);
         // top left : (0, 0)
         while (!pointOrNullDfsStack.isEmpty()) {
@@ -203,7 +178,6 @@ public final class MazeSolver {
             }
         }
 
-        assert (false);
         return outPath;
     }
 }
