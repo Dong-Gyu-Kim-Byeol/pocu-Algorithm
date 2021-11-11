@@ -62,4 +62,12 @@ public final class Stack<T> {
 
         return this.size == 0;
     }
+
+    public void clear() {
+        for (int i = 0; i < this.array.length; ++i) {
+            this.array[i] = null;
+        }
+
+        this.size = 0;
+    }
 }

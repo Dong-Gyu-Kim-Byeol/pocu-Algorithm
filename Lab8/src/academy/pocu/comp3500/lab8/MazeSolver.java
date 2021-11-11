@@ -9,18 +9,22 @@ public final class MazeSolver {
     public static List<Point> findPath(final char[][] maze, final Point start) {
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
 
-        final CircularQueue<Path> pathBfsQueue = new CircularQueue<Path>(maze.length * maze[0].length);
-        pathBfsQueue.enqueue(new Path(start));
+        final CircularQueue<NowAndPrePosition> bfsQueue = new CircularQueue<NowAndPrePosition>(maze.length * maze[0].length);
+        bfsQueue.enqueue(new NowAndPrePosition(start, null));
         isVisit[start.getY()][start.getX()] = true;
 
         // top left : (0, 0)
-        while (pathBfsQueue.size() != 0) {
-            final Path nowPath = pathBfsQueue.dequeue();
-            final Point nowPos = nowPath.getNowPosition();
+        force_break:
+        while (bfsQueue.size() != 0) {
+            final NowAndPrePosition nowAndPrePosition = bfsQueue.dequeue();
+
+            final Point nowPos = nowAndPrePosition.getNowPos();
 
             switch (maze[nowPos.getY()][nowPos.getX()]) {
                 case 'E':
-                    return nowPath.getPath();
+                    bfsQueue.clear();
+                    bfsQueue.enqueue(nowAndPrePosition);
+                    break force_break;
                 case ' ':
                     break;
                 case 'x':
@@ -70,13 +74,33 @@ public final class MazeSolver {
 
                 isVisit[nextY][nextX] = true;
 
+
                 final Point nextPos = new Point(nextX, nextY);
-                final Path nextPath = new Path(nowPath);
-                nextPath.move(nextPos);
-                pathBfsQueue.enqueue(nextPath);
+                final NowAndPrePosition nextNowAndPrePosition = new NowAndPrePosition(nextPos, nowAndPrePosition);
+                bfsQueue.enqueue(nextNowAndPrePosition);
             }
         }
 
-        return new ArrayList<Point>(0);
+
+        Stack<Point> reverse = new Stack<Point>(maze.length * maze[0].length);
+
+        if (bfsQueue.size() == 1) {
+            NowAndPrePosition nowAndPrePosition = bfsQueue.dequeue();
+            reverse.push(nowAndPrePosition.getNowPos());
+
+            while (nowAndPrePosition.getPrePosOrNull() != null) {
+                final Point prePos = nowAndPrePosition.getPrePosOrNull().getNowPos();
+                reverse.push(prePos);
+
+                nowAndPrePosition = nowAndPrePosition.getPrePosOrNull();
+            }
+        }
+
+        final ArrayList<Point> outPath = new ArrayList<Point>(reverse.size());
+        while (!reverse.isEmpty()) {
+            outPath.add(reverse.pop());
+        }
+
+        return outPath;
     }
 }

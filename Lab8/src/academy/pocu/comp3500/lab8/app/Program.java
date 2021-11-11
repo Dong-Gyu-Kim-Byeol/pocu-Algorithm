@@ -13,7 +13,9 @@ public class Program {
             char[][] maze1x1 = new char[][]{
                     {' '}
             };
+
             List<Point> result = MazeSolver.findPath(maze1x1, new Point(0, 0));
+
             assert (result.size() == 0);
         }
 
@@ -21,7 +23,9 @@ public class Program {
             char[][] maze1x1 = new char[][]{
                     {'E'}
             };
+
             List<Point> result = MazeSolver.findPath(maze1x1, new Point(0, 0));
+
             assert (result.size() == 1);
             assert (result.get(0).getX() == 0 && result.get(0).getY() == 0);
         }
@@ -46,6 +50,7 @@ public class Program {
             };
 
             List<Point> result = MazeSolver.findPath(maze7x5, new Point(5, 3));
+
             assert (result.size() == 0);
         }
 

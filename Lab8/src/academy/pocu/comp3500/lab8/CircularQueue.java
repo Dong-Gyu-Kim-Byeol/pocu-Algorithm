@@ -74,4 +74,20 @@ public class CircularQueue<T> {
 
         return data;
     }
+
+    public void clear() {
+        int nowArrayIndex = (this.front + 1) % this.array.length;
+        for (int i = 0; i < this.array.length; ++i) {
+            if (this.array[nowArrayIndex] == null) {
+                break;
+            }
+
+            this.array[nowArrayIndex] = null;
+            nowArrayIndex = (nowArrayIndex + 1) % this.array.length;
+        }
+
+        this.size = 0;
+        this.front = 0;
+        this.rear = 0;
+    }
 }
