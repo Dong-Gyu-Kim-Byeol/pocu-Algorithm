@@ -2,16 +2,21 @@ package academy.pocu.comp3500.lab8;
 
 import academy.pocu.comp3500.lab8.maze.Point;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class MazeSolver {
     public static List<Point> findPath(final char[][] maze, final Point start) {
+        return myGenericFindPath(maze, start);
+    }
+
+
+    public static List<Point> myGenericFindPath(final char[][] maze, final Point start) {
         Node lastNodeOrNull = null;
 
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
 
-        final CircularQueueNode bfsQueue = new CircularQueueNode(maze.length * maze[0].length);
+        final CircularQueue<Node> bfsQueue = new CircularQueue<Node>(maze.length * maze[0].length);
         bfsQueue.enqueue(new Node(start, null));
         isVisit[start.getY()][start.getX()] = true;
 
@@ -84,18 +89,22 @@ public final class MazeSolver {
 
         assert (bfsQueue.capacity() == maze.length * maze[0].length);
 
-        final LinkedList<Point> outPath = new LinkedList<Point>();
-
+        final Stack<Point> reverse = new Stack<Point>(maze.length * maze[0].length);
         if (lastNodeOrNull != null) {
             Node nowAndPrePosition = lastNodeOrNull;
-            outPath.addFirst(nowAndPrePosition.getNowPos());
+            reverse.push(nowAndPrePosition.getNowPos());
 
             while (nowAndPrePosition.getPrePosOrNull() != null) {
                 final Point prePos = nowAndPrePosition.getPrePosOrNull().getNowPos();
-                outPath.addFirst(prePos);
+                reverse.push(prePos);
 
                 nowAndPrePosition = nowAndPrePosition.getPrePosOrNull();
             }
+        }
+
+        final ArrayList<Point> outPath = new ArrayList<>(reverse.size());
+        while (!reverse.isEmpty()) {
+            outPath.add(reverse.pop());
         }
 
         return outPath;
