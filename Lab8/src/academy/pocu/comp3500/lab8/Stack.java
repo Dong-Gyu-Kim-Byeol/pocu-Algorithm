@@ -1,14 +1,16 @@
-package academy.pocu.comp3500.lab7;
+package academy.pocu.comp3500.lab8;
 
-public final class FixedStack<T> extends java.util.ArrayList<T> {
+public final class Stack<T> {
+    private static final int CAPACITY_INCREASE_RATE = 2;
+
     private int size;
-    private final Object[] array;
+    private Object[] array;
 
-    public FixedStack(final int capacity) {
+    public Stack(final int capacity) {
         this.array = new Object[capacity];
     }
 
-    public int size(){
+    public int size() {
         return this.size;
     }
 
@@ -25,6 +27,18 @@ public final class FixedStack<T> extends java.util.ArrayList<T> {
     }
 
     public void push(final T data) {
+        assert (this.capacity() >= this.size);
+
+        if (this.capacity() <= this.size) {
+            final Object[] newArray = new Object[this.capacity() * CAPACITY_INCREASE_RATE];
+
+            for (int i = 0; i < this.array.length; ++i) {
+                newArray[i] = this.array[i];
+            }
+
+            this.array = newArray;
+        }
+
         assert (this.capacity() > this.size);
 
         this.array[this.size] = data;

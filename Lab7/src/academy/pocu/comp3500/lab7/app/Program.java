@@ -80,7 +80,7 @@ public class Program {
         }
 
         {
-            String[] codeWords = new String[]{"cat", "CATS", "AcTS", "SCAN", "acre", "aNTS"};
+            String[] codeWords = new String[]{"cat", "carte", "CATS", "AcTS", "actarte", "SCAN", "acre", "aNTS"};
 
             Decryptor decryptor = new Decryptor(codeWords);
 

@@ -72,5 +72,57 @@ public class Program {
         assert (result.size() == 7);
         assert (result.get(0).getX() == 2 && result.get(0).getY() == 2);
         assert (result.get(6).getX() == 5 && result.get(6).getY() == 1);
+
+        {
+            char[][] maze8x7 = new char[][]{
+                    {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
+                    {'x', ' ', ' ', ' ', ' ', ' ', 'x', 'x'},
+                    {'x', ' ', 'x', 'x', 'x', ' ', 'x', 'x'},
+                    {' ', ' ', 'x', 'x', 'x', ' ', ' ', 'E'},
+                    {'x', ' ', 'x', 'x', 'x', ' ', 'x', 'x'},
+                    {'x', ' ', ' ', ' ', ' ', ' ', 'x', 'x'},
+                    {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'}
+            };
+
+            result = MazeSolver.findPath(maze8x7, new Point(0, 3));
+
+            assert (result.size() == 12);
+            assert (result.get(11).getX() == 7 && result.get(11).getY() == 3);
+        }
+
+        {
+            char[][] maze8x7 = new char[][]{
+                    {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
+                    {'x', ' ', ' ', ' ', ' ', ' ', 'x', 'x'},
+                    {'x', ' ', 'x', 'x', 'x', ' ', 'x', 'x'},
+                    {' ', ' ', 'x', 'x', 'x', ' ', 'x', 'x'},
+                    {'x', ' ', 'x', 'x', 'x', ' ', ' ', 'E'},
+                    {'x', ' ', ' ', ' ', ' ', ' ', 'x', 'x'},
+                    {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'}
+            };
+
+            result = MazeSolver.findPath(maze8x7, new Point(0, 3));
+
+            assert (result.size() == 11);
+            assert (result.get(10).getX() == 7 && result.get(10).getY() == 4);
+        }
+
+        {
+            char[][] maze8x7 = new char[][]{
+                    {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
+                    {'x', ' ', ' ', ' ', ' ', ' ', 'x', 'x'},
+                    {'x', ' ', 'x', 'x', 'x', ' ', ' ', 'E'},
+                    {' ', ' ', 'x', 'x', 'x', ' ', 'x', 'x'},
+                    {'x', ' ', 'x', 'x', 'x', ' ', 'x', 'x'},
+                    {'x', ' ', ' ', ' ', ' ', ' ', 'x', 'x'},
+                    {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'}
+            };
+
+            result = MazeSolver.findPath(maze8x7, new Point(0, 3));
+
+            assert (result.size() == 11);
+            assert (result.get(10).getX() == 7 && result.get(10).getY() == 2);
+        }
     }
+
 }

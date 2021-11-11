@@ -103,16 +103,19 @@ public final class Trie {
         final FixedStack<Integer> accessIndexOrNullStack = new FixedStack<Integer>(2 * this.size + 1);
 
         int wordAccessCount = 0;
-        final boolean[] wordAccessArray = new boolean[lowWord.length()];
+        final boolean[] wordAccess = new boolean[lowWord.length()];
 
-        final char[] wordArray = lowWord.toCharArray();
-        Sort.radixSort(wordArray, 3);
         final HashMap<Character, Integer[]> accessArrayStartIndex = new HashMap<Character, Integer[]>(lowWord.length());
-        for (int i = 0; i < lowWord.length(); ++i) {
-            if (accessArrayStartIndex.containsKey(wordArray[i]) == false) {
-                accessArrayStartIndex.put(wordArray[i], new Integer[]{i, 1}); // Integer[] : first -> wordAccessArray index / second -> same char count
-            } else {
-                ++accessArrayStartIndex.get(wordArray[i])[1];
+        {
+            final char[] wordArray = lowWord.toCharArray();
+            Sort.radixSort(wordArray, 3);
+
+            for (int i = 0; i < lowWord.length(); ++i) {
+                if (accessArrayStartIndex.containsKey(wordArray[i]) == false) {
+                    accessArrayStartIndex.put(wordArray[i], new Integer[]{i, 1}); // Integer[] : first -> wordAccessArray index / second -> same char count
+                } else {
+                    ++accessArrayStartIndex.get(wordArray[i])[1];
+                }
             }
         }
 
@@ -123,14 +126,14 @@ public final class Trie {
             }
         }
 
-        while (nodeOrNullStack.empty() == false) {
+        while (nodeOrNullStack.isEmpty() == false) {
             final TrieNode nodeOrNull = nodeOrNullStack.pop();
             if (nodeOrNull == null) {
                 assert (accessIndexOrNullStack.peek() == null);
                 accessIndexOrNullStack.pop();
 
                 while (accessIndexOrNullStack.peek() != null) {
-                    wordAccessArray[accessIndexOrNullStack.pop()] = false;
+                    wordAccess[accessIndexOrNullStack.pop()] = false;
                     --wordAccessCount;
                 }
                 continue;
@@ -140,26 +143,27 @@ public final class Trie {
 
             assert (accessArrayStartIndex.containsKey(node.getCharacter()));
             boolean isDifferent = true;
-            final int iLimit = accessArrayStartIndex.get(node.getCharacter())[0] + accessArrayStartIndex.get(node.getCharacter())[1];
-            for (int i = accessArrayStartIndex.get(node.getCharacter())[0]; i < iLimit; ++i) {
-                if (wordAccessArray[i] == false) {
-                    wordAccessArray[i] = true;
+            {
+                final int iLimit = accessArrayStartIndex.get(node.getCharacter())[0] + accessArrayStartIndex.get(node.getCharacter())[1];
+                for (int i = accessArrayStartIndex.get(node.getCharacter())[0]; i < iLimit; ++i) {
+                    if (wordAccess[i] == false) {
+                        wordAccess[i] = true;
 
-                    accessIndexOrNullStack.push(i);
-                    ++wordAccessCount;
+                        accessIndexOrNullStack.push(i);
+                        ++wordAccessCount;
 
-                    isDifferent = false;
-                    break;
+                        isDifferent = false;
+                        break;
+                    }
                 }
-            }
 
-
-            if (isDifferent) {
-                while (accessIndexOrNullStack.peek() != null) {
-                    wordAccessArray[accessIndexOrNullStack.pop()] = false;
-                    --wordAccessCount;
+                if (isDifferent) {
+                    while (accessIndexOrNullStack.peek() != null) {
+                        wordAccess[accessIndexOrNullStack.pop()] = false;
+                        --wordAccessCount;
+                    }
+                    continue;
                 }
-                continue;
             }
 
             if (node.isWordEnd() && wordAccessCount == lowWord.length()) {
@@ -168,7 +172,7 @@ public final class Trie {
                 candidates.add(candidate);
 
                 while (accessIndexOrNullStack.peek() != null) {
-                    wordAccessArray[accessIndexOrNullStack.pop()] = false;
+                    wordAccess[accessIndexOrNullStack.pop()] = false;
                     --wordAccessCount;
                 }
                 continue;
@@ -177,9 +181,9 @@ public final class Trie {
 
             accessIndexOrNullStack.push(null);
             nodeOrNullStack.push(null);
-            for (final TrieNode nextNode : node.getChildren()) {
-                if (nextNode != null && accessArrayStartIndex.containsKey(nextNode.getCharacter())) {
-                    nodeOrNullStack.push(nextNode);
+            for (final TrieNode nextNodeOrNull : node.getChildren()) {
+                if (nextNodeOrNull != null && accessArrayStartIndex.containsKey(nextNodeOrNull.getCharacter())) {
+                    nodeOrNullStack.push(nextNodeOrNull);
                 }
             }
         }
