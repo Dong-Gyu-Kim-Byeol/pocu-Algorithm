@@ -29,11 +29,7 @@ public final class MazeSolver {
 
             final Point nowPos = nowPath.getNowPosition();
 
-            if (isVisit[nowPos.getY()][nowPos.getX()]) {
-                continue;
-            }
-
-            isVisit[nowPos.getY()][nowPos.getX()] = true;
+            assert (isVisit[nowPos.getY()][nowPos.getX()] == false);
 
             switch (maze[nowPos.getY()][nowPos.getX()]) {
                 case 'E':
@@ -89,6 +85,8 @@ public final class MazeSolver {
                     continue;
                 }
 
+
+                isVisit[y][x] = true;
 
                 final Point nextPos = new Point(x, y);
                 final Path nextPath = new Path(nowPath);

@@ -9,11 +9,11 @@ public final class Player extends PlayerBase {
     private static final int MINI_MAX_DEPTH = 4;
 
     // DEPTH = 4
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 107217;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 52528;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 2456543; // 107217;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 67361; // 52528;
 
-    private static int outMovesMaxSizeInGetCanMoves = 52;
-    private static int outScoreMovesMaxSizeInGetQueenCanMoves = 24;
+    private static int outMovesMaxSizeInGetCanMoves = 55;
+    private static int outScoreMovesMaxSizeInGetQueenCanMoves = 25;
     private static int outScoreMovesMaxSizeInGetRookCanMoves = 14;
     private static int outScoreMovesMaxSizeInGetBishopCanMoves = 13;
 
@@ -79,12 +79,7 @@ public final class Player extends PlayerBase {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
         assert (turnCount >= 1);
-
-        if (turnCount >= maxTurnCount) {
-            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
-            newScoreMove.init(-1, -1, -1, -1, Chess.calculateBoardPoint(board, player));
-            return newScoreMove;
-        }
+        assert (turnCount <= maxTurnCount);
 
         if (Chess.hasWon(board, opponent)) {
             final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
@@ -106,11 +101,25 @@ public final class Player extends PlayerBase {
         }
 
         for (final ScoreMove canMove : canMoveList) {
+            if (turnCount == maxTurnCount) {
+                final char tempTo = board[canMove.toY()][canMove.toX()];
+                board[canMove.toY()][canMove.toX()] = board[canMove.fromY()][canMove.fromX()];
+                board[canMove.fromY()][canMove.fromX()] = 0;
+
+                canMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), Chess.calculateBoardPoint(board, player));
+
+                board[canMove.fromY()][canMove.fromX()] = board[canMove.toY()][canMove.toX()];
+                board[canMove.toY()][canMove.toX()] = tempTo;
+
+                continue;
+            }
+
             final char[][] newBoard = this.getNextBoard();
             Chess.copyBoard(board, newBoard);
 
             newBoard[canMove.toY()][canMove.toX()] = newBoard[canMove.fromY()][canMove.fromX()];
             newBoard[canMove.fromY()][canMove.fromX()] = 0;
+
 
             final EColor nextPlayer = turn == player
                     ? opponent : player;

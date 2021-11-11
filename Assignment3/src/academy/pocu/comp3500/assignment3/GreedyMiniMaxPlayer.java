@@ -9,8 +9,8 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private static final int MINI_MAX_DEPTH = 6;
 
     // DEPTH = 6;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 0; // 605069;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 0; // 315269;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 605069;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 315269;
 
     private static int outMovesMaxSizeInGetCanMoves = 14;
 
