@@ -14,6 +14,8 @@ public final class MazeSolver {
 
         // top left : (0, 0)
         while (pathBfsQueue.size() != 0) {
+            assert (pathBfsQueue.capacity() == maze.length * maze[0].length);
+
             final Path nowPath = pathBfsQueue.dequeue();
             final Point nowPos = nowPath.getNowPosition();
 
