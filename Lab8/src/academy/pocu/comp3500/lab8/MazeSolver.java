@@ -75,10 +75,6 @@ public final class MazeSolver {
                     continue;
                 }
 
-                if (maze[nextY][nextX] == 'x') {
-                    continue;
-                }
-
                 if (isVisit[nextY][nextX]) {
                     continue;
                 }
