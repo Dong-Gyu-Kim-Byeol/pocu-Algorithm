@@ -7,15 +7,9 @@ import java.util.List;
 
 public final class MazeSolver {
     public static List<Point> findPath(final char[][] maze, final Point start) {
-        if (maze[start.getY()][start.getX()] == 'E') {
-            final ArrayList<Point> path = new ArrayList<Point>(1);
-            path.add(start);
-            return path;
-        }
-
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
 
-        final CircularQueue<Path> pathBfsQueue = new CircularQueue<Path>(1);
+        final CircularQueue<Path> pathBfsQueue = new CircularQueue<Path>(maze.length * maze[0].length);
         pathBfsQueue.enqueue(new Path(start));
 
         // top left : (0, 0)
