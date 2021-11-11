@@ -8,8 +8,8 @@ import java.util.List;
 
 public final class MazeSolver {
     public static List<Point> findPath(final char[][] maze, final Point start) {
-//        return myGenericFindPath(maze, start);
-        return javaGenericFindPath(maze, start);
+        return myGenericFindPath(maze, start);
+//        return javaGenericFindPath(maze, start);
     }
 
 
