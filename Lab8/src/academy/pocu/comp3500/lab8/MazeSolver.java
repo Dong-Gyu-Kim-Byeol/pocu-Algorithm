@@ -11,19 +11,12 @@ public final class MazeSolver {
 
         final CircularQueue<Path> pathBfsQueue = new CircularQueue<Path>(maze.length * maze[0].length);
         pathBfsQueue.enqueue(new Path(start));
+        isVisit[start.getY()][start.getX()] = true;
 
         // top left : (0, 0)
         while (pathBfsQueue.size() != 0) {
-            assert (pathBfsQueue.capacity() == maze.length * maze[0].length);
-
             final Path nowPath = pathBfsQueue.dequeue();
             final Point nowPos = nowPath.getNowPosition();
-
-            if (isVisit[nowPos.getY()][nowPos.getX()]) {
-                continue;
-            }
-
-            isVisit[nowPos.getY()][nowPos.getX()] = true;
 
             switch (maze[nowPos.getY()][nowPos.getX()]) {
                 case 'E':
@@ -75,6 +68,7 @@ public final class MazeSolver {
                     continue;
                 }
 
+                isVisit[nextY][nextX] = true;
 
                 final Point nextPos = new Point(nextX, nextY);
                 final Path nextPath = new Path(nowPath);

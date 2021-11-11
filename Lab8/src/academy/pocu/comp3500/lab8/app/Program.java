@@ -27,6 +27,16 @@ public class Program {
         }
 
         {
+            char[][] maze1x1 = new char[][]{
+                    {'x'}
+            };
+
+            List<Point> result = MazeSolver.findPath(maze1x1, new Point(0, 0));
+
+            assert (result.size() == 0);
+        }
+
+        {
             char[][] maze7x5 = new char[][]{
                     {'x', 'x', 'x', 'x', 'x', 'x', 'x'},
                     {'x', 'E', 'x', ' ', ' ', ' ', 'x'},
@@ -51,44 +61,22 @@ public class Program {
             };
 
             List<Point> result = MazeSolver.findPath(maze7x7, new Point(5, 5));
+
             assert (result.size() == 10);
-            if (result.size() == 10) {
-                assert (result.get(0).getX() == 5 && result.get(0).getY() == 5);
-                assert (result.get(1).getX() == 5 && result.get(1).getY() == 4);
-                assert (result.get(2).getX() == 5 && result.get(2).getY() == 3);
-                assert (result.get(3).getX() == 4 && result.get(3).getY() == 3);
-                assert (result.get(4).getX() == 3 && result.get(4).getY() == 3);
-                assert (result.get(5).getX() == 3 && result.get(5).getY() == 4);
-                assert (result.get(6).getX() == 3 && result.get(6).getY() == 5);
-                assert (result.get(7).getX() == 2 && result.get(7).getY() == 5);
-                assert (result.get(8).getX() == 1 && result.get(8).getY() == 5);
-                assert (result.get(9).getX() == 1 && result.get(9).getY() == 4);
-            }
-        }
-
-
-        {
-            char[][] maze = new char[][] {
-                    {' '}
-            };
-
-            List<Point>result = MazeSolver.findPath(maze, new Point(0, 0));
-
-            assert (result.size() == 0);
+            assert (result.get(0).getX() == 5 && result.get(0).getY() == 5);
+            assert (result.get(1).getX() == 5 && result.get(1).getY() == 4);
+            assert (result.get(2).getX() == 5 && result.get(2).getY() == 3);
+            assert (result.get(3).getX() == 4 && result.get(3).getY() == 3);
+            assert (result.get(4).getX() == 3 && result.get(4).getY() == 3);
+            assert (result.get(5).getX() == 3 && result.get(5).getY() == 4);
+            assert (result.get(6).getX() == 3 && result.get(6).getY() == 5);
+            assert (result.get(7).getX() == 2 && result.get(7).getY() == 5);
+            assert (result.get(8).getX() == 1 && result.get(8).getY() == 5);
+            assert (result.get(9).getX() == 1 && result.get(9).getY() == 4);
         }
 
         {
-            char[][] maze = new char[][] {
-                    {'x'}
-            };
-
-            List<Point>result = MazeSolver.findPath(maze, new Point(0, 0));
-
-            assert (result.size() == 0);
-        }
-
-        {
-            char[][] maze8x7 = new char[][] {
+            char[][] maze8x7 = new char[][]{
                     {' ', 'x', 'x', 'x', 'x', 'x', 'x', ' '},
                     {' ', 'x', ' ', ' ', ' ', 'x', ' ', ' '},
                     {' ', 'x', ' ', 'x', ' ', 'x', 'x', ' '},
@@ -97,7 +85,7 @@ public class Program {
                     {' ', 'x', 'x', 'x', 'x', 'x', 'x', ' '}
             };
 
-            List<Point>result = MazeSolver.findPath(maze8x7, new Point(1, 3));
+            List<Point> result = MazeSolver.findPath(maze8x7, new Point(1, 3));
 
             assert (result.size() == 0);
         }

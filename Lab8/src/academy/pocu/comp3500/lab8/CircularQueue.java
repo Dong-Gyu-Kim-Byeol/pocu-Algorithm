@@ -28,25 +28,25 @@ public class CircularQueue<T> {
         assert (this.capacity() >= this.size);
         assert (this.array[this.front] == null);
 
-//        if ((this.rear + 1) % this.array.length == this.front) {
-//            final int newArrayCapacity = this.capacity() * CAPACITY_INCREASE_RATE + 1;
-//            final Object[] newArray = new Object[newArrayCapacity];
-//
-//            int nowArrayIndex = (this.front + 1) % this.array.length;
-//            for (int i = 0; i < newArray.length; ++i) {
-//                if (this.array[nowArrayIndex] == null) {
-//                    assert (i != 0);
-//                    this.rear = i - 1;
-//                    break;
-//                }
-//
-//                newArray[i] = this.array[nowArrayIndex];
-//                nowArrayIndex = (nowArrayIndex + 1) % this.array.length;
-//            }
-//
-//            this.array = newArray;
-//            this.front = newArray.length - 1;
-//        }
+        if ((this.rear + 1) % this.array.length == this.front) {
+            final int newArrayCapacity = this.capacity() * CAPACITY_INCREASE_RATE + 1;
+            final Object[] newArray = new Object[newArrayCapacity];
+
+            int nowArrayIndex = (this.front + 1) % this.array.length;
+            for (int i = 0; i < newArray.length; ++i) {
+                if (this.array[nowArrayIndex] == null) {
+                    assert (i != 0);
+                    this.rear = i - 1;
+                    break;
+                }
+
+                newArray[i] = this.array[nowArrayIndex];
+                nowArrayIndex = (nowArrayIndex + 1) % this.array.length;
+            }
+
+            this.array = newArray;
+            this.front = newArray.length - 1;
+        }
 
         this.rear = (this.rear + 1) % this.array.length;
         assert (this.array[this.rear] == null);
