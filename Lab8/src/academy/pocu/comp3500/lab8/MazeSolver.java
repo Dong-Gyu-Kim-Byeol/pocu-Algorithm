@@ -22,6 +22,7 @@ public final class MazeSolver {
 
         final CircularQueue<Path> pathBfsQueue = new CircularQueue<Path>(1);
         pathBfsQueue.enqueue(new Path(start));
+        isVisit[start.getY()][start.getX()] = true;
 
         // top left : (0, 0)
         while (pathBfsQueue.size() != 0) {
@@ -29,7 +30,7 @@ public final class MazeSolver {
 
             final Point nowPos = nowPath.getNowPosition();
 
-            assert (isVisit[nowPos.getY()][nowPos.getX()] == false);
+            assert (isVisit[nowPos.getY()][nowPos.getX()]);
 
             switch (maze[nowPos.getY()][nowPos.getX()]) {
                 case 'E':
