@@ -8,6 +8,8 @@ import java.util.List;
 
 public final class MazeSolver {
     public static List<Point> findPath(final char[][] maze, final Point start) {
+        NowAndPrePosition lastPosOrNull = null;
+
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
 
         final CircularQueue<NowAndPrePosition> bfsQueue = new CircularQueue<NowAndPrePosition>(maze.length * maze[0].length);
@@ -23,8 +25,7 @@ public final class MazeSolver {
 
             switch (maze[nowPos.getY()][nowPos.getX()]) {
                 case 'E':
-                    bfsQueue.clear();
-                    bfsQueue.enqueue(nowAndPrePosition);
+                    lastPosOrNull = nowAndPrePosition;
                     break force_break;
                 case ' ':
                     break;
@@ -85,8 +86,8 @@ public final class MazeSolver {
 
         final LinkedList<Point> outPath = new LinkedList<Point>();
 
-        if (bfsQueue.size() == 1) {
-            NowAndPrePosition nowAndPrePosition = bfsQueue.dequeue();
+        if (lastPosOrNull != null) {
+            NowAndPrePosition nowAndPrePosition = lastPosOrNull;
             outPath.addFirst(nowAndPrePosition.getNowPos());
 
             while (nowAndPrePosition.getPrePosOrNull() != null) {
