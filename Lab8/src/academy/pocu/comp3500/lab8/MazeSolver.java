@@ -2,30 +2,29 @@ package academy.pocu.comp3500.lab8;
 
 import academy.pocu.comp3500.lab8.maze.Point;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public final class MazeSolver {
     public static List<Point> findPath(final char[][] maze, final Point start) {
-        NowAndPrePosition lastPosOrNull = null;
+        Node lastNodeOrNull = null;
 
         final boolean[][] isVisit = new boolean[maze.length][maze[0].length];
 
-        final LinkedList<NowAndPrePosition> bfsQueue = new LinkedList<NowAndPrePosition>();
-        bfsQueue.add(new NowAndPrePosition(start, null));
+        final LinkedList<Node> bfsQueue = new LinkedList<Node>();
+        bfsQueue.add(new Node(start, null));
         isVisit[start.getY()][start.getX()] = true;
 
         // top left : (0, 0)
         force_break:
         while (bfsQueue.size() != 0) {
-            final NowAndPrePosition nowAndPrePosition = bfsQueue.poll();
+            final Node nowNode = bfsQueue.poll();
 
-            final Point nowPos = nowAndPrePosition.getNowPos();
+            final Point nowPos = nowNode.getNowPos();
 
             switch (maze[nowPos.getY()][nowPos.getX()]) {
                 case 'E':
-                    lastPosOrNull = nowAndPrePosition;
+                    lastNodeOrNull = nowNode;
                     break force_break;
                 case ' ':
                     break;
@@ -78,7 +77,7 @@ public final class MazeSolver {
 
 
                 final Point nextPos = new Point(nextX, nextY);
-                final NowAndPrePosition nextNowAndPrePosition = new NowAndPrePosition(nextPos, nowAndPrePosition);
+                final Node nextNowAndPrePosition = new Node(nextPos, nowNode);
                 bfsQueue.add(nextNowAndPrePosition);
             }
         }
@@ -86,8 +85,8 @@ public final class MazeSolver {
 
         final LinkedList<Point> outPath = new LinkedList<Point>();
 
-        if (lastPosOrNull != null) {
-            NowAndPrePosition nowAndPrePosition = lastPosOrNull;
+        if (lastNodeOrNull != null) {
+            Node nowAndPrePosition = lastNodeOrNull;
             outPath.addFirst(nowAndPrePosition.getNowPos());
 
             while (nowAndPrePosition.getPrePosOrNull() != null) {

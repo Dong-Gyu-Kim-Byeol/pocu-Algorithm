@@ -42,6 +42,20 @@ public class Program {
 
         {
             char[][] maze7x5 = new char[][]{
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' '}
+            };
+
+            List<Point> result = MazeSolver.findPath(maze7x5, new Point(5, 3));
+
+            assert (result.size() == 0);
+        }
+
+        {
+            char[][] maze7x5 = new char[][]{
                     {'x', 'x', 'x', 'x', 'x', 'x', 'x'},
                     {'x', 'E', 'x', ' ', ' ', ' ', 'x'},
                     {'x', ' ', 'x', ' ', 'x', ' ', 'x'},

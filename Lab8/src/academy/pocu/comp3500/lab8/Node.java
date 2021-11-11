@@ -2,11 +2,11 @@ package academy.pocu.comp3500.lab8;
 
 import academy.pocu.comp3500.lab8.maze.Point;
 
-public class NowAndPrePosition {
+public class Node {
     private final Point nowPos;
-    private final NowAndPrePosition prePosOrNull;
+    private final Node prePosOrNull;
 
-    public NowAndPrePosition(final Point nowPos, final NowAndPrePosition prePosOrNull) {
+    public Node(final Point nowPos, final Node prePosOrNull) {
         this.nowPos = nowPos;
         this.prePosOrNull = prePosOrNull;
     }
@@ -15,7 +15,7 @@ public class NowAndPrePosition {
         return nowPos;
     }
 
-    public NowAndPrePosition getPrePosOrNull() {
+    public Node getPrePosOrNull() {
         return prePosOrNull;
     }
 }
