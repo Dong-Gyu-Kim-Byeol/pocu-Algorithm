@@ -6,6 +6,8 @@ public final class Chess {
     private Chess() {
     }
 
+    // --
+
     public static final int BOARD_SIZE = 8;
 
     public static final int[][] KING_MOVE_OFFSETS = {
@@ -47,6 +49,8 @@ public final class Chess {
     public static final int BISHOP_SCORE = 10;
     public static final int KNIGHT_SCORE = 5;
     public static final int PAWN_SCORE = 2;
+
+    // --
 
     public static int getPieceScore(final char attackedPiece) {
         switch (Character.toLowerCase(attackedPiece)) {

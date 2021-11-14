@@ -17,10 +17,14 @@ public final class Player extends PlayerBase {
     private static int outScoreMovesMaxSizeInGetRookCanMoves = 14;
     private static int outScoreMovesMaxSizeInGetBishopCanMoves = 13;
 
+    // ---
+
     private final EColor color;
 
     private final MemoryPool<ScoreMove> scoreMoveMemoryPool;
     private final ManualMemoryPool<char[][]> boardMemoryPool;
+
+    // ---
 
     public Player(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -36,6 +40,8 @@ public final class Player extends PlayerBase {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
     }
+
+    // ---
 
     public void printMemoryPoolSize() {
         System.out.println("Player");
@@ -75,6 +81,8 @@ public final class Player extends PlayerBase {
         return new Move(move.fromX(), move.fromY(), move.toX(), move.toY());
     }
 
+    // ---
+
     private ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
@@ -102,14 +110,14 @@ public final class Player extends PlayerBase {
 
         for (final ScoreMove canMove : canMoveList) {
             if (turnCount == maxTurnCount) {
-                final char tempTo = board[canMove.toY()][canMove.toX()];
+                final char tempToPiece = board[canMove.toY()][canMove.toX()];
                 board[canMove.toY()][canMove.toX()] = board[canMove.fromY()][canMove.fromX()];
                 board[canMove.fromY()][canMove.fromX()] = 0;
 
                 canMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), Chess.calculateBoardPoint(board, player));
 
                 board[canMove.fromY()][canMove.fromX()] = board[canMove.toY()][canMove.toX()];
-                board[canMove.toY()][canMove.toX()] = tempTo;
+                board[canMove.toY()][canMove.toX()] = tempToPiece;
 
                 continue;
             }
@@ -119,7 +127,6 @@ public final class Player extends PlayerBase {
 
             newBoard[canMove.toY()][canMove.toX()] = newBoard[canMove.fromY()][canMove.fromX()];
             newBoard[canMove.fromY()][canMove.fromX()] = 0;
-
 
             final EColor nextPlayer = turn == player
                     ? opponent : player;

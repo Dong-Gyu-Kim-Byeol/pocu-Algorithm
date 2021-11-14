@@ -18,7 +18,7 @@ public class Program {
 
         final boolean IS_LIMIT_TURN_COUNT = true; // true 라면 검은색 플레이어의 수를 콘솔에 입력해야 함
 
-        final int MAX_MOVE_TIME_MILLISECONDS = 1000; // Player 가 턴마다 수를 결정하는 데에 주어진 시간
+        final int MAX_MOVE_TIME_MILLISECONDS = 10000; // Player 가 턴마다 수를 결정하는 데에 주어진 시간
         final long AUTO_PLAY_TURN_DURATION_IN_MILLISECONDS = 1000; // Autoplay 중 턴마다 일시중지 되는 기간
 
         PlayerBase whitePlayer;
@@ -31,11 +31,11 @@ public class Program {
 //            whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
 //            blackPlayer = new GreedyMiniMaxPlayer(false, MAX_MOVE_TIME_MILLISECONDS);
 
-//            whitePlayer = new GreedyMiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
-//            blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
-
-            whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
+            whitePlayer = new GreedyMiniMaxPlayer(true, MAX_MOVE_TIME_MILLISECONDS);
             blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
+
+//            whitePlayer = new Player(true, MAX_MOVE_TIME_MILLISECONDS);
+//            blackPlayer = new Player(false, MAX_MOVE_TIME_MILLISECONDS);
         } else {
             if (IS_WHITE_KEYBOARD_PLAYER) {
                 whitePlayer = new KeyboardPlayer(true);

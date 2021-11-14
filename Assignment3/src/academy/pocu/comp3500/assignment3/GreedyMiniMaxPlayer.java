@@ -9,16 +9,20 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
     private static final int MINI_MAX_DEPTH = 6;
 
     // DEPTH = 6;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 605069;
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 315269;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 0; // 605069;2686027
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 0; // 315269;233994
 
     private static int outMovesMaxSizeInGetCanMoves = 14;
+
+    // --
 
     private final EColor color;
 
     private final ScoreMove bestScratchScoreMove;
     private final MemoryPool<ScoreMove> scoreMoveMemoryPool;
     private final ManualMemoryPool<char[][]> boardMemoryPool;
+
+    // --
 
     public GreedyMiniMaxPlayer(final boolean isWhite, final int maxMoveTimeMilliseconds) {
         super(isWhite, maxMoveTimeMilliseconds);
@@ -35,6 +39,8 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
             throw new IllegalArgumentException("can not getDeclaredConstructor");
         }
     }
+
+    // --
 
     public void printMemoryPoolSize() {
         System.out.println("GreedyMiniMaxPlayer");
@@ -71,16 +77,13 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         return new Move(move.fromX(), move.fromY(), move.toX(), move.toY());
     }
 
+    // --
+
     private ScoreMove getBestMoveRecursive(final char[][] board, final EColor player, final EColor opponent, final EColor turn, final int turnCount, final int maxTurnCount) {
         assert (board.length == Chess.BOARD_SIZE);
         assert (board[0].length == Chess.BOARD_SIZE);
         assert (turnCount >= 1);
-
-        if (turnCount >= maxTurnCount) {
-            final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
-            newScoreMove.init(-1, -1, -1, -1, Chess.calculateBoardPoint(board, player));
-            return newScoreMove;
-        }
+        assert (turnCount <= maxTurnCount);
 
         if (Chess.hasWon(board, opponent)) {
             final ScoreMove newScoreMove = this.scoreMoveMemoryPool.getNext();
@@ -102,6 +105,19 @@ public final class GreedyMiniMaxPlayer extends PlayerBase {
         }
 
         for (final ScoreMove canMove : canMoveList) {
+            if (turnCount == maxTurnCount) {
+                final char tempToPiece = board[canMove.toY()][canMove.toX()];
+                board[canMove.toY()][canMove.toX()] = board[canMove.fromY()][canMove.fromX()];
+                board[canMove.fromY()][canMove.fromX()] = 0;
+
+                canMove.init(canMove.fromX(), canMove.fromY(), canMove.toX(), canMove.toY(), Chess.calculateBoardPoint(board, player));
+
+                board[canMove.fromY()][canMove.fromX()] = board[canMove.toY()][canMove.toX()];
+                board[canMove.toY()][canMove.toX()] = tempToPiece;
+
+                continue;
+            }
+
             final char[][] newBoard = this.getNextBoard();
             Chess.copyBoard(board, newBoard);
 

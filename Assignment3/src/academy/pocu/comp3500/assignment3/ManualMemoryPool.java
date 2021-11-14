@@ -6,9 +6,13 @@ public class ManualMemoryPool<T> {
     protected int nextIndex;
     protected final ArrayList<T> pool;
 
+    // --
+
     public ManualMemoryPool() {
         this.pool = new ArrayList<T>();
     }
+
+    // --
 
     public int poolSize() {
         return this.pool.size();
