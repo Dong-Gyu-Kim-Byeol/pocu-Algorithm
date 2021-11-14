@@ -6,11 +6,11 @@ import academy.pocu.comp3500.assignment3.chess.PlayerBase;
 import java.util.ArrayList;
 
 public final class GreedyMiniMaxPlayer extends PlayerBase {
-    private static final int MINI_MAX_DEPTH = 6;
+    private static final int MINI_MAX_DEPTH = 5;
 
-    // DEPTH = 6;
-    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 0; // 605069;2686027
-    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 0; // 315269;233994
+    // DEPTH = 5;
+    private static final int SCORE_MOVE_MEMORY_POOL_DEFAULT_SIZE = 315273;
+    private static final int BOARD_MEMORY_POOL_DEFAULT_SIZE = 25473;
 
     private static int outMovesMaxSizeInGetCanMoves = 14;
 
