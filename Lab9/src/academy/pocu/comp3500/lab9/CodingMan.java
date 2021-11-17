@@ -7,6 +7,22 @@ public final class CodingMan {
         Sort.radixSort(clips, VideoClip::getEndTime);
         Sort.radixSort(clips, VideoClip::getStartTime);
 
+        final int clipsSize;
+        {
+            int write = 0;
+            for (int i = 0; i < clips.length - 1; ++i) {
+                if (clips[i].getStartTime() != clips[i + 1].getStartTime()) {
+                    clips[write] = clips[i];
+                    ++write;
+                }
+            }
+
+            clips[write] = clips[clips.length - 1];
+            ++write;
+
+            clipsSize = write;
+        }
+
         int clipIndex = 0;
         int useCount = 0;
         int nowEndTime = 0;
@@ -16,7 +32,7 @@ public final class CodingMan {
                 return useCount;
             }
 
-            if (clipIndex >= clips.length) {
+            if (clipIndex >= clipsSize) {
                 return -1;
             }
 
@@ -24,17 +40,19 @@ public final class CodingMan {
                 return -1;
             }
 
+            while (true) {
+                if (++clipIndex >= clipsSize) {
+                    clipIndex = clipsSize - 1;
+                    break;
+                }
 
-            final int nowStartTime = clips[clipIndex].getStartTime();
-            while (nowStartTime == clips[clipIndex].getStartTime()) {
-                nowEndTime = clips[clipIndex].getEndTime();
-
-                ++clipIndex;
-                if (clipIndex >= clips.length) {
+                if (nowEndTime < clips[clipIndex].getStartTime()) {
+                    --clipIndex;
                     break;
                 }
             }
 
+            nowEndTime = clips[clipIndex++].getEndTime();
             ++useCount;
         }
     }
