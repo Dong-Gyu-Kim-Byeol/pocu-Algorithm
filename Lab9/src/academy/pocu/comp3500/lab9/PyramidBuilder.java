@@ -1,6 +1,11 @@
 package academy.pocu.comp3500.lab9;
 
 public final class PyramidBuilder {
+    private PyramidBuilder() {
+    }
+
+    // ---
+
     public static int findMaxHeight(final int[] widths, final int statue) {
         Sort.radixSort(widths);
 

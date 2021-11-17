@@ -3,6 +3,11 @@ package academy.pocu.comp3500.lab9;
 import academy.pocu.comp3500.lab9.data.Task;
 
 public final class ProfitCalculator {
+    private ProfitCalculator() {
+    }
+
+    // ---
+
     public static int findMaxProfit(final Task[] tasks, final int[] skillLevels) {
         Sort.radixSort(tasks, Task::getProfit);
 
