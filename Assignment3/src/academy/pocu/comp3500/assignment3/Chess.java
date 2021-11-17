@@ -76,7 +76,7 @@ public final class Chess {
 
         ScoreMove bestMove = moves.get(0);
         for (final ScoreMove scoreMove : moves) {
-            if ((scoreMove.score() == bestMove.score() && (Character.toLowerCase(scoreMove.piece()) == 'p' || Character.toLowerCase(bestMove.piece()) == 'k'))
+            if ((scoreMove.score() == bestMove.score() && Character.toLowerCase(scoreMove.piece()) == 'p')
                     || (scoreMove.score() > bestMove.score())) {
                 bestMove = scoreMove;
             }
@@ -89,10 +89,10 @@ public final class Chess {
         assert (!moves.isEmpty());
 
         ScoreMove bestMove = moves.get(0);
-        for (final ScoreMove move : moves) {
-            if ((move.score() == bestMove.score() && Character.toLowerCase(move.piece()) == 'p')
-                    || move.score() < bestMove.score()) {
-                bestMove = move;
+        for (final ScoreMove scoreMove : moves) {
+            if ((scoreMove.score() == bestMove.score() && Character.toLowerCase(scoreMove.piece()) == 'p')
+                    || scoreMove.score() < bestMove.score()) {
+                bestMove = scoreMove;
             }
         }
 

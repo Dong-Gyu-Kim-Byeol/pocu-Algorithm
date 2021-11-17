@@ -4,6 +4,14 @@ import academy.pocu.comp3500.lab9.data.VideoClip;
 
 public final class CodingMan {
     public static int findMinClipsCount(final VideoClip[] clips, final int time) {
+        if (time == 0) {
+            return 0;
+        }
+
+        if (clips.length == 0) {
+            return -1;
+        }
+
         Sort.radixSort(clips, VideoClip::getEndTime);
         Sort.radixSort(clips, VideoClip::getStartTime);
 
