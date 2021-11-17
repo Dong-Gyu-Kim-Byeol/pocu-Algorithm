@@ -9,11 +9,11 @@ public final class VideoClip {
         endTime = end;
     }
 
-    public int getStartTime() {
+    public final int getStartTime() {
         return startTime;
     }
 
-    public int getEndTime() {
+    public final int getEndTime() {
         return endTime;
     }
 }

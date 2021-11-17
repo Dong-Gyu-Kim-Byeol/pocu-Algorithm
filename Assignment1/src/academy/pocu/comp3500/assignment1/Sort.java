@@ -2,6 +2,7 @@ package academy.pocu.comp3500.assignment1;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.function.Function;
 
 public final class Sort {
     private Sort() {
@@ -18,65 +19,173 @@ public final class Sort {
         }
     }
 
-    public static void radixSort(final char[] array, int cycle) {
-        final ArrayList<ArrayList<Character>> scratch = new ArrayList<ArrayList<Character>>(10);
-        for (int i = 0; i < 10; ++i) {
-            scratch.add(new ArrayList<Character>(array.length));
-        }
+    public static void radixSort(final char[] array) {
+        final char[][] scratch = new char[10][array.length];
+        final int[] scratchSecondIndex = new int[10];
+
         int div = 1;
 
-        while (cycle > 0) {
+        while (true) {
+            boolean isEnd = true;
+
             for (final char c : array) {
-                final int scratchIndex = (c / div) % 10;
-                scratch.get(scratchIndex).add(c);
+                final int targetNum = c / div;
+                if (targetNum > 0) {
+                    isEnd = false;
+                }
+
+                final int firstIndex = targetNum % 10;
+                scratch[firstIndex][scratchSecondIndex[firstIndex]] = c;
+                ++scratchSecondIndex[firstIndex];
+            }
+
+            if (isEnd) {
+                return;
             }
 
             int arrayIndex = 0;
-            for (int i = 0; i < 10; ++i) {
-                final ArrayList<Character> subScratch = scratch.get(i);
-                for (final char c : subScratch) {
+            for (int firstIndex = 0; firstIndex < 10; ++firstIndex) {
+                final char[] subScratch = scratch[firstIndex];
+
+                for (int second = 0; second < scratchSecondIndex[firstIndex]; ++second) {
                     assert (arrayIndex < array.length);
-                    array[arrayIndex++] = c;
+                    array[arrayIndex++] = subScratch[second];
                 }
             }
 
             for (int i = 0; i < 10; ++i) {
-                scratch.get(i).clear();
+                scratchSecondIndex[i] = 0;
             }
 
             div *= 10;
-            --cycle;
         }
     }
 
-    public static void radixSort(final int[] array, int cycle) {
-        final ArrayList<ArrayList<Integer>> scratch = new ArrayList<ArrayList<Integer>>(10);
-        for (int i = 0; i < 10; ++i) {
-            scratch.add(new ArrayList<Integer>(array.length));
-        }
+    public static void radixSort(final int[] array) {
+        final int[][] scratch = new int[10][array.length];
+        final int[] scratchSecondIndex = new int[10];
+
         int div = 1;
 
-        while (cycle > 0) {
+        while (true) {
+            boolean isEnd = true;
+
             for (final int num : array) {
-                final int scratchIndex = (num / div) % 10;
-                scratch.get(scratchIndex).add(num);
+                final int targetNum = num / div;
+                if (targetNum > 0) {
+                    isEnd = false;
+                }
+
+                final int firstIndex = targetNum % 10;
+                scratch[firstIndex][scratchSecondIndex[firstIndex]] = num;
+                ++scratchSecondIndex[firstIndex];
+            }
+
+            if (isEnd) {
+                return;
             }
 
             int arrayIndex = 0;
-            for (int i = 0; i < 10; ++i) {
-                final ArrayList<Integer> subScratch = scratch.get(i);
-                for (final int num : subScratch) {
+            for (int firstIndex = 0; firstIndex < 10; ++firstIndex) {
+                final int[] subScratch = scratch[firstIndex];
+
+                for (int second = 0; second < scratchSecondIndex[firstIndex]; ++second) {
                     assert (arrayIndex < array.length);
-                    array[arrayIndex++] = num;
+                    array[arrayIndex++] = subScratch[second];
                 }
             }
 
             for (int i = 0; i < 10; ++i) {
-                scratch.get(i).clear();
+                scratchSecondIndex[i] = 0;
             }
 
             div *= 10;
-            --cycle;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> void radixSort(final T[] array, final Function<T, Integer> function) {
+        final T[][] scratch = (T[][]) new Object[10][array.length];
+        final int[] scratchSecondIndex = new int[10];
+
+        int div = 1;
+
+        while (true) {
+            boolean isEnd = true;
+
+            for (final T o : array) {
+                final int targetNum = function.apply(o) / div;
+                if (targetNum > 0) {
+                    isEnd = false;
+                }
+
+                final int firstIndex = targetNum % 10;
+                scratch[firstIndex][scratchSecondIndex[firstIndex]] = o;
+                ++scratchSecondIndex[firstIndex];
+            }
+
+            if (isEnd) {
+                return;
+            }
+
+            int arrayIndex = 0;
+            for (int firstIndex = 0; firstIndex < 10; ++firstIndex) {
+                final T[] subScratch = scratch[firstIndex];
+
+                for (int second = 0; second < scratchSecondIndex[firstIndex]; ++second) {
+                    assert (arrayIndex < array.length);
+                    array[arrayIndex++] = subScratch[second];
+                }
+            }
+
+            for (int i = 0; i < 10; ++i) {
+                scratchSecondIndex[i] = 0;
+            }
+
+            div *= 10;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> void radixSort(final ArrayList<T> array, final Function<T, Integer> function) {
+        final T[][] scratch = (T[][]) new Object[10][array.size()];
+        final int[] scratchSecondIndex = new int[10];
+
+        int div = 1;
+
+        while (true) {
+            boolean isEnd = true;
+
+            for (final T o : array) {
+                final int targetNum = function.apply(o) / div;
+                if (targetNum > 0) {
+                    isEnd = false;
+                }
+
+                final int firstIndex = targetNum % 10;
+                scratch[firstIndex][scratchSecondIndex[firstIndex]] = o;
+                ++scratchSecondIndex[firstIndex];
+            }
+
+            if (isEnd) {
+                return;
+            }
+
+            int arrayIndex = 0;
+            for (int firstIndex = 0; firstIndex < 10; ++firstIndex) {
+                final T[] subScratch = scratch[firstIndex];
+
+                for (int second = 0; second < scratchSecondIndex[firstIndex]; ++second) {
+                    assert (arrayIndex < scratch[0].length);
+                    array.set(arrayIndex++, subScratch[second]);
+                }
+            }
+
+            for (int i = 0; i < 10; ++i) {
+                scratchSecondIndex[i] = 0;
+            }
+
+            div *= 10;
         }
     }
 

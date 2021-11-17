@@ -9,11 +9,11 @@ public final class Task {
         this.profit = profit;
     }
 
-    public int getDifficulty() {
+    public final int getDifficulty() {
         return difficulty;
     }
 
-    public int getProfit() {
+    public final int getProfit() {
         return profit;
     }
 }
