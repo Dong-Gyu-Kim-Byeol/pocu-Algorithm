@@ -9,6 +9,8 @@ public final class CodingMan {
     // ---
 
     public static int findMinClipsCount(final VideoClip[] clips, final int time) {
+        assert (time > 0);
+
         if (clips.length == 0) {
             return -1;
         }
