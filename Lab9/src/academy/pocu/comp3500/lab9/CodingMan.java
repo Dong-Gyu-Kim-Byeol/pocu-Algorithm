@@ -4,64 +4,48 @@ import academy.pocu.comp3500.lab9.data.VideoClip;
 
 public final class CodingMan {
     public static int findMinClipsCount(final VideoClip[] clips, final int time) {
-        if (time == 0) {
-            return 0;
+        Sort.radixSort(clips, CodingMan::getInterval);
+        final int mid = clips.length / 2;
+        for (int i = 0; i < mid; ++i) {
+            Sort.swap(clips, i, clips.length - 1 - i);
         }
 
-        if (clips.length == 0) {
-            return -1;
-        }
+        final boolean[] isChecked = new boolean[time];
+        int checkCount = 0;
 
-        Sort.radixSort(clips, VideoClip::getEndTime);
-        Sort.radixSort(clips, VideoClip::getStartTime);
+        int useCount = 0;
 
-        final int clipsSize;
-        {
-            int write = 0;
-            for (int i = 0; i < clips.length - 1; ++i) {
-                if (clips[i].getStartTime() != clips[i + 1].getStartTime()) {
-                    clips[write] = clips[i];
-                    ++write;
+        for (final VideoClip clip : clips) {
+            final int min = clip.getStartTime();
+            final int max = Math.min(clip.getEndTime(), isChecked.length - 1);
+
+            boolean isUsed = false;
+
+            for (int i = min; i <= max; ++i) {
+                if (isChecked[i] == false) {
+                    isChecked[i] = true;
+
+                    ++checkCount;
+                    isUsed = true;
                 }
             }
 
-            clips[write] = clips[clips.length - 1];
-            ++write;
+            if (isUsed) {
+                ++useCount;
+            }
 
-            clipsSize = write;
-        }
-
-        int clipIndex = 0;
-        int useCount = 0;
-        int nowEndTime = 0;
-
-        while (true) {
-            if (nowEndTime >= time) {
+            if (checkCount == time) {
                 return useCount;
             }
-
-            if (clipIndex >= clipsSize) {
-                return -1;
-            }
-
-            if (nowEndTime < clips[clipIndex].getStartTime()) {
-                return -1;
-            }
-
-            while (true) {
-                if (++clipIndex >= clipsSize) {
-                    clipIndex = clipsSize - 1;
-                    break;
-                }
-
-                if (nowEndTime < clips[clipIndex].getStartTime()) {
-                    --clipIndex;
-                    break;
-                }
-            }
-
-            nowEndTime = clips[clipIndex++].getEndTime();
-            ++useCount;
         }
+
+        return -1;
     }
+
+    // ---
+
+    private static int getInterval(final VideoClip videoClip) {
+        return videoClip.getEndTime() - videoClip.getStartTime();
+    }
+
 }
