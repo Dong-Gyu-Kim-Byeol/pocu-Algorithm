@@ -43,7 +43,7 @@ public final class CodingMan {
             }
 
             if (clips[next].getEndTime() >= time) {
-                uncheckClip(isChecked, clips[next]);
+                uncheckClip(isChecked, clips[pre]);
 
                 checkCount = 0;
                 useCount = 0;
@@ -128,9 +128,4 @@ public final class CodingMan {
             isChecked[i] = false;
         }
     }
-
-    private static int getInterval(final VideoClip videoClip) {
-        return videoClip.getEndTime() - videoClip.getStartTime();
-    }
-
 }
