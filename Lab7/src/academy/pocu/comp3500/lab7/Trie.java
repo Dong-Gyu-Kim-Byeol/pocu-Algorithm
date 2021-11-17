@@ -108,7 +108,7 @@ public final class Trie {
         final HashMap<Character, Integer[]> accessArrayStartIndex = new HashMap<Character, Integer[]>(lowWord.length());
         {
             final char[] wordArray = lowWord.toCharArray();
-            Sort.radixSort(wordArray, 3);
+            Sort.radixSort(wordArray);
 
             for (int i = 0; i < lowWord.length(); ++i) {
                 if (accessArrayStartIndex.containsKey(wordArray[i]) == false) {
