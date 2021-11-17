@@ -147,6 +147,18 @@ public class PocuBasketballAssociation {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
 
+        // 안녕하세요. 조금 늦은 감이 있지만 과제1 에서 조금 더 논의되었으면 하는  부분이 있어서 알려드리려고 합니다.
+        // 과제 1의 findDreamTeam 을 해결하는 과정에서
+        // 'k명의 인원을 유지하되 k명중 pass 혹은 assist가 최소인 인원을 교체해가면서 답을 갱신' 하는 방법이 있었습니다.
+        // 이 때, k명의 팀(scratch 나 outPlayters)에서 최소 혹은 최대를 매번 for문으로 찾는 것이 아니라
+        // 배열을 힙으로 유지하는 방법이 있습니다. 
+        //
+        // 힙은 push, pop 연산이 O(log n), 최소(minheap인 경우) 혹은 최대값(maxheap인 경우)에 접근할 때 O(1)이 걸리게 됩니다.
+        // 그렇다면 시간복잡도 nk 의 부분이 nlogk 로 줄어들게 됩니다.
+        // 힙을 배열로 구현하는 것은 힙소트를 찾아보시면 도움이 되실 겁니다.
+        // (자바의 PriorityQueue 를 사용하는 것이 아닙니다)
+        // 도움이 되면 좋겠습니다.
+
         return findDreamTeamAssistSort(players, teamSize, outPlayers, scratch);
 //        return findDreamTeamPassSort(players, teamSize, outPlayers, scratch);
     }
