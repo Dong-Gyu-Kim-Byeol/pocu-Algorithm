@@ -71,6 +71,7 @@ public final class CodingMan {
     // ---
 
     private static int getNextMinStartTimeClipIndexOrMinusOne(final VideoClip[] clips, final int nowClipIndex) {
+        assert (nowClipIndex < clips.length);
 
         int minStartTimeClip = -1;
         int minStartTime = Integer.MAX_VALUE;
