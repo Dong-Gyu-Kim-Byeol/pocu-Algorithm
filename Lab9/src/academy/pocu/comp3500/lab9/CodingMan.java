@@ -37,7 +37,7 @@ public final class CodingMan {
         }
 
         while (true) {
-            final int next = getMaxCheckCountClipIndexOrMinusOne(isChecked, checkCount, clips, pre);
+            final int next = getNextMinStartTimeClipIndexOrMinusOne(clips, pre);
             if (next == -1) {
                 break;
             }
@@ -70,30 +70,19 @@ public final class CodingMan {
 
     // ---
 
-    private static int getMaxCheckCountClipIndexOrMinusOne(final boolean[] isChecked, final int nowCheckCount, final VideoClip[] clips, final int start) {
+    private static int getNextMinStartTimeClipIndexOrMinusOne(final VideoClip[] clips, final int nowClipIndex) {
 
-        int maxNewCheckCountClip = -1;
-        int maxNewCheckCount = Integer.MIN_VALUE;
+        int minStartTimeClip = -1;
+        int minStartTime = Integer.MAX_VALUE;
 
-        for (int i = start + 1; i < clips.length; ++i) {
-            if (clips[start].getStartTime() <= clips[i].getEndTime()) {
-                int newCheckCount = 0;
+        for (int i = nowClipIndex + 1; i < clips.length; ++i) {
+            if (clips[nowClipIndex].getStartTime() <= clips[i].getEndTime()) {
+                if (minStartTime > clips[i].getStartTime()) {
+                    minStartTime = clips[i].getStartTime();
+                    minStartTimeClip = i;
 
-                final int min = clips[i].getStartTime();
-                final int max = Math.min(clips[i].getEndTime(), isChecked.length - 1);
-
-                for (int k = min; k <= max; ++k) {
-                    if (isChecked[k] == false) {
-                        ++newCheckCount;
-                    }
-                }
-
-                if (maxNewCheckCount < newCheckCount) {
-                    maxNewCheckCount = newCheckCount;
-                    maxNewCheckCountClip = i;
-
-                    if (nowCheckCount + maxNewCheckCount == isChecked.length) {
-                        return maxNewCheckCountClip;
+                    if (minStartTime == 0) {
+                        return minStartTimeClip;
                     }
                 }
             } else {
@@ -101,7 +90,7 @@ public final class CodingMan {
             }
         }
 
-        return maxNewCheckCountClip;
+        return minStartTimeClip;
     }
 
     private static int checkClip(final boolean[] isChecked, final VideoClip videoClip) {
