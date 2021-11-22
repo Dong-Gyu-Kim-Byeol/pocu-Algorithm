@@ -1,14 +1,15 @@
 package academy.pocu.comp3500.lab7;
 
-public final class FixedStack<T> extends java.util.ArrayList<T> {
+public final class FixedStack<T> {
     private int size;
-    private final Object[] array;
+    private final T[] array;
 
+    @SuppressWarnings("unchecked")
     public FixedStack(final int capacity) {
-        this.array = new Object[capacity];
+        this.array = (T[]) new Object[capacity];
     }
 
-    public int size(){
+    public int size() {
         return this.size;
     }
 
@@ -16,12 +17,11 @@ public final class FixedStack<T> extends java.util.ArrayList<T> {
         return this.array.length;
     }
 
-    @SuppressWarnings("unchecked")
     public T peek() {
         assert (this.capacity() >= this.size);
         assert (this.size > 0);
 
-        return (T) this.array[this.size - 1];
+        return this.array[this.size - 1];
     }
 
     public void push(final T data) {
@@ -31,12 +31,11 @@ public final class FixedStack<T> extends java.util.ArrayList<T> {
         ++this.size;
     }
 
-    @SuppressWarnings("unchecked")
     public T pop() {
         assert (this.capacity() >= this.size);
         assert (this.size > 0);
 
-        final T data = (T) this.array[this.size - 1];
+        final T data = this.array[this.size - 1];
         this.array[this.size - 1] = null;
         --this.size;
 
