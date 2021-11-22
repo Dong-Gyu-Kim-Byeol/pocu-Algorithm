@@ -2,7 +2,7 @@ package academy.pocu.comp3500.assignment2.app;
 
 import academy.pocu.comp3500.assignment2.Indent;
 import academy.pocu.comp3500.assignment2.Logger;
-import academy.pocu.comp3500.assignment2.datastructure.Sort;
+import academy.pocu.comp3500.assignment2.datastructure.LogSort;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -69,7 +69,7 @@ public class Program {
 
             int[] nums = new int[]{30, 10, 80, 90, 50, 70, 40};
 
-            Sort.quickSort(nums);
+            LogSort.quickSort(nums);
 
             Logger.printTo(writer1);
 
