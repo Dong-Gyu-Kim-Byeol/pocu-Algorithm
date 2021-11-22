@@ -58,6 +58,7 @@ public final class Sort {
             }
 
             div *= 10;
+            assert (div > 0);
         }
     }
 
@@ -100,6 +101,7 @@ public final class Sort {
             }
 
             div *= 10;
+            assert (div > 0);
         }
     }
 
@@ -143,6 +145,7 @@ public final class Sort {
             }
 
             div *= 10;
+            assert (div > 0);
         }
     }
 
@@ -186,6 +189,7 @@ public final class Sort {
             }
 
             div *= 10;
+            assert (div > 0);
         }
     }
 
