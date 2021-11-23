@@ -8,6 +8,8 @@ public final class Sort {
     private Sort() {
     }
 
+    // ---
+
     public static <T> void bubbleSort(final T[] objects, final Comparator<T> comparator) {
         for (int i = 0; i < objects.length - 1; ++i) {
             for (int j = 0; j < objects.length - i - 1; ++j) {
@@ -213,6 +215,13 @@ public final class Sort {
         array[i2] = temp;
     }
 
+    public static <T> void reverse(final T[] objects) {
+        final int mid = objects.length / 2;
+        for (int i = 0; i < mid; ++i) {
+            academy.pocu.comp3500.lab9.Sort.swap(objects, i, objects.length - 1 - i);
+        }
+    }
+
     public static <T> void quickSortRecursive(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
         if (left >= right) {
             return;
@@ -283,7 +292,7 @@ public final class Sort {
         }
     }
 
-    private static <T> int chooseMedianPivotPos(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
+    public static <T> int chooseMedianPivotPos(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
         final int mid = (left + right) / 2;
 
         if ((comparator.compare(objects[mid], objects[left]) < 0 && comparator.compare(objects[left], objects[right]) < 0)
@@ -297,7 +306,7 @@ public final class Sort {
         }
     }
 
-    private static int chooseMedianPivotPos(final char[] array, final int left, final int right) {
+    public static int chooseMedianPivotPos(final char[] array, final int left, final int right) {
         final int mid = (left + right) / 2;
 
         if ((array[mid] < array[left] && array[left] < array[right])
@@ -311,7 +320,7 @@ public final class Sort {
         }
     }
 
-    private static <T> int partition(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
+    public static <T> int partition(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
         assert (left < right);
 
         int pivot = right;
@@ -331,7 +340,7 @@ public final class Sort {
         return pivot;
     }
 
-    private static int partition(final char[] array, final int left, final int right) {
+    public static int partition(final char[] array, final int left, final int right) {
         assert (left < right);
 
         int pivot = right;

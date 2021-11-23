@@ -16,24 +16,13 @@ public final class CodingMan {
         }
 
         Sort.radixSort(clips, VideoClip::getEndTime);
-        final int mid = clips.length / 2;
-        for (int i = 0; i < mid; ++i) {
-            Sort.swap(clips, i, clips.length - 1 - i);
-        }
+        Sort.reverse(clips);
 
-        final boolean[] isChecked = new boolean[time];
-        int checkCount = 0;
-
-        int useCount = 0;
+        int useCount = 1;
         int pre = 0;
 
-        {
-            checkCount += checkClip(isChecked, clips[pre]);
-            ++useCount;
-
-            if (checkCount == time) {
-                return useCount;
-            }
+        if (clips[pre].getStartTime() == 0) {
+            return useCount;
         }
 
         while (true) {
@@ -43,21 +32,12 @@ public final class CodingMan {
             }
 
             if (clips[next].getEndTime() >= time) {
-                uncheckClip(isChecked, clips[pre]);
-
-                checkCount = 0;
                 useCount = 0;
             }
 
-            final int addCount = checkClip(isChecked, clips[next]);
-            if (addCount == 0) {
-                break;
-            }
-
-            checkCount += addCount;
             ++useCount;
 
-            if (checkCount == time) {
+            if (clips[next].getStartTime() == 0) {
                 return useCount;
             }
 
@@ -92,30 +72,5 @@ public final class CodingMan {
         }
 
         return minStartTimeClip;
-    }
-
-    private static int checkClip(final boolean[] isChecked, final VideoClip videoClip) {
-        final int min = videoClip.getStartTime();
-        final int max = Math.min(videoClip.getEndTime(), isChecked.length - 1);
-
-        int checkCount = 0;
-
-        for (int i = min; i <= max; ++i) {
-            if (isChecked[i] == false) {
-                isChecked[i] = true;
-                ++checkCount;
-            }
-        }
-
-        return checkCount;
-    }
-
-    private static void uncheckClip(final boolean[] isChecked, final VideoClip videoClip) {
-        final int min = videoClip.getStartTime();
-        final int max = Math.min(videoClip.getEndTime(), isChecked.length - 1);
-
-        for (int i = min; i <= max; ++i) {
-            isChecked[i] = false;
-        }
     }
 }
