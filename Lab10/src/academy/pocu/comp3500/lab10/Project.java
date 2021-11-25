@@ -29,7 +29,7 @@ public class Project {
         final HashSet<GraphNode<T>> isDiscovered = new HashSet<>(graph.size());
         final LinkedList<GraphNode<T>> dfsPostOrderList = new LinkedList<>();
 
-        dfsPostOrder(graph, isDiscovered, dfsPostOrderList);
+        topologicalSortDfsPostOrder(graph, isDiscovered, dfsPostOrderList);
 
         // get scc with size > 1
         final HashSet<GraphNode<T>> skipNodes = new HashSet<>(dfsPostOrderList.size());
@@ -42,7 +42,7 @@ public class Project {
                     continue;
                 }
 
-                dfsPostOrderRecursive(node, isDiscovered, null, scc);
+                topologicalSortDfsPostOrderRecursive(node, isDiscovered, null, scc);
 
                 assert (scc.size() >= 1);
 
@@ -61,9 +61,9 @@ public class Project {
         isDiscovered.clear();
         dfsPostOrderList.clear();
         if (includeCycle) {
-            dfsPostOrderRecursive(startNode, isDiscovered, null, dfsPostOrderList);
+            topologicalSortDfsPostOrderRecursive(startNode, isDiscovered, null, dfsPostOrderList);
         } else {
-            dfsPostOrderRecursive(startNode, isDiscovered, skipNodes, dfsPostOrderList);
+            topologicalSortDfsPostOrderRecursive(startNode, isDiscovered, skipNodes, dfsPostOrderList);
         }
 
         final ArrayList<GraphNode<T>> outSortedArray = new ArrayList<>(dfsPostOrderList.size());
@@ -75,17 +75,17 @@ public class Project {
         return outSortedArray;
     }
 
-    public static <T> void dfsPostOrder(final ArrayList<GraphNode<T>> graph, final HashSet<GraphNode<T>> isDiscovered, final LinkedList<GraphNode<T>> outNodeList) {
+    public static <T> void topologicalSortDfsPostOrder(final ArrayList<GraphNode<T>> graph, final HashSet<GraphNode<T>> isDiscovered, final LinkedList<GraphNode<T>> outNodeList) {
         for (GraphNode<T> node : graph) {
             if (isDiscovered.contains(node)) {
                 continue;
             }
 
-            dfsPostOrderRecursive(node, isDiscovered, null, outNodeList);
+            topologicalSortDfsPostOrderRecursive(node, isDiscovered, null, outNodeList);
         }
     }
 
-    public static <T> void dfsPostOrderRecursive(final GraphNode<T> startNode, final HashSet<GraphNode<T>> isDiscovered, final HashSet<GraphNode<T>> skipNodesOrNull, final LinkedList<GraphNode<T>> outNodeList) {
+    public static <T> void topologicalSortDfsPostOrderRecursive(final GraphNode<T> startNode, final HashSet<GraphNode<T>> isDiscovered, final HashSet<GraphNode<T>> skipNodesOrNull, final LinkedList<GraphNode<T>> outNodeList) {
         isDiscovered.add(startNode);
 
         for (GraphNode<T> node : startNode.getNeighbors()) {
@@ -97,7 +97,33 @@ public class Project {
                 continue;
             }
 
-            dfsPostOrderRecursive(node, isDiscovered, skipNodesOrNull, outNodeList);
+            topologicalSortDfsPostOrderRecursive(node, isDiscovered, skipNodesOrNull, outNodeList);
+        }
+
+        outNodeList.add(startNode);
+    }
+
+    public static <T> void dfsPostOrder(final ArrayList<GraphNode<T>> graph, final LinkedList<GraphNode<T>> outNodeList) {
+        final HashSet<GraphNode<T>> isDiscovered = new HashSet<>(graph.size());
+
+        for (GraphNode<T> node : graph) {
+            if (isDiscovered.contains(node)) {
+                continue;
+            }
+
+            dfsPostOrderRecursive(node, isDiscovered, outNodeList);
+        }
+    }
+
+    public static <T> void dfsPostOrderRecursive(final GraphNode<T> startNode, final HashSet<GraphNode<T>> isDiscovered, final LinkedList<GraphNode<T>> outNodeList) {
+        isDiscovered.add(startNode);
+
+        for (GraphNode<T> node : startNode.getNeighbors()) {
+            if (isDiscovered.contains(node)) {
+                continue;
+            }
+
+            dfsPostOrderRecursive(node, isDiscovered, outNodeList);
         }
 
         outNodeList.add(startNode);
