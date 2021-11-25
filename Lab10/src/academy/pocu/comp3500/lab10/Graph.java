@@ -25,10 +25,10 @@ public class Graph {
         }
 
         for (final T data : graph) {
-            for (final T preTask : getNeighbors.apply(data)) {
-                assert (outTransposedGraph.containsKey(preTask));
+            for (final T neighbor : getNeighbors.apply(data)) {
+                assert (outTransposedGraph.containsKey(neighbor));
 
-                final GraphNode<T> transposedNode = outTransposedGraph.get(preTask);
+                final GraphNode<T> transposedNode = outTransposedGraph.get(neighbor);
                 transposedNode.addNeighbor(outTransposedGraph.get(data));
             }
         }
