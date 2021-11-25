@@ -1,7 +1,6 @@
 package academy.pocu.comp3500.lab3;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 
 public final class MissionControl {
     private MissionControl() {

@@ -7,6 +7,14 @@ public class Search {
     private Search() {
     }
 
+    public static void binarySearch(final int targetNum, final int[] nums, final ArrayList<Integer> outIndexes) {
+        binarySearchRecursive(targetNum, nums, false, 0, nums.length - 1, outIndexes);
+    }
+
+    public static void binarySearchReverse(final int targetNum, final int[] nums, final ArrayList<Integer> outIndexes) {
+        binarySearchRecursive(targetNum, nums, true, 0, nums.length - 1, outIndexes);
+    }
+
     public static void binarySearchRecursive(final int targetNum, final int[] nums, final boolean isReverse, final int left, final int right, final ArrayList<Integer> outIndexes) {
         if (left > right) {
             return;
@@ -26,7 +34,15 @@ public class Search {
         }
     }
 
-    public static <T> void binarySearchRecursive(final T target, final T[] objects, final Comparator<T> comparator, final int left, final int right, final ArrayList<Integer> outIndexes) {
+    public static <T> void binarySearch(final T target, final T[] objects, final Comparator<T> comparator, final ArrayList<Integer> outIndexes) {
+        binarySearchRecursive(target, objects, comparator, false, 0, objects.length - 1, outIndexes);
+    }
+
+    public static <T> void binarySearchReverse(final T target, final T[] objects, final Comparator<T> comparator, final ArrayList<Integer> outIndexes) {
+        binarySearchRecursive(target, objects, comparator, false, 0, objects.length - 1, outIndexes);
+    }
+
+    public static <T> void binarySearchRecursive(final T target, final T[] objects, final Comparator<T> comparator, final boolean isReverse, final int left, final int right, final ArrayList<Integer> outIndexes) {
         if (left > right) {
             return;
         }
@@ -39,10 +55,10 @@ public class Search {
             return;
         }
 
-        if (compare < 0) {
-            binarySearchRecursive(target, objects, comparator, left, mid - 1, outIndexes);
-        } else {
-            binarySearchRecursive(target, objects, comparator, mid + 1, right, outIndexes);
+        if (compare < 0 ^ isReverse) {
+            binarySearchRecursive(target, objects, comparator, isReverse, left, mid - 1, outIndexes);
+        } else { // objects[mid] < target ^ isReverse
+            binarySearchRecursive(target, objects, comparator, isReverse, mid + 1, right, outIndexes);
         }
     }
 }
