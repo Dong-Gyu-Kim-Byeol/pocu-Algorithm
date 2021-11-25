@@ -35,4 +35,8 @@ public final class Task {
     public int getEstimate() {
         return this.estimate;
     }
+
+    public String toString() {
+        return this.title;
+    }
 }

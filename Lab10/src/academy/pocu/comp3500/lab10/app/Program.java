@@ -9,6 +9,41 @@ public class Program {
 
     public static void main(String[] args) {
         {
+//            index                                   title    estimate            predecessors
+//            0    c1695778-b9ff-41fb-ad3d-7808f860de75           2
+//            1    6db24098-c4f3-4fca-9592-c9bbf9756382           4                       0
+//            2    d529c340-da51-4ceb-bf90-80f223752de1           3                       1
+//            3    2c542814-d2a6-434d-9007-b1af6bde7366           5                       2
+//            4    1c8ec1d0-8d5e-4ac6-aca9-947024437054           7
+//            5    ab29ac2d-4240-428f-bb46-312659375adb           2                    1, 4
+//            6    834e57e1-09dd-4650-b889-ac85e7eda35d           8                    3,;
+
+
+            Task t0 = new Task("A0", 2);
+            Task t1 = new Task("B1", 4);
+            Task t2 = new Task("C2", 3);
+            Task t3 = new Task("D3", 5);
+            Task t4 = new Task("E4", 7);
+            Task t5 = new Task("F5", 2);
+            Task t6 = new Task("G6", 8);
+
+            t1.addPredecessor(t0);
+            t2.addPredecessor(t1);
+            t3.addPredecessor(t2);
+
+            t5.addPredecessor(t1,t4);
+            t6.addPredecessor(t3);
+
+            Task[] tasks = new Task[]{
+                    t6, t5, t1, t0, t4, t3, t2,
+            };
+
+            List<String> schedule = Project.findSchedule(tasks, false);
+
+            assert (schedule.size() == 7);
+        }
+
+        {
             Task a = new Task("A", 15);
             Task b = new Task("B", 12);
             Task c = new Task("C", 11);
