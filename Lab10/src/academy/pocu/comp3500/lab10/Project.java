@@ -7,14 +7,15 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 public class Project {
     public static List<String> findSchedule(final Task[] tasks, final boolean includeMaintenance) {
-        final ArrayList<GraphNode<Task>> graph = new ArrayList<>(tasks.length);
+        final HashMap<Task, GraphNode<Task>> graph = new HashMap<>(tasks.length);
         getTransposedGraph(tasks, graph);
 
         // get sortedList
-        final ArrayList<GraphNode<Task>> sortedList = topologicalSort(graph, includeMaintenance);
+        final LinkedList<GraphNode<Task>> sortedList = topologicalSort(graph, tasks, Task::getPredecessors, includeMaintenance);
 
         final ArrayList<String> outSortedList = new ArrayList<>(sortedList.size());
         for (final GraphNode<Task> node : sortedList) {
@@ -25,30 +26,32 @@ public class Project {
         return outSortedList;
     }
 
-    public static <T> ArrayList<GraphNode<T>> topologicalSort(final ArrayList<GraphNode<T>> graph, final boolean includeCycle) {
+    public static <T> LinkedList<GraphNode<T>> topologicalSort(final HashMap<T, GraphNode<T>> graph, final T[] transposedGraph, final Function<T, List<T>> getTransposedGraphNeighbors, final boolean includeCycle) {
         final HashSet<GraphNode<T>> isDiscovered = new HashSet<>(graph.size());
-        final LinkedList<GraphNode<T>> dfsPostOrderList = new LinkedList<>();
+        final LinkedList<GraphNode<T>> outNodeList = new LinkedList<>();
 
-        topologicalSortDfsPostOrder(graph, isDiscovered, dfsPostOrderList);
+        topologicalSortDfsPostOrder(graph, isDiscovered, outNodeList);
 
         // get scc with size > 1
-        final HashSet<GraphNode<T>> skipNodes = new HashSet<>(dfsPostOrderList.size());
+        final HashSet<GraphNode<T>> skipNodes = new HashSet<>(outNodeList.size());
         {
-            isDiscovered.clear();
-            final LinkedList<GraphNode<T>> scc = new LinkedList<>();
+            final HashSet<T> tIsDiscovered = new HashSet<>(graph.size());
 
-            for (final GraphNode<T> node : dfsPostOrderList) {
+            isDiscovered.clear();
+            final LinkedList<T> scc = new LinkedList<>();
+
+            for (final GraphNode<T> node : outNodeList) {
                 if (isDiscovered.contains(node)) {
                     continue;
                 }
 
-                topologicalSortDfsPostOrderRecursive(node, isDiscovered, null, scc);
+                topologicalSortDfsPostOrderRecursive(node.getData(), getTransposedGraphNeighbors, tIsDiscovered, null, scc);
 
                 assert (scc.size() >= 1);
 
                 if (scc.size() > 1) {
-                    for (final GraphNode<T> skip : scc) {
-                        skipNodes.add(skip);
+                    for (final T skip : scc) {
+                        skipNodes.add(graph.get(skip));
                     }
                 }
 
@@ -57,26 +60,51 @@ public class Project {
         }
 
         // get sortedList
-        final GraphNode<T> startNode = dfsPostOrderList.getLast();
-        isDiscovered.clear();
-        dfsPostOrderList.clear();
-        if (includeCycle) {
-            topologicalSortDfsPostOrderRecursive(startNode, isDiscovered, null, dfsPostOrderList);
-        } else {
-            topologicalSortDfsPostOrderRecursive(startNode, isDiscovered, skipNodes, dfsPostOrderList);
+        {
+            final GraphNode<T> startNode = outNodeList.getFirst();
+            isDiscovered.clear();
+            outNodeList.clear();
+
+            if (includeCycle) {
+                topologicalSortDfsPostOrderRecursive(startNode, isDiscovered, null, outNodeList);
+            } else {
+                topologicalSortDfsPostOrderRecursive(startNode, isDiscovered, skipNodes, outNodeList);
+            }
         }
 
-        final ArrayList<GraphNode<T>> outSortedArray = new ArrayList<>(dfsPostOrderList.size());
-        while (!dfsPostOrderList.isEmpty()) {
-            outSortedArray.add(dfsPostOrderList.getLast());
-            dfsPostOrderList.removeLast();
-        }
-
-        return outSortedArray;
+        return outNodeList;
     }
 
-    public static <T> void topologicalSortDfsPostOrder(final ArrayList<GraphNode<T>> graph, final HashSet<GraphNode<T>> isDiscovered, final LinkedList<GraphNode<T>> outNodeList) {
-        for (GraphNode<T> node : graph) {
+    public static <T> void topologicalSortDfsPostOrder(final T[] graph, final Function<T, List<T>> getTransposedGraphNeighbors, final HashSet<T> isDiscovered, final LinkedList<T> outNodeList) {
+        for (T node : graph) {
+            if (isDiscovered.contains(node)) {
+                continue;
+            }
+
+            topologicalSortDfsPostOrderRecursive(node, getTransposedGraphNeighbors, isDiscovered, null, outNodeList);
+        }
+    }
+
+    public static <T> void topologicalSortDfsPostOrderRecursive(final T startNode, final Function<T, List<T>> getTransposedGraphNeighbors, final HashSet<T> isDiscovered, final HashSet<T> skipNodesOrNull, final LinkedList<T> outNodeList) {
+        isDiscovered.add(startNode);
+
+        for (final T node : getTransposedGraphNeighbors.apply(startNode)) {
+            if (skipNodesOrNull != null && skipNodesOrNull.contains(node)) {
+                continue;
+            }
+
+            if (isDiscovered.contains(node)) {
+                continue;
+            }
+
+            topologicalSortDfsPostOrderRecursive(node, getTransposedGraphNeighbors, isDiscovered, skipNodesOrNull, outNodeList);
+        }
+
+        outNodeList.addFirst(startNode);
+    }
+
+    public static <T> void topologicalSortDfsPostOrder(final HashMap<T, GraphNode<T>> graph, final HashSet<GraphNode<T>> isDiscovered, final LinkedList<GraphNode<T>> outNodeList) {
+        for (GraphNode<T> node : graph.values()) {
             if (isDiscovered.contains(node)) {
                 continue;
             }
@@ -100,7 +128,7 @@ public class Project {
             topologicalSortDfsPostOrderRecursive(node, isDiscovered, skipNodesOrNull, outNodeList);
         }
 
-        outNodeList.add(startNode);
+        outNodeList.addFirst(startNode);
     }
 
     public static <T> void dfsPostOrder(final ArrayList<GraphNode<T>> graph, final LinkedList<GraphNode<T>> outNodeList) {
@@ -129,24 +157,20 @@ public class Project {
         outNodeList.add(startNode);
     }
 
-    public static void getTransposedGraph(final Task[] tasks, final ArrayList<GraphNode<Task>> outTransposedGraph) {
+    public static void getTransposedGraph(final Task[] tasks, final HashMap<Task, GraphNode<Task>> outTransposedGraph) {
         assert (outTransposedGraph.isEmpty());
-
-        final HashMap<Task, GraphNode<Task>> transposedNodes = new HashMap<>(tasks.length);
 
         for (final Task task : tasks) {
             final GraphNode<Task> transposedNode = new GraphNode<>(task);
-            outTransposedGraph.add(transposedNode);
-
-            transposedNodes.put(task, transposedNode);
+            outTransposedGraph.put(task, transposedNode);
         }
 
         for (final Task task : tasks) {
             for (final Task preTask : task.getPredecessors()) {
-                assert (transposedNodes.containsKey(preTask));
+                assert (outTransposedGraph.containsKey(preTask));
 
-                final GraphNode<Task> transposedNode = transposedNodes.get(preTask);
-                transposedNode.addNeighbor(transposedNodes.get(task));
+                final GraphNode<Task> transposedNode = outTransposedGraph.get(preTask);
+                transposedNode.addNeighbor(outTransposedGraph.get(task));
             }
         }
     }
