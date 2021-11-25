@@ -15,6 +15,8 @@ public class Graph {
 
     // Transposed
     public static <T> HashMap<T, GraphNode<T>> getTransposedGraph(final T[] graph, final Function<T, List<T>> getNeighbors) {
+        // O(n) + O(ne)
+
         final HashMap<T, GraphNode<T>> outTransposedGraph = new HashMap<>(graph.length);
 
         for (final T data : graph) {
@@ -38,6 +40,8 @@ public class Graph {
 
     // search
     public static <T> void dfsPostOrder(final ArrayList<GraphNode<T>> graph, final LinkedList<GraphNode<T>> outNodeList) {
+        // O(n + e)
+
         final HashSet<GraphNode<T>> isDiscovered = new HashSet<>(graph.size());
 
         for (GraphNode<T> node : graph) {
@@ -67,6 +71,8 @@ public class Graph {
 
     // topological sort
     public static <T> LinkedList<GraphNode<T>> topologicalSort(final HashMap<T, GraphNode<T>> graph, final Function<T, List<T>> getTransposedNeighbors, final boolean includeCycle) {
+        // O(n + e) + O(n + e) + O(n + e)
+
         final LinkedList<GraphNode<T>> dfsPostOrderNodeReverseList = new LinkedList<>();
         topologicalSortDfsPostOrder(graph, null, dfsPostOrderNodeReverseList);
 
@@ -108,6 +114,8 @@ public class Graph {
     }
 
     public static <T> LinkedList<T> topologicalSort(final T[] graph, final Function<T, List<T>> getNeighbors, final HashMap<T, GraphNode<T>> transposedGraph, final boolean includeCycle) {
+        // O(n + e) + O(n + e) + O(n + e)
+
         final LinkedList<T> dfsPostOrderNodeReverseList = new LinkedList<>();
         topologicalSortDfsPostOrder(graph, getNeighbors, null, dfsPostOrderNodeReverseList);
 
@@ -151,6 +159,8 @@ public class Graph {
 
     // topological sort
     private static <T> void topologicalSortDfsPostOrder(final T[] graph, final Function<T, List<T>> getNeighbors, final HashSet<T> skipNodesOrNull, final LinkedList<T> outPostOrderNodeReverseList) {
+        // O(n + e)
+
         final HashSet<T> isDiscovered = new HashSet<>(graph.length);
 
         for (T node : graph) {
@@ -167,6 +177,8 @@ public class Graph {
     }
 
     private static <T> void topologicalSortDfsPostOrder(final List<T> graph, final Function<T, List<T>> getNeighbors, final HashSet<T> skipNodesOrNull, final LinkedList<T> outPostOrderNodeReverseList) {
+        // O(n + e)
+
         final HashSet<T> isDiscovered = new HashSet<>(graph.size());
 
         for (T node : graph) {
@@ -201,6 +213,8 @@ public class Graph {
     }
 
     private static <T> void topologicalSortDfsPostOrder(final HashMap<T, GraphNode<T>> graph, final HashSet<GraphNode<T>> skipNodesOrNull, final LinkedList<GraphNode<T>> outPostOrderNodeReverseList) {
+        // O(n + e)
+
         final HashSet<GraphNode<T>> isDiscovered = new HashSet<>(graph.size());
 
         for (GraphNode<T> node : graph.values()) {
@@ -217,6 +231,8 @@ public class Graph {
     }
 
     private static <T> void topologicalSortDfsPostOrder(final List<GraphNode<T>> graph, final HashSet<GraphNode<T>> skipNodesOrNull, final LinkedList<GraphNode<T>> outPostOrderNodeReverseList) {
+        // O(n + e)
+
         final HashSet<GraphNode<T>> isDiscovered = new HashSet<>(graph.size());
 
         for (GraphNode<T> node : graph) {

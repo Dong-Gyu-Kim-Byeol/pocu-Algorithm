@@ -9,6 +9,8 @@ import java.util.List;
 
 public class Project {
     public static List<String> findSchedule(final Task[] tasks, final boolean includeMaintenance) {
+        // O(n) + O(ne) + O(n + e) + O(n + e) + O(n + e) + O(n)
+
         // tasks == transposed graph
         final HashMap<Task, GraphNode<Task>> graph = Graph.getTransposedGraph(tasks, Task::getPredecessors);
 
