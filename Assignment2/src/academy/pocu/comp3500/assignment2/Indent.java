@@ -3,52 +3,45 @@ package academy.pocu.comp3500.assignment2;
 import academy.pocu.comp3500.assignment2.datastructure.ArrayList;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 
-public class Indent {
-    private ArrayList<Log> logs;
-    private final String indentChar;
+public final class Indent extends Log {
+    private static final String BASE_INDENT_SPACE = "  ";
 
-    // public
-    public void discard() {
-        this.logs = null;
-    }
+    // ---
+
+    private final ArrayList<Log> logs;
+
+    // ---
 
     // package
-    Indent(final char[] indentChar, final int indentCharCount) {
-        this.logs = new ArrayList<Log>();
-        this.indentChar = String.valueOf(indentChar, 0, indentCharCount);
+    Indent() {
+        this.logs = new ArrayList<>();
     }
 
-    void addLog(final Log log) {
+    // ---
+
+    public final void discard() {
+        this.logs.clear();
+    }
+
+    // ---
+
+    final void addLog(final Log log) {
         this.logs.add(log);
     }
 
-    void printTo(final BufferedWriter writer, final String filter) throws IOException {
-        if (this.logs == null) {
-            return;
-        }
-
+    final void printTo(final BufferedWriter writer, final String filter) {
         for (final Log log : this.logs) {
-            switch (log.getLogType()) {
-                case TEXT: {
-                    if (!log.getTextOrNull().contains(filter)) {
-                        continue;
-                    }
-
-                    writer.write(this.indentChar);
-                    writer.write(log.getTextOrNull());
-                    writer.write(System.lineSeparator());
-                    break;
-                }
-                case INDENT: {
-                    log.getIndentOrNull().printTo(writer, filter);
-                    break;
-                }
-                default:
-                    throw new IllegalArgumentException("unknown type");
-            }
+            log.printTo(writer, filter, "");
         }
     }
 
+    @Override
+    final void printTo(final BufferedWriter writer, final String filter, String indentSpace) {
+        indentSpace = indentSpace + BASE_INDENT_SPACE;
+
+        for (final Log log : this.logs) {
+            log.printTo(writer, filter, indentSpace);
+        }
+    }
 }
