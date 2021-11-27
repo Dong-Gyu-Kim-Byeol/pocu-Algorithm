@@ -39,12 +39,127 @@ public class Graph {
     // ---
 
     // search
+    // dfs
+    public static <T> void dfsGraph(final ArrayList<T> graph, final Function<T, List<T>> getNeighbors, final LinkedList<T> outNodeList, final boolean isOutReverse) {
+        // O(n + e)
+
+        final HashSet<T> isDiscovered = new HashSet<>();
+
+        for (final T node : graph) {
+            dfsNode(node, getNeighbors, isDiscovered, outNodeList, isOutReverse);
+        }
+    }
+
+    public static <T> void dfsNode(final T startNode, final Function<T, List<T>> getNeighbors, final HashSet<T> isDiscovered, final LinkedList<T> outNodeList, final boolean isOutReverse) {
+        final LinkedList<T> dfsStack = new LinkedList<>();
+
+        {
+            if (isDiscovered.contains(startNode)) {
+                return;
+            }
+
+            isDiscovered.add(startNode);
+            dfsStack.addLast(startNode);
+        }
+
+        while (!dfsStack.isEmpty()) {
+            final T node = dfsStack.getLast();
+            dfsStack.removeLast();
+
+            if (isOutReverse) {
+                outNodeList.addFirst(node);
+            } else {
+                outNodeList.add(node);
+            }
+
+            for (final T neighbor : getNeighbors.apply(node)) {
+                if (isDiscovered.contains(neighbor)) {
+                    continue;
+                }
+
+                isDiscovered.add(neighbor);
+                dfsStack.addLast(neighbor);
+            }
+        }
+    }
+
+    public static <T> void dfsNodeUntilFirstLeafNode(final T startNode, final Function<T, List<T>> getNeighbors, final HashSet<T> isDiscovered, final LinkedList<T> outNodeList, final boolean isOutReverse) {
+        final LinkedList<T> dfsStack = new LinkedList<>();
+
+        {
+            if (isDiscovered.contains(startNode)) {
+                return;
+            }
+
+            isDiscovered.add(startNode);
+            dfsStack.addLast(startNode);
+        }
+
+        while (!dfsStack.isEmpty()) {
+            final T node = dfsStack.getLast();
+            dfsStack.removeLast();
+
+            if (isOutReverse) {
+                outNodeList.addFirst(node);
+            } else {
+                outNodeList.add(node);
+            }
+
+            if (getNeighbors.apply(node).isEmpty()) {
+                break;
+            }
+
+            for (final T neighbor : getNeighbors.apply(node)) {
+                if (isDiscovered.contains(neighbor)) {
+                    continue;
+                }
+
+                isDiscovered.add(neighbor);
+                dfsStack.addLast(neighbor);
+                break;
+            }
+        }
+    }
+
+    public static <T> void dfsAllPathsNodeToLeafNode(final T startNode, final Function<T, List<T>> getNeighbors, final HashMap<T, GraphNode<T>> transposedGraph, final LinkedList<LinkedList<T>> outNodeLists) {
+        final HashSet<T> isDiscovered = new HashSet<>();
+        LinkedList<T> searchNodes = new LinkedList<>();
+
+        while (true) {
+            for (final T node : searchNodes) {
+                if (getNeighbors.apply(node).size() > 1) {
+                    int discoveredPredecessorCount = 0;
+                    for (final T predecessor : getNeighbors.apply(node)) {
+                        if (isDiscovered.contains(predecessor)) {
+                            ++discoveredPredecessorCount;
+                        }
+                    }
+
+                    if (discoveredPredecessorCount < getNeighbors.apply(node).size()) {
+                        isDiscovered.remove(node);
+                        for (final GraphNode<T> graphNode : transposedGraph.get(node).getNeighbors()) {
+                            isDiscovered.remove(graphNode.getData());
+                        }
+                    }
+                }
+            }
+            searchNodes = new LinkedList<>();
+            Graph.dfsNodeUntilFirstLeafNode(startNode, getNeighbors, isDiscovered, searchNodes, true);
+
+            if (searchNodes.isEmpty()) {
+                break;
+            }
+
+            outNodeLists.add(searchNodes);
+        }
+    }
+
     public static <T> void dfsPostOrder(final ArrayList<GraphNode<T>> graph, final LinkedList<GraphNode<T>> outNodeList) {
         // O(n + e)
 
         final HashSet<GraphNode<T>> isDiscovered = new HashSet<>(graph.size());
 
-        for (GraphNode<T> node : graph) {
+        for (final GraphNode<T> node : graph) {
             if (isDiscovered.contains(node)) {
                 continue;
             }
@@ -56,7 +171,7 @@ public class Graph {
     public static <T> void dfsPostOrderRecursive(final GraphNode<T> startNode, final HashSet<GraphNode<T>> isDiscovered, final LinkedList<GraphNode<T>> outNodeList) {
         isDiscovered.add(startNode);
 
-        for (GraphNode<T> node : startNode.getNeighbors()) {
+        for (final GraphNode<T> node : startNode.getNeighbors()) {
             if (isDiscovered.contains(node)) {
                 continue;
             }
@@ -67,6 +182,35 @@ public class Graph {
         outNodeList.add(startNode);
     }
 
+    public static <T> void dfsPostOrder(final ArrayList<T> graph, final Function<T, List<T>> getNeighbors, final LinkedList<T> outNodeList) {
+        // O(n + e)
+
+        final HashSet<T> isDiscovered = new HashSet<>(graph.size());
+
+        for (final T node : graph) {
+            if (isDiscovered.contains(node)) {
+                continue;
+            }
+
+            dfsPostOrderRecursive(node, getNeighbors, isDiscovered, outNodeList);
+        }
+    }
+
+    public static <T> void dfsPostOrderRecursive(final T startNode, final Function<T, List<T>> getNeighbors, final HashSet<T> isDiscovered, final LinkedList<T> outNodeList) {
+        isDiscovered.add(startNode);
+
+        for (final T node : getNeighbors.apply(startNode)) {
+            if (isDiscovered.contains(node)) {
+                continue;
+            }
+
+            dfsPostOrderRecursive(node, getNeighbors, isDiscovered, outNodeList);
+        }
+
+        outNodeList.add(startNode);
+    }
+
+    
     // ---
 
     // topological sort
