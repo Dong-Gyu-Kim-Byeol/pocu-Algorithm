@@ -1,4 +1,4 @@
-package academy.pocu.comp3500.lab3;
+package academy.pocu.comp3500.assignment1;
 
 import java.util.ArrayList;
 import java.util.Comparator;

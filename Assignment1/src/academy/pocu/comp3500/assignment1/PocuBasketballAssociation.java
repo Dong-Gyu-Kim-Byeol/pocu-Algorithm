@@ -9,6 +9,8 @@ public class PocuBasketballAssociation {
     private PocuBasketballAssociation() {
     }
 
+    // ---
+
     public static void processGameStats(final GameStat[] gameStats, final Player[] outPlayers) {
         Sort.quickSort(gameStats, Comparator.comparing(GameStat::getPlayerName));
 
@@ -55,83 +57,11 @@ public class PocuBasketballAssociation {
     }
 
     public static Player findPlayerPointsPerGame(final Player[] players, int targetPoints) {
-        int left = 0;
-        int right = players.length - 1;
-
-        int targetPlayerIndex = -1;
-        int minDifference = Integer.MAX_VALUE;
-
-        while (left <= right) {
-            final int mid = (left + right) / 2;
-
-            final int difference = Math.abs(players[mid].getPointsPerGame() - targetPoints);
-
-            if (difference == 0) {
-                minDifference = difference;
-                targetPlayerIndex = mid;
-
-                return players[targetPlayerIndex];
-            }
-
-            if (minDifference == difference) {
-                if (players[targetPlayerIndex].getPointsPerGame() < players[mid].getPointsPerGame()) {
-                    targetPlayerIndex = mid;
-                }
-            }
-
-            if (minDifference > difference) {
-                minDifference = difference;
-                targetPlayerIndex = mid;
-            }
-
-            if (targetPoints < players[mid].getPointsPerGame()) {
-                right = mid - 1;
-            } else { // players[mid].getPointsPerGame() < targetPoints
-                left = mid + 1;
-            }
-        }
-
-        return players[targetPlayerIndex];
+        return Search.binarySearchFindAndNear(targetPoints, players, Player::getPointsPerGame, false);
     }
 
     public static Player findPlayerShootingPercentage(final Player[] players, int targetShootingPercentage) {
-        int left = 0;
-        int right = players.length - 1;
-
-        int targetPlayerIndex = -1;
-        int minDifference = Integer.MAX_VALUE;
-
-        while (left <= right) {
-            final int mid = (left + right) / 2;
-
-            final int difference = Math.abs(players[mid].getShootingPercentage() - targetShootingPercentage);
-
-            if (difference == 0) {
-                minDifference = difference;
-                targetPlayerIndex = mid;
-
-                return players[targetPlayerIndex];
-            }
-
-            if (minDifference == difference) {
-                if (players[targetPlayerIndex].getShootingPercentage() < players[mid].getShootingPercentage()) {
-                    targetPlayerIndex = mid;
-                }
-            }
-
-            if (minDifference > difference) {
-                minDifference = difference;
-                targetPlayerIndex = mid;
-            }
-
-            if (targetShootingPercentage < players[mid].getShootingPercentage()) {
-                right = mid - 1;
-            } else { // players[mid].getShootingPercentage() < targetShootingPercentage
-                left = mid + 1;
-            }
-        }
-
-        return players[targetPlayerIndex];
+        return Search.binarySearchFindAndNear(targetShootingPercentage, players, Player::getShootingPercentage, false);
     }
 
     public static long find3ManDreamTeam(final Player[] players, final Player[] outPlayers, final Player[] scratch) {
@@ -149,7 +79,6 @@ public class PocuBasketballAssociation {
         return findDreamTeamAssistSort(players, k, outPlayers, scratch);
 //        return findDreamTeamPassSort(players, k, outPlayers, scratch);
     }
-
 
     public static int findDreamTeamSize(final Player[] players, final Player[] scratch) {
         if (players.length == 0) {
@@ -174,6 +103,8 @@ public class PocuBasketballAssociation {
         return dreamTeamworkTeamSize;
     }
 
+    // ---
+
     private static long findDreamTeamAssistSort(final Player[] players, final int teamSize, final Player[] outPlayers, final Player[] scratch) {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
@@ -192,15 +123,15 @@ public class PocuBasketballAssociation {
         }
         long dreamTeamwork = sumPass * players[teamSize - 1].getAssistsPerGame();
 
-        final Comparator<Player> scratchHeapComparator = Comparator.comparing(Player::getPassesPerGame);
-        HeapOperation.buildHeap(scratch, teamSize, true, scratchHeapComparator);
+        final Comparator<Player> scratchHeapPassComparator = Comparator.comparing(Player::getPassesPerGame);
+        HeapOperation.buildHeap(scratch, teamSize, true, scratchHeapPassComparator);
 
         for (int p = teamSize; p < players.length; ++p) {
             if (scratch[0].getPassesPerGame() < players[p].getPassesPerGame()) {
                 sumPass -= scratch[0].getPassesPerGame();
                 sumPass += players[p].getPassesPerGame();
 
-                HeapOperation.extractAndInsert(players[p], scratch, teamSize, true, scratchHeapComparator);
+                HeapOperation.extractAndInsert(players[p], scratch, teamSize, true, scratchHeapPassComparator);
             }
 
             final long tempTeamwork = sumPass * players[p].getAssistsPerGame();
@@ -215,7 +146,6 @@ public class PocuBasketballAssociation {
         return dreamTeamwork;
     }
 
-
     private static long findDreamTeamPassSort(final Player[] players, final int teamSize, final Player[] outPlayers, final Player[] scratch) {
         assert (players.length >= teamSize);
         assert (outPlayers.length >= teamSize);
@@ -227,33 +157,27 @@ public class PocuBasketballAssociation {
         Sort.quickSort(players, Comparator.comparing(Player::getPassesPerGame).reversed());
 
         long sumPass = 0;
-        int scratchMinAssistIndex = 0;
         for (int so = 0; so < teamSize; ++so) {
             scratch[so] = players[so];
             outPlayers[so] = players[so];
 
             sumPass += players[so].getPassesPerGame();
-
-            if (scratch[scratchMinAssistIndex].getAssistsPerGame() > scratch[so].getAssistsPerGame()) {
-                scratchMinAssistIndex = so;
-            }
         }
-        long dreamTeamwork = sumPass * scratch[scratchMinAssistIndex].getAssistsPerGame();
+
+        final Comparator<Player> scratchHeapAssistComparator = Comparator.comparing(Player::getAssistsPerGame);
+        HeapOperation.buildHeap(scratch, teamSize, true, scratchHeapAssistComparator);
+
+        long dreamTeamwork = sumPass * scratch[0].getAssistsPerGame();
 
         for (int p = teamSize; p < players.length; ++p) {
-            if (scratch[scratchMinAssistIndex].getAssistsPerGame() < players[p].getAssistsPerGame()) {
-                sumPass -= scratch[scratchMinAssistIndex].getPassesPerGame();
+            if (scratch[0].getAssistsPerGame() < players[p].getAssistsPerGame()) {
+                sumPass -= scratch[0].getPassesPerGame();
                 sumPass += players[p].getPassesPerGame();
 
-                scratch[scratchMinAssistIndex] = players[p];
-            }
-            for (int s = 0; s < teamSize; ++s) {
-                if (scratch[scratchMinAssistIndex].getAssistsPerGame() > scratch[s].getAssistsPerGame()) {
-                    scratchMinAssistIndex = s;
-                }
+                HeapOperation.extractAndInsert(players[p], scratch, teamSize, true, scratchHeapAssistComparator);
             }
 
-            final long tempTeamwork = sumPass * scratch[scratchMinAssistIndex].getAssistsPerGame();
+            final long tempTeamwork = sumPass * scratch[0].getAssistsPerGame();
             if (dreamTeamwork < tempTeamwork) {
                 dreamTeamwork = tempTeamwork;
                 for (int o = 0; o < teamSize; ++o) {

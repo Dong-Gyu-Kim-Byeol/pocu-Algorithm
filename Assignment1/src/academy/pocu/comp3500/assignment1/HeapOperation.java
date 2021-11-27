@@ -1,6 +1,5 @@
 package academy.pocu.comp3500.assignment1;
 
-import javax.naming.directory.InvalidSearchControlsException;
 import java.util.Comparator;
 
 public final class HeapOperation {
@@ -65,6 +64,7 @@ public final class HeapOperation {
 
         while (iChild > iStart) {
             final T child = array[iChild];
+
             final int iParent = iParent(iChild);
             assert (iParent >= 0);
             final T parent = array[iParent];
@@ -75,6 +75,7 @@ public final class HeapOperation {
             }
 
             if (compare < 0 ^ isMinHeap) {
+                assert (compare > 0 ^ !isMinHeap);
                 swap(array, iParent, iChild);
                 iChild = iParent;
             } else {
