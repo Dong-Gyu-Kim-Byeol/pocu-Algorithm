@@ -218,7 +218,7 @@ public final class Sort {
     public static <T> void reverse(final T[] objects) {
         final int mid = objects.length / 2;
         for (int i = 0; i < mid; ++i) {
-            academy.pocu.comp3500.lab9.Sort.swap(objects, i, objects.length - 1 - i);
+            swap(objects, i, objects.length - 1 - i);
         }
     }
 

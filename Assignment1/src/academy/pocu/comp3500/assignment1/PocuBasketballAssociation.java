@@ -31,7 +31,7 @@ public class PocuBasketballAssociation {
             assists += gameStats[i].getAssists();
             numPasses += gameStats[i].getNumPasses();
 
-            if (i == gameStats.length - 1 || gameStats[i + 1].getPlayerName().equals(playerName) == false) {
+            if (i == gameStats.length - 1 || !gameStats[i + 1].getPlayerName().equals(playerName)) {
                 outPlayers[playerIndex].setName(playerName);
                 outPlayers[playerIndex].setPointsPerGame(points / gameCount);
                 outPlayers[playerIndex].setAssistsPerGame(assists / gameCount);
@@ -55,14 +55,14 @@ public class PocuBasketballAssociation {
     }
 
     public static Player findPlayerPointsPerGame(final Player[] players, int targetPoints) {
-        int letf = 0;
+        int left = 0;
         int right = players.length - 1;
 
         int targetPlayerIndex = -1;
         int minDifference = Integer.MAX_VALUE;
 
-        while (letf <= right) {
-            final int mid = (letf + right) / 2;
+        while (left <= right) {
+            final int mid = (left + right) / 2;
 
             final int difference = Math.abs(players[mid].getPointsPerGame() - targetPoints);
 
@@ -87,7 +87,7 @@ public class PocuBasketballAssociation {
             if (targetPoints < players[mid].getPointsPerGame()) {
                 right = mid - 1;
             } else { // players[mid].getPointsPerGame() < targetPoints
-                letf = mid + 1;
+                left = mid + 1;
             }
         }
 
@@ -95,14 +95,14 @@ public class PocuBasketballAssociation {
     }
 
     public static Player findPlayerShootingPercentage(final Player[] players, int targetShootingPercentage) {
-        int letf = 0;
+        int left = 0;
         int right = players.length - 1;
 
         int targetPlayerIndex = -1;
         int minDifference = Integer.MAX_VALUE;
 
-        while (letf <= right) {
-            final int mid = (letf + right) / 2;
+        while (left <= right) {
+            final int mid = (left + right) / 2;
 
             final int difference = Math.abs(players[mid].getShootingPercentage() - targetShootingPercentage);
 
@@ -127,7 +127,7 @@ public class PocuBasketballAssociation {
             if (targetShootingPercentage < players[mid].getShootingPercentage()) {
                 right = mid - 1;
             } else { // players[mid].getShootingPercentage() < targetShootingPercentage
-                letf = mid + 1;
+                left = mid + 1;
             }
         }
 
@@ -142,25 +142,12 @@ public class PocuBasketballAssociation {
         return findDreamTeam(players, TEAM_SIZE, outPlayers, scratch);
     }
 
-    public static long findDreamTeam(final Player[] players, int k, final Player[] outPlayers, final Player[] scratch) {
-        final int teamSize = k;
-        assert (players.length >= teamSize);
-        assert (outPlayers.length >= teamSize);
+    public static long findDreamTeam(final Player[] players, final int k, final Player[] outPlayers, final Player[] scratch) {
+        assert (players.length >= k);
+        assert (outPlayers.length >= k);
 
-        // 안녕하세요. 조금 늦은 감이 있지만 과제1 에서 조금 더 논의되었으면 하는  부분이 있어서 알려드리려고 합니다.
-        // 과제 1의 findDreamTeam 을 해결하는 과정에서
-        // 'k명의 인원을 유지하되 k명중 pass 혹은 assist가 최소인 인원을 교체해가면서 답을 갱신' 하는 방법이 있었습니다.
-        // 이 때, k명의 팀(scratch 나 outPlayters)에서 최소 혹은 최대를 매번 for문으로 찾는 것이 아니라
-        // 배열을 힙으로 유지하는 방법이 있습니다. 
-        //
-        // 힙은 push, pop 연산이 O(log n), 최소(minheap인 경우) 혹은 최대값(maxheap인 경우)에 접근할 때 O(1)이 걸리게 됩니다.
-        // 그렇다면 시간복잡도 nk 의 부분이 nlogk 로 줄어들게 됩니다.
-        // 힙을 배열로 구현하는 것은 힙소트를 찾아보시면 도움이 되실 겁니다.
-        // (자바의 PriorityQueue 를 사용하는 것이 아닙니다)
-        // 도움이 되면 좋겠습니다.
-
-        return findDreamTeamAssistSort(players, teamSize, outPlayers, scratch);
-//        return findDreamTeamPassSort(players, teamSize, outPlayers, scratch);
+        return findDreamTeamAssistSort(players, k, outPlayers, scratch);
+//        return findDreamTeamPassSort(players, k, outPlayers, scratch);
     }
 
 
@@ -205,18 +192,15 @@ public class PocuBasketballAssociation {
         }
         long dreamTeamwork = sumPass * players[teamSize - 1].getAssistsPerGame();
 
-        int scratchMinPassIndex = 0;
+        final Comparator<Player> scratchHeapComparator = Comparator.comparing(Player::getPassesPerGame);
+        HeapOperation.buildHeap(scratch, teamSize, true, scratchHeapComparator);
+
         for (int p = teamSize; p < players.length; ++p) {
-            for (int s = 0; s < teamSize; ++s) {
-                if (scratch[scratchMinPassIndex].getPassesPerGame() > scratch[s].getPassesPerGame()) {
-                    scratchMinPassIndex = s;
-                }
-            }
-            if (scratch[scratchMinPassIndex].getPassesPerGame() < players[p].getPassesPerGame()) {
-                sumPass -= scratch[scratchMinPassIndex].getPassesPerGame();
+            if (scratch[0].getPassesPerGame() < players[p].getPassesPerGame()) {
+                sumPass -= scratch[0].getPassesPerGame();
                 sumPass += players[p].getPassesPerGame();
 
-                scratch[scratchMinPassIndex] = players[p];
+                HeapOperation.extractAndInsert(players[p], scratch, teamSize, true, scratchHeapComparator);
             }
 
             final long tempTeamwork = sumPass * players[p].getAssistsPerGame();
