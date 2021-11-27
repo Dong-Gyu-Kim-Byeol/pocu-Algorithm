@@ -1,7 +1,7 @@
 package academy.pocu.comp3500.assignment4;
 
 
-import java.util.HashSet;
+import academy.pocu.comp3500.assignment4.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class Graph {
                                     final boolean isOutReverse) {
         // O(n + e)
 
-        final HashSet<T> isDiscovered = new HashSet<>();
+        final HashSet<T> isDiscovered = new HashSet<>(graph.size());
 
         for (final T node : graph) {
             dfsNode(node, getNeighbors, isDiscovered, outNodeList, isOutReverse);
@@ -180,7 +180,7 @@ public class Graph {
                                                      final HashMap<T, GraphNode<T>> transposedGraph,
                                                      final LinkedList<LinkedList<T>> outNodeLists,
                                                      final boolean isOutReverse) {
-        final HashSet<T> isDiscovered = new HashSet<>();
+        final HashSet<T> isDiscovered = new HashSet<>(transposedGraph.size());
         LinkedList<T> searchNodes = new LinkedList<>();
 
         while (true) {
@@ -289,7 +289,7 @@ public class Graph {
                                     final LinkedList<T> outNodeList) {
         // O(n + e)
 
-        final HashSet<T> isDiscovered = new HashSet<>();
+        final HashSet<T> isDiscovered = new HashSet<>(graph.size());
 
         for (final T node : graph) {
             bfsNode(node, getNeighbors, isDiscovered, outNodeList);

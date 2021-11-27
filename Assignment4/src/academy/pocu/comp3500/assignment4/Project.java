@@ -2,18 +2,12 @@ package academy.pocu.comp3500.assignment4;
 
 import academy.pocu.comp3500.assignment4.project.Task;
 
-import javax.management.MBeanAttributeInfo;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 
 public final class Project {
     private final HashMap<String, Task> transposedGraphWithOutCycle;
     private final HashMap<Task, GraphNode<Task>> graph;
-
-    private final LinkedList<GraphNode<Task>> sortedWithoutCycle;
-//    private final LinkedList<GraphNode<Task>> sortedIncludeCycle;
 
     // ---
 
@@ -21,12 +15,10 @@ public final class Project {
         this.graph = Graph.getTransposedGraph(tasks, Task::getPredecessors);
 
         this.transposedGraphWithOutCycle = new HashMap<>();
-        this.sortedWithoutCycle = Graph.topologicalSort(this.graph, Task::getPredecessors, false);
-        for (final GraphNode<Task> node : this.sortedWithoutCycle) {
+        final LinkedList<GraphNode<Task>> sortedWithoutCycle = Graph.topologicalSort(this.graph, Task::getPredecessors, false);
+        for (final GraphNode<Task> node : sortedWithoutCycle) {
             this.transposedGraphWithOutCycle.put(node.getData().getTitle(), node.getData());
         }
-
-//        this.sortedIncludeCycle = Graph.topologicalSort(this.graph, Task::getPredecessors, true);
     }
 
     // ---
@@ -35,7 +27,7 @@ public final class Project {
         assert (this.transposedGraphWithOutCycle.containsKey(task));
         final Task taskNode = this.transposedGraphWithOutCycle.get(task);
 
-        final HashSet<Task> isDiscovered = new HashSet<>();
+        final HashSet<Task> isDiscovered = new HashSet<>(this.transposedGraphWithOutCycle.size());
         final LinkedList<Task> searchNodes = new LinkedList<>();
 //        Graph.bfsNode(taskNode, Task::getPredecessors, isDiscovered, searchNodes);
         Graph.dfsNode(taskNode, Task::getPredecessors, isDiscovered, searchNodes, true);
@@ -53,7 +45,6 @@ public final class Project {
         assert (this.transposedGraphWithOutCycle.containsKey(task));
         final Task taskNode = this.transposedGraphWithOutCycle.get(task);
 
-        final HashSet<Task> isDiscovered = new HashSet<>();
         final LinkedList<LinkedList<Task>> searchNodeLists = new LinkedList<>();
 
         int maxManMonths = 0;
