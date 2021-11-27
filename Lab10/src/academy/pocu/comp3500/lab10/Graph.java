@@ -210,7 +210,7 @@ public class Graph {
         outNodeList.add(startNode);
     }
 
-    
+
     // ---
 
     // topological sort
