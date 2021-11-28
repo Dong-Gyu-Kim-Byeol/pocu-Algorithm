@@ -7,15 +7,35 @@ import java.util.LinkedList;
 
 public final class Project {
     private final HashMap<String, Task> transposedGraphWithOutCycle;
+    private final HashMap<Task, Integer> taskIndex;
+
     private final HashMap<Task, GraphNode<Task>> graph;
+    private final HashMap<GraphNode<Task>, Integer> graphNodeIndex;
+
 
     // ---
 
     public Project(final Task[] tasks) {
         this.graph = Graph.getTransposedGraph(tasks, Task::getPredecessors);
 
+        {
+            this.graphNodeIndex = new HashMap<>(this.graph.size());
+            int i = 0;
+            for (final GraphNode<Task> graphNode : this.graph.values()) {
+                this.graphNodeIndex.put(graphNode, i++);
+            }
+        }
+
+        {
+            this.taskIndex = new HashMap<>(tasks.length);
+            int i = 0;
+            for (final Task task : tasks) {
+                this.taskIndex.put(task, i++);
+            }
+        }
+
         this.transposedGraphWithOutCycle = new HashMap<>();
-        final LinkedList<GraphNode<Task>> sortedWithoutCycle = Graph.topologicalSort(this.graph, Task::getPredecessors, false);
+        final LinkedList<GraphNode<Task>> sortedWithoutCycle = Graph.topologicalSort(this.graph, this.graphNodeIndex, Task::getPredecessors, this.taskIndex, false);
         for (final GraphNode<Task> node : sortedWithoutCycle) {
             this.transposedGraphWithOutCycle.put(node.getData().getTitle(), node.getData());
         }
@@ -27,10 +47,10 @@ public final class Project {
         assert (this.transposedGraphWithOutCycle.containsKey(task));
         final Task taskNode = this.transposedGraphWithOutCycle.get(task);
 
-        final HashSet<Task> isDiscovered = new HashSet<>(this.transposedGraphWithOutCycle.size());
+        final boolean[] isDiscovered = new boolean[this.graph.size()];
         final LinkedList<Task> searchNodes = new LinkedList<>();
 //        Graph.bfsNode(taskNode, Task::getPredecessors, isDiscovered, searchNodes);
-        Graph.dfsNode(taskNode, Task::getPredecessors, isDiscovered, searchNodes, true);
+        Graph.dfsNode(taskNode, Task::getPredecessors, this.taskIndex, isDiscovered, searchNodes, true);
 
         int manMonths = 0;
 
@@ -44,12 +64,12 @@ public final class Project {
     public final int findMinDuration(final String task) {
         assert (this.transposedGraphWithOutCycle.containsKey(task));
         final Task taskNode = this.transposedGraphWithOutCycle.get(task);
-
+        final HashMap<Task, Integer> isDiscoveredAndEstimate = new HashMap<>();
         final LinkedList<LinkedList<Task>> searchNodeLists = new LinkedList<>();
 
         int maxManMonths = 0;
 
-        Graph.dfsAllPathsNodeToLeafNode(taskNode, Task::getPredecessors, this.graph, searchNodeLists, true);
+        Graph.dfsAllPathsNodeToLeafNode(taskNode, Task::getPredecessors, this.graph, isDiscoveredAndEstimate, Task::getEstimate, searchNodeLists, true);
 
         for (final LinkedList<Task> searchNodeList : searchNodeLists) {
             int manMonths = 0;
