@@ -4,12 +4,16 @@ import academy.pocu.comp3500.assignment4.project.Task;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 
 public final class Project {
     private final Task[] tasks;
+    private final HashMap<Task, Integer> taskEstimateBackup;
+
     private final HashMap<Task, GraphNode<Task>> graph;
 
-    final LinkedList<GraphNode<Task>> sortedWithoutCycle;
+    final LinkedList<Task> tasksWithoutCycle;
+    final LinkedList<GraphNode<Task>> sortedGraphNodeWithoutCycle;
     private final HashMap<String, Task> taskMapWithOutCycle;
 
     private final HashMap<Task, Integer> taskIndex;
@@ -44,14 +48,21 @@ public final class Project {
         this.taskScc = new HashMap<>(tasks.length);
         this.graphNodeScc = new HashMap<>(tasks.length);
 
-        this.sortedWithoutCycle = topologicalSort(this.graphNodeScc);
+        this.sortedGraphNodeWithoutCycle = topologicalSort(this.graphNodeScc);
+        this.tasksWithoutCycle = new LinkedList<>();
         this.taskMapWithOutCycle = new HashMap<>(tasks.length);
-        for (final GraphNode<Task> node : sortedWithoutCycle) {
+        for (final GraphNode<Task> node : sortedGraphNodeWithoutCycle) {
+            this.tasksWithoutCycle.addLast(node.getData());
             this.taskMapWithOutCycle.put(node.getData().getTitle(), node.getData());
         }
 
         for (final GraphNode<Task> node : this.graphNodeScc.keySet()) {
             this.taskScc.put(node.getData(), true);
+        }
+
+        this.taskEstimateBackup = new HashMap<>(this.tasks.length);
+        for (final Task task : this.tasks) {
+            this.taskEstimateBackup.put(task, task.getEstimate());
         }
     }
 
@@ -77,54 +88,29 @@ public final class Project {
     public final int findMinDuration(final String task) {
         assert (this.taskMapWithOutCycle.containsKey(task));
         final Task taskNode = this.taskMapWithOutCycle.get(task);
-        final HashMap<Task, Integer> isDiscoveredAndEstimate = new HashMap<>();
-        final LinkedList<LinkedList<Task>> searchNodeLists = new LinkedList<>();
 
-        int maxManMonths = 0;
+        final LinkedList<WeightNode<Task>> sums = bfsNodeAllPathSumEstimate(taskNode);
 
-        bfsAllPathsNodeToLeafNode(taskNode, isDiscoveredAndEstimate, searchNodeLists);
-
-        for (final LinkedList<Task> searchNodeList : searchNodeLists) {
-            int manMonths = 0;
-            for (final Task node : searchNodeList) {
-                manMonths += node.getEstimate();
-            }
-
-            if (maxManMonths < manMonths) {
-                maxManMonths = manMonths;
-            }
+        int max = 0;
+        for (final WeightNode<Task> snm : sums) {
+            max = Math.max(max, snm.getWeight());
         }
 
-        return maxManMonths;
+        return max;
     }
 
     public final int findMaxBonusCount(final String task) {
-        assert (this.taskMapWithOutCycle.containsKey(task));
-        final Task taskNode = this.taskMapWithOutCycle.get(task);
+//        assert (this.taskMapWithOutCycle.containsKey(task));
+//        final Task taskNode = this.taskMapWithOutCycle.get(task);
+//
+//        final HashMap<Task, Integer> isDiscoveredAndEstimate = new HashMap<>();
+//        final LinkedList<TaskPrePath<GraphNode<Task>>> paths = new LinkedList<>();
+//
+//        if ( final Task t this.sortedGraphNodeWithoutCycle)
+//
+//        bfsAllPathsNodeToLeafNode(taskNode, isDiscoveredAndEstimate, paths);
 
-        final HashMap<Task, Integer> isDiscoveredAndEstimate = new HashMap<>();
-        final LinkedList<LinkedList<Task>> searchNodeLists = new LinkedList<>();
-
-        dfsAllPathsNodeToLeafNode(taskNode, isDiscoveredAndEstimate, searchNodeLists);
-
-        int sumPathMinManMonths = 0;
-
-        for (final LinkedList<Task> searchNodeList : searchNodeLists) {
-            int pathMinManMonths = searchNodeList.getFirst().getEstimate();
-            for (final Task node : searchNodeList) {
-                if (pathMinManMonths > node.getEstimate()) {
-                    pathMinManMonths = node.getEstimate();
-                }
-            }
-            for (final Task node : searchNodeList) {
-                final int estimate = isDiscoveredAndEstimate.get(node);
-                isDiscoveredAndEstimate.put(node, Math.max(0, estimate - pathMinManMonths));
-            }
-
-            sumPathMinManMonths += pathMinManMonths;
-        }
-
-        return sumPathMinManMonths;
+        return 0;
     }
 
     // ---
@@ -150,129 +136,6 @@ public final class Project {
         }
 
         return outTransposedGraph;
-    }
-
-
-    private void dfsNode(final Task startNode,
-                         final boolean[] isDiscovered,
-                         final LinkedList<Task> outNodeList) {
-        final LinkedList<Task> dfsStack = new LinkedList<>();
-
-        {
-            if (this.taskScc.containsKey(startNode)) {
-                return;
-            }
-
-            if (isDiscovered[this.taskIndex.get(startNode)]) {
-                return;
-            }
-
-            isDiscovered[this.taskIndex.get(startNode)] = true;
-            dfsStack.addLast(startNode);
-        }
-
-        while (!dfsStack.isEmpty()) {
-            final Task node = dfsStack.getLast();
-            dfsStack.removeLast();
-
-            outNodeList.addFirst(node);
-
-            for (final Task predecessor : node.getPredecessors()) {
-                if (this.taskScc.containsKey(predecessor)) {
-                    continue;
-                }
-
-                if (isDiscovered[this.taskIndex.get(predecessor)]) {
-                    continue;
-                }
-
-                isDiscovered[this.taskIndex.get(predecessor)] = true;
-                dfsStack.addLast(predecessor);
-            }
-        }
-    }
-
-    private void dfsNodeUntilFirstLeafNode(final Task startNode,
-                                           final HashMap<Task, Integer> isDiscoveredAndCapacity,
-                                           final LinkedList<Task> outNodeList) {
-        final LinkedList<Task> dfsStack = new LinkedList<>();
-
-        {
-            if (this.taskScc.containsKey(startNode)) {
-                return;
-            }
-
-            if (isDiscoveredAndCapacity.containsKey(startNode)) {
-                return;
-            }
-
-            isDiscoveredAndCapacity.put(startNode, startNode.getEstimate());
-            dfsStack.addLast(startNode);
-        }
-
-        while (!dfsStack.isEmpty()) {
-            final Task node = dfsStack.getLast();
-            dfsStack.removeLast();
-
-            outNodeList.addFirst(node);
-
-            if (node.getPredecessors().isEmpty()) {
-                break;
-            }
-
-            for (final Task predecessor : node.getPredecessors()) {
-                if (this.taskScc.containsKey(predecessor)) {
-                    continue;
-                }
-
-                if (isDiscoveredAndCapacity.containsKey(predecessor)) {
-                    continue;
-                }
-
-                isDiscoveredAndCapacity.put(predecessor, predecessor.getEstimate());
-                dfsStack.addLast(predecessor);
-                break;
-            }
-        }
-    }
-
-    private void dfsAllPathsNodeToLeafNode(final Task startNode,
-                                           final HashMap<Task, Integer> isDiscoveredAndCapacity,
-                                           final LinkedList<LinkedList<Task>> outNodeLists) {
-        LinkedList<Task> searchNodes = new LinkedList<>();
-
-        while (true) {
-            for (final Task node : searchNodes) {
-                if (node.getPredecessors().size() > 1) {
-                    int discoveredPredecessorCount = 0;
-                    for (final Task predecessor : node.getPredecessors()) {
-                        if (isDiscoveredAndCapacity.containsKey(predecessor)) {
-                            ++discoveredPredecessorCount;
-                            continue;
-                        }
-
-                        if (this.taskScc.containsKey(predecessor)) {
-                            ++discoveredPredecessorCount;
-                        }
-                    }
-
-                    if (discoveredPredecessorCount < node.getPredecessors().size()) {
-                        isDiscoveredAndCapacity.remove(node);
-                        for (final GraphNode<Task> graphNode : this.graph.get(node).getNeighbors()) {
-                            isDiscoveredAndCapacity.remove(graphNode.getData());
-                        }
-                    }
-                }
-            }
-            searchNodes = new LinkedList<>();
-            dfsNodeUntilFirstLeafNode(startNode, isDiscoveredAndCapacity, searchNodes);
-
-            if (searchNodes.isEmpty()) {
-                break;
-            }
-
-            outNodeLists.add(searchNodes);
-        }
     }
 
     // bfs
@@ -314,73 +177,68 @@ public final class Project {
         }
     }
 
-    private void bfsAllPathsNodeToLeafNode(final Task target,
-                                           final HashMap<Task, Integer> isDiscoveredAndCapacity,
-                                           final LinkedList<LinkedList<Task>> outNodeLists) {
+    private LinkedList<WeightNode<Task>> bfsNodeAllPathSumEstimate(final Task startNode) {
+        final LinkedList<WeightNode<Task>> bfsQueue = new LinkedList<>();
+        final LinkedList<WeightNode<Task>> outEndSumEstimate = new LinkedList<>();
 
-        final LinkedList<GraphPrePath<GraphNode<Task>>> paths = new LinkedList<>();
-        final LinkedList<GraphPrePath<GraphNode<Task>>> bfsQueue = new LinkedList<>();
+        {
+            assert (!this.taskScc.containsKey(startNode));
 
-        for (final GraphNode<Task> startNode : this.sortedWithoutCycle) {
+            bfsQueue.addLast(new WeightNode<>(startNode.getEstimate(), startNode));
+        }
 
-            {
-                if (this.taskScc.containsKey(startNode.getData())) {
-                    continue;
-                }
+        while (!bfsQueue.isEmpty()) {
+            final WeightNode<Task> node = bfsQueue.poll();
 
-//                if (isDiscoveredAndCapacity.containsKey(startNode)) {
-//                    return;
-//                }
-
-                if (startNode.getData().getPredecessors().size() != 0) {
-                    continue;
-                }
-
-                isDiscoveredAndCapacity.put(startNode.getData(), startNode.getData().getEstimate());
-                bfsQueue.addLast(new GraphPrePath<>(startNode, null));
+            if (node.getData().getPredecessors().size() == 0) {
+                outEndSumEstimate.add(node);
             }
 
-            while (!bfsQueue.isEmpty()) {
-                final GraphPrePath<GraphNode<Task>> now = bfsQueue.poll();
-                final GraphNode<Task> nowNode = now.getData();
-
-                if (target.equals(nowNode.getData())) {
-                    paths.add(now);
+            for (final Task predecessor : node.getData().getPredecessors()) {
+                if (this.taskScc.containsKey(predecessor)) {
                     continue;
                 }
 
-                for (final GraphNode<Task> neighborNode : nowNode.getNeighbors()) {
-                    if (this.taskScc.containsKey(neighborNode.getData())) {
-                        continue;
-                    }
-
-//                    if (isDiscovered[this.taskIndex.get(predecessor)]) {
-//                        continue;
-//                    }
-
-                    isDiscoveredAndCapacity.put(neighborNode.getData(), neighborNode.getData().getEstimate());
-                    bfsQueue.addLast(new GraphPrePath<>(neighborNode, now));
-                }
+                bfsQueue.addLast(new WeightNode<>(node.getWeight() + predecessor.getEstimate(), predecessor));
             }
         }
 
-        for (final GraphPrePath<GraphNode<Task>> graphPrePath : paths) {
-            final LinkedList<Task> list = new LinkedList<>();
-            outNodeLists.add(list);
-
-            GraphPrePath<GraphNode<Task>> nowNode = graphPrePath;
-
-            while (true) {
-                list.addFirst(nowNode.getData().getData());
-
-                if (nowNode.getPreOrNull() == null) {
-                    break;
-                }
-
-                nowNode = nowNode.getPreOrNull();
-            }
-        }
+        return outEndSumEstimate;
     }
+
+//    private void bfsPostRecursive(final Task startNode,
+//                                  final boolean[] isDiscovered) {
+//        final LinkedList<WeightNode<Task>> bfsFirstQueue = new LinkedList<>();
+//        final Stack<WeightNode<Task>> bfsSecondStack = new Stack<>();
+//
+//        {
+//            if (this.taskScc.containsKey(startNode)) {
+//                return;
+//            }
+//
+//            bfsFirstQueue.addLast(new WeightNode<Task>(startNode.getEstimate(), startNode, null));
+//        }
+//
+//        while (!bfsFirstQueue.isEmpty()) {
+//            final WeightNode<Task> now = bfsFirstQueue.poll();
+//
+//            final Task nowTask = now.getData();
+//
+//            for (final Task predecessor : nowTask.getPredecessors()) {
+//                if (this.taskScc.containsKey(predecessor)) {
+//                    continue;
+//                }
+//
+//                isDiscovered[this.taskIndex.get(predecessor)] = true;
+//                bfsFirstQueue.addLast(predecessor);
+//                bfsSecondStack.push();
+//            }
+//        }
+//
+//        while (!bfsSecondStack.isEmpty()) {
+//            final WeightNode<Task> now = bfsSecondStack.pop();
+//        }
+//    }
 
     // topological sort
     private LinkedList<GraphNode<Task>> topologicalSort(final HashMap<GraphNode<Task>, Boolean> outScc) {

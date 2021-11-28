@@ -7,7 +7,7 @@ import java.util.List;
 public final class Task {
     private final String title;
     private final ArrayList<Task> predecessors = new ArrayList<>(64);
-    private final int estimate;
+    private int estimate;
 
     public Task(final String title, final int estimate) {
         this.title = title;

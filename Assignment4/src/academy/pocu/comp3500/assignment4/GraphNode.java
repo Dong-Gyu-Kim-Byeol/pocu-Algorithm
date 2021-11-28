@@ -3,13 +3,17 @@ package academy.pocu.comp3500.assignment4;
 import java.util.LinkedList;
 
 public final class GraphNode<T> {
-    final private T data;
-    final private LinkedList<GraphNode<T>> neighbors;
+    private final T data;
+    private final LinkedList<GraphNode<T>> neighbors;
+
+    // ---
 
     public GraphNode(final T data) {
         this.data = data;
         this.neighbors = new LinkedList<>();
     }
+
+    // ---
 
     public final T getData() {
         return data;
