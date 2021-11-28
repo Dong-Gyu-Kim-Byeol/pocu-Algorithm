@@ -113,9 +113,14 @@ public final class Project {
         final int[] weights = new int[this.graph.size()];
 
 
-        this.removeGhostNode(ghostTask, ghostCombineNodes);
 
-        return -1;
+
+
+        {
+            this.removeGhostNode(ghostTask, ghostCombineNodes);
+
+            return -1;
+        }
     }
 
 
@@ -268,15 +273,15 @@ public final class Project {
     }
 
     // bfs
-    private void bfs(final HashMap<Task, Boolean> sccOrNull,
+    private void bfs(final HashMap<Task, Boolean> skipOrNull,
                          final DirectedGraphBackNode<Task> startNode,
                          final boolean[] isDiscovered,
                          final LinkedList<Task> outNodeList) {
         final LinkedList<DirectedGraphBackNode<Task>> bfsQueue = new LinkedList<>();
 
         {
-            if (sccOrNull != null) {
-                if (sccOrNull.containsKey(startNode.getData())) {
+            if (skipOrNull != null) {
+                if (skipOrNull.containsKey(startNode.getData())) {
                     return;
                 }
             }
@@ -295,8 +300,8 @@ public final class Project {
             outNodeList.addFirst(backNode.getData());
 
             for (final DirectedGraphBackNode<Task> preNode : backNode.getPreNodes()) {
-                if (sccOrNull != null) {
-                    if (sccOrNull.containsKey(preNode.getData())) {
+                if (skipOrNull != null) {
+                    if (skipOrNull.containsKey(preNode.getData())) {
                         continue;
                     }
                 }
@@ -311,15 +316,15 @@ public final class Project {
         }
     }
 
-    private void dfsPostOrderReverse(final HashMap<Task, Boolean> sccOrNull,
+    private void dfsPostOrderReverse(final HashMap<Task, Boolean> skipOrNull,
                                      final HashMap<Task, DirectedGraphNode<Task>> graph,
                                      final LinkedList<Task> outPostOrderNodeReverseList) {
         // O(n + e)
         final boolean[] isDiscovered = new boolean[graph.size()];
 
         for (final DirectedGraphNode<Task> node : graph.values()) {
-            if (sccOrNull != null) {
-                if (sccOrNull.containsKey(node.getData())) {
+            if (skipOrNull != null) {
+                if (skipOrNull.containsKey(node.getData())) {
                     continue;
                 }
             }
@@ -328,19 +333,19 @@ public final class Project {
                 continue;
             }
 
-            dfsPostOrderReverseRecursive(sccOrNull, node, isDiscovered, outPostOrderNodeReverseList);
+            dfsPostOrderReverseRecursive(skipOrNull, node, isDiscovered, outPostOrderNodeReverseList);
         }
     }
 
-    private void dfsPostOrderReverseRecursive(final HashMap<Task, Boolean> sccOrNull,
+    private void dfsPostOrderReverseRecursive(final HashMap<Task, Boolean> skipOrNull,
                                               final DirectedGraphNode<Task> startNode,
                                               final boolean[] isDiscovered,
                                               final LinkedList<Task> outPostOrderNodeReverseList) {
         isDiscovered[this.graphIndex.get(startNode)] = true;
 
         for (final DirectedGraphNode<Task> node : startNode.getNextNodes()) {
-            if (sccOrNull != null) {
-                if (sccOrNull.containsKey(node.getData())) {
+            if (skipOrNull != null) {
+                if (skipOrNull.containsKey(node.getData())) {
                     continue;
                 }
             }
@@ -349,21 +354,21 @@ public final class Project {
                 continue;
             }
 
-            dfsPostOrderReverseRecursive(sccOrNull, node, isDiscovered, outPostOrderNodeReverseList);
+            dfsPostOrderReverseRecursive(skipOrNull, node, isDiscovered, outPostOrderNodeReverseList);
         }
 
         outPostOrderNodeReverseList.addFirst(startNode.getData());
     }
 
-    private void dfsPostOrderReverseRecursive(final HashMap<Task, Boolean> sccOrNull,
+    private void dfsPostOrderReverseRecursive(final HashMap<Task, Boolean> skipOrNull,
                                               final DirectedGraphBackNode<Task> startNode,
                                               final boolean[] isDiscovered,
                                               final LinkedList<Task> outPostOrderNodeReverseList) {
         isDiscovered[this.backGraphIndex.get(startNode)] = true;
 
         for (final DirectedGraphBackNode<Task> node : startNode.getPreNodes()) {
-            if (sccOrNull != null) {
-                if (sccOrNull.containsKey(node.getData())) {
+            if (skipOrNull != null) {
+                if (skipOrNull.containsKey(node.getData())) {
                     continue;
                 }
             }
@@ -372,7 +377,7 @@ public final class Project {
                 continue;
             }
 
-            dfsPostOrderReverseRecursive(sccOrNull, node, isDiscovered, outPostOrderNodeReverseList);
+            dfsPostOrderReverseRecursive(skipOrNull, node, isDiscovered, outPostOrderNodeReverseList);
         }
 
         outPostOrderNodeReverseList.addFirst(startNode.getData());
@@ -414,11 +419,10 @@ public final class Project {
 
         // get sortedList
         final LinkedList<Task> outSortedList = new LinkedList<>();
-        final boolean[] isDiscovered = new boolean[this.graph.size()];
         if (includeScc) {
-            dfsPostOrderReverseRecursive(outScc, this.graph.get(dfsPostOrderNodeReverseList.getFirst()), isDiscovered, outSortedList);
+            dfsPostOrderReverse(outScc, this.graph, outSortedList);
         } else {
-            dfsPostOrderReverseRecursive(null, this.graph.get(dfsPostOrderNodeReverseList.getFirst()), isDiscovered, outSortedList);
+            dfsPostOrderReverse(null, this.graph, outSortedList);
         }
 
         return outSortedList;
