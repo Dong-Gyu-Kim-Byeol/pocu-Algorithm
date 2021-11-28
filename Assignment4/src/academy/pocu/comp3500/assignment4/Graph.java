@@ -44,11 +44,16 @@ public class Graph {
                                    final Function<T, List<T>> getNeighbors,
                                    final HashMap<T, Integer> graphIndex,
                                    final boolean[] isDiscovered,
+                                   final HashMap<T, Boolean> skipScc,
                                    final LinkedList<T> outNodeList,
                                    final boolean isOutReverse) {
         final LinkedList<T> dfsStack = new LinkedList<>();
 
         {
+            if (skipScc.containsKey(startNode)) {
+                return;
+            }
+
             if (isDiscovered[graphIndex.get(startNode)]) {
                 return;
             }
@@ -68,6 +73,10 @@ public class Graph {
             }
 
             for (final T neighbor : getNeighbors.apply(node)) {
+                if (skipScc.containsKey(neighbor)) {
+                    continue;
+                }
+
                 if (isDiscovered[graphIndex.get(neighbor)]) {
                     continue;
                 }
@@ -82,11 +91,16 @@ public class Graph {
                                                      final Function<T, List<T>> getNeighbors,
                                                      final HashMap<T, Integer> isDiscoveredAndCapacity,
                                                      final Function<T, Integer> getCapacity,
+                                                     final HashMap<T, Boolean> skipScc,
                                                      final LinkedList<T> outNodeList,
                                                      final boolean isOutReverse) {
         final LinkedList<T> dfsStack = new LinkedList<>();
 
         {
+            if (skipScc.containsKey(startNode)) {
+                return;
+            }
+
             if (isDiscoveredAndCapacity.containsKey(startNode)) {
                 return;
             }
@@ -110,6 +124,10 @@ public class Graph {
             }
 
             for (final T neighbor : getNeighbors.apply(node)) {
+                if (skipScc.containsKey(neighbor)) {
+                    continue;
+                }
+
                 if (isDiscoveredAndCapacity.containsKey(neighbor)) {
                     continue;
                 }
@@ -126,6 +144,7 @@ public class Graph {
                                                      final HashMap<T, GraphNode<T>> transposedGraph,
                                                      final HashMap<T, Integer> isDiscoveredAndCapacity,
                                                      final Function<T, Integer> getCapacity,
+                                                     final HashMap<T, Boolean> skipScc,
                                                      final LinkedList<LinkedList<T>> outNodeLists,
                                                      final boolean isOutReverse) {
         LinkedList<T> searchNodes = new LinkedList<>();
@@ -136,6 +155,11 @@ public class Graph {
                     int discoveredPredecessorCount = 0;
                     for (final T predecessor : getNeighbors.apply(node)) {
                         if (isDiscoveredAndCapacity.containsKey(predecessor)) {
+                            ++discoveredPredecessorCount;
+                            continue;
+                        }
+
+                        if (skipScc.containsKey(predecessor)) {
                             ++discoveredPredecessorCount;
                         }
                     }
@@ -149,7 +173,7 @@ public class Graph {
                 }
             }
             searchNodes = new LinkedList<>();
-            Graph.dfsNodeUntilFirstLeafNode(startNode, getNeighbors, isDiscoveredAndCapacity, getCapacity, searchNodes, isOutReverse);
+            Graph.dfsNodeUntilFirstLeafNode(startNode, getNeighbors, isDiscoveredAndCapacity, getCapacity, skipScc, searchNodes, isOutReverse);
 
             if (searchNodes.isEmpty()) {
                 break;
@@ -164,14 +188,14 @@ public class Graph {
                                                                final HashMap<GraphNode<T>, Integer> graphIndex,
                                                                final Function<T, List<T>> getTransposedNeighbors,
                                                                final HashMap<T, Integer> transposedIndex,
-                                                               final boolean includeCycle) {
+                                                               final boolean includeCycle,
+                                                               final HashMap<GraphNode<T>, Boolean> outScc) {
         // O(n + e) + O(n + e) + O(n + e)
 
         final LinkedList<GraphNode<T>> dfsPostOrderNodeReverseList = new LinkedList<>();
         topologicalSortDfsPostOrderGraph(graph, graphIndex, null, dfsPostOrderNodeReverseList);
 
         // get scc groups with size > 1
-        final HashMap<GraphNode<T>, Boolean> skipNodes = new HashMap<>(dfsPostOrderNodeReverseList.size());
         {
             final boolean[] tIsDiscovered = new boolean[graph.size()];
             final LinkedList<T> scc = new LinkedList<>();
@@ -187,7 +211,7 @@ public class Graph {
 
                 if (scc.size() > 1) {
                     for (final T skip : scc) {
-                        skipNodes.put(graph.get(skip), true);
+                        outScc.put(graph.get(skip), true);
                     }
                 }
 
@@ -200,7 +224,7 @@ public class Graph {
         if (includeCycle) {
             topologicalSortDfsPostOrderGraph(dfsPostOrderNodeReverseList, GraphNode<T>::getNeighbors, graphIndex, null, outSortedList);
         } else {
-            topologicalSortDfsPostOrderGraph(dfsPostOrderNodeReverseList, GraphNode<T>::getNeighbors, graphIndex, skipNodes, outSortedList);
+            topologicalSortDfsPostOrderGraph(dfsPostOrderNodeReverseList, GraphNode<T>::getNeighbors, graphIndex, outScc, outSortedList);
         }
 
 

@@ -9,13 +9,19 @@ public final class Project {
     private final HashMap<String, Task> transposedGraphWithOutCycle;
     private final HashMap<Task, Integer> taskIndex;
 
+    private final HashMap<Task, Boolean> taskScc;
+
     private final HashMap<Task, GraphNode<Task>> graph;
     private final HashMap<GraphNode<Task>, Integer> graphNodeIndex;
+
+    private final HashMap<GraphNode<Task>, Boolean> graphNodeScc;
 
 
     // ---
 
     public Project(final Task[] tasks) {
+        this.graphNodeScc = new HashMap<>(tasks.length);
+
         this.graph = Graph.getTransposedGraph(tasks, Task::getPredecessors);
 
         {
@@ -35,9 +41,14 @@ public final class Project {
         }
 
         this.transposedGraphWithOutCycle = new HashMap<>();
-        final LinkedList<GraphNode<Task>> sortedWithoutCycle = Graph.topologicalSort(this.graph, this.graphNodeIndex, Task::getPredecessors, this.taskIndex, false);
+        final LinkedList<GraphNode<Task>> sortedWithoutCycle = Graph.topologicalSort(this.graph, this.graphNodeIndex, Task::getPredecessors, this.taskIndex, false, this.graphNodeScc);
         for (final GraphNode<Task> node : sortedWithoutCycle) {
             this.transposedGraphWithOutCycle.put(node.getData().getTitle(), node.getData());
+        }
+
+        this.taskScc = new HashMap<>(tasks.length);
+        for (final GraphNode<Task> node : this.graphNodeScc.keySet()) {
+            this.taskScc.put(node.getData(), true);
         }
     }
 
@@ -49,8 +60,7 @@ public final class Project {
 
         final boolean[] isDiscovered = new boolean[this.graph.size()];
         final LinkedList<Task> searchNodes = new LinkedList<>();
-//        Graph.bfsNode(taskNode, Task::getPredecessors, isDiscovered, searchNodes);
-        Graph.dfsNode(taskNode, Task::getPredecessors, this.taskIndex, isDiscovered, searchNodes, true);
+        Graph.dfsNode(taskNode, Task::getPredecessors, this.taskIndex, isDiscovered, this.taskScc, searchNodes, true);
 
         int manMonths = 0;
 
@@ -69,7 +79,7 @@ public final class Project {
 
         int maxManMonths = 0;
 
-        Graph.dfsAllPathsNodeToLeafNode(taskNode, Task::getPredecessors, this.graph, isDiscoveredAndEstimate, Task::getEstimate, searchNodeLists, true);
+        Graph.dfsAllPathsNodeToLeafNode(taskNode, Task::getPredecessors, this.graph, isDiscoveredAndEstimate, Task::getEstimate, this.taskScc, searchNodeLists, true);
 
         for (final LinkedList<Task> searchNodeList : searchNodeLists) {
             int manMonths = 0;
@@ -92,7 +102,7 @@ public final class Project {
         final HashMap<Task, Integer> isDiscoveredAndEstimate = new HashMap<>();
         final LinkedList<LinkedList<Task>> searchNodeLists = new LinkedList<>();
 
-        Graph.dfsAllPathsNodeToLeafNode(taskNode, Task::getPredecessors, this.graph, isDiscoveredAndEstimate, Task::getEstimate, searchNodeLists, true);
+        Graph.dfsAllPathsNodeToLeafNode(taskNode, Task::getPredecessors, this.graph, isDiscoveredAndEstimate, Task::getEstimate, this.taskScc, searchNodeLists, true);
 
         int sumPathMinManMonths = 0;
 

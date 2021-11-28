@@ -49,6 +49,14 @@ public class Program {
         Task ms1 = new Task("ms1", 6);
         Task ms2 = new Task("ms2", 8);
 
+        Task ca = new Task("CA", 3);
+        Task cb = new Task("CB", 5);
+        Task cc = new Task("CC", 3);
+
+        ca.addPredecessor(ms1, cc);
+        cc.addPredecessor(cb);
+        cb.addPredecessor(ca);
+
         c.addPredecessor(b);
         d.addPredecessor(a);
 
@@ -72,7 +80,7 @@ public class Program {
         ms2.addPredecessor(o, p);
 
         Task[] tasks = new Task[]{
-                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2
+                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2, ca, cb, cc
         };
 
         return tasks;
