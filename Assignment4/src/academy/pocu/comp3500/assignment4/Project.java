@@ -113,9 +113,6 @@ public final class Project {
         final int[] weights = new int[this.graph.size()];
 
 
-
-
-
         {
             this.removeGhostNode(ghostTask, ghostCombineNodes);
 
@@ -274,9 +271,9 @@ public final class Project {
 
     // bfs
     private void bfs(final HashMap<Task, Boolean> skipOrNull,
-                         final DirectedGraphBackNode<Task> startNode,
-                         final boolean[] isDiscovered,
-                         final LinkedList<Task> outNodeList) {
+                     final DirectedGraphBackNode<Task> startNode,
+                     final boolean[] isDiscovered,
+                     final LinkedList<Task> outNodeList) {
         final LinkedList<DirectedGraphBackNode<Task>> bfsQueue = new LinkedList<>();
 
         {
