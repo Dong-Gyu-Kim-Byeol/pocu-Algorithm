@@ -8,61 +8,44 @@ import java.util.Stack;
 
 public final class Project {
     private final Task[] tasks;
-    private final HashMap<Task, Integer> taskEstimateBackup;
-
-    private final HashMap<Task, GraphNode<Task>> graph;
-
-    final LinkedList<Task> tasksWithoutCycle;
-    final LinkedList<GraphNode<Task>> sortedGraphNodeWithoutCycle;
     private final HashMap<String, Task> taskMapWithOutCycle;
-
-    private final HashMap<Task, Integer> taskIndex;
-    private final HashMap<GraphNode<Task>, Integer> graphNodeIndex;
-
     private final HashMap<Task, Boolean> taskScc;
-    private final HashMap<GraphNode<Task>, Boolean> graphNodeScc;
 
+    private final HashMap<Task, DirectedGraphNode<Task>> graph;
+    private final HashMap<DirectedGraphNode<Task>, Integer> graphIndex;
+
+    private final HashMap<Task, DirectedGraphBackNode<Task>> backGraph;
+    private final HashMap<DirectedGraphBackNode<Task>, Integer> backGraphIndex;
 
     // ---
 
     public Project(final Task[] tasks) {
         this.tasks = tasks;
-        this.graph = getTransposedGraph();
+        this.graph = getGraph();
+        this.backGraph = getBackGraph();
 
         {
-            this.taskIndex = new HashMap<>(tasks.length);
+            this.backGraphIndex = new HashMap<>(this.backGraph.size());
             int i = 0;
-            for (final Task task : tasks) {
-                this.taskIndex.put(task, i++);
+            for (final DirectedGraphBackNode<Task> backNode : this.backGraph.values()) {
+                this.backGraphIndex.put(backNode, i++);
             }
         }
 
         {
-            this.graphNodeIndex = new HashMap<>(this.graph.size());
+            this.graphIndex = new HashMap<>(this.graph.size());
             int i = 0;
-            for (final GraphNode<Task> graphNode : this.graph.values()) {
-                this.graphNodeIndex.put(graphNode, i++);
+            for (final DirectedGraphNode<Task> graphNode : this.graph.values()) {
+                this.graphIndex.put(graphNode, i++);
             }
         }
 
         this.taskScc = new HashMap<>(tasks.length);
-        this.graphNodeScc = new HashMap<>(tasks.length);
+        final LinkedList<Task> sortedWithoutCycle = topologicalSort(false, this.taskScc);
 
-        this.sortedGraphNodeWithoutCycle = topologicalSort(this.graphNodeScc);
-        this.tasksWithoutCycle = new LinkedList<>();
         this.taskMapWithOutCycle = new HashMap<>(tasks.length);
-        for (final GraphNode<Task> node : sortedGraphNodeWithoutCycle) {
-            this.tasksWithoutCycle.addLast(node.getData());
-            this.taskMapWithOutCycle.put(node.getData().getTitle(), node.getData());
-        }
-
-        for (final GraphNode<Task> node : this.graphNodeScc.keySet()) {
-            this.taskScc.put(node.getData(), true);
-        }
-
-        this.taskEstimateBackup = new HashMap<>(this.tasks.length);
-        for (final Task task : this.tasks) {
-            this.taskEstimateBackup.put(task, task.getEstimate());
+        for (final Task task : sortedWithoutCycle) {
+            this.taskMapWithOutCycle.put(task.getTitle(), task);
         }
     }
 
@@ -74,7 +57,7 @@ public final class Project {
 
         final boolean[] isDiscovered = new boolean[this.graph.size()];
         final LinkedList<Task> searchNodes = new LinkedList<>();
-        bfsNode(taskNode, isDiscovered, searchNodes);
+        bfs(this.taskScc, this.backGraph.get(taskNode), isDiscovered, searchNodes);
 
         int manMonths = 0;
 
@@ -89,10 +72,10 @@ public final class Project {
         assert (this.taskMapWithOutCycle.containsKey(task));
         final Task taskNode = this.taskMapWithOutCycle.get(task);
 
-        final LinkedList<WeightNode<Task>> sums = bfsNodeAllPathSumEstimate(taskNode);
+        final LinkedList<WeightNode<DirectedGraphBackNode<Task>>> sums = bfsBackNodeAllPathSumEstimate(this.backGraph.get(taskNode));
 
         int max = 0;
-        for (final WeightNode<Task> snm : sums) {
+        for (final WeightNode<DirectedGraphBackNode<Task>> snm : sums) {
             max = Math.max(max, snm.getWeight());
         }
 
@@ -103,210 +86,324 @@ public final class Project {
         assert (this.taskMapWithOutCycle.containsKey(task));
         final Task taskNode = this.taskMapWithOutCycle.get(task);
 
-        final boolean[] isDiscovered = new boolean[this.graph.size()];
-        final Stack<GraphNode<Task>> bfsPostOrderStack = getBfsPostOrderStack(taskNode, isDiscovered);
+        final LinkedList<Task> ghostCombineNodes;
+        final Task ghostTask;
+        {
+            final boolean[] isDiscovered = new boolean[this.graph.size()];
+            final LinkedList<Task> searchNodes = new LinkedList<>();
+            bfs(this.taskScc, this.backGraph.get(taskNode), isDiscovered, searchNodes);
 
-        while (!bfsPostOrderStack.isEmpty()) {
-            final GraphNode<Task> nowNode = bfsPostOrderStack.pop();
-
-            int sccCount = 0;
-
-            int preWeightSum = 0;
-            for (final Task pre : nowNode.getData().getPredecessors()) {
-                if (this.taskScc.containsKey(pre)) {
-                    ++sccCount;
-                    continue;
+            int leafCapacitySum = 0;
+            ghostCombineNodes = new LinkedList<>();
+            for (final Task node : searchNodes) {
+                if (node.getPredecessors().size() == 0) {
+                    ghostCombineNodes.add(node);
+                    leafCapacitySum += node.getEstimate();
                 }
-
-                final GraphNode<Task> preNode = this.graph.get(pre);
-                preWeightSum += preNode.getDataWeight();
             }
 
-            if (nowNode.getData().getPredecessors().size() == sccCount) {
-                preWeightSum = nowNode.getDataWeight();
-            }
+            ghostTask = new Task("ADD", leafCapacitySum);
 
-            int cnaUseWeight = Math.min(nowNode.getDataWeight(), preWeightSum);
-            nowNode.setDataWeight(cnaUseWeight);
-            assert (nowNode.getDataWeight() >= 0);
-
-            for (final Task pre : nowNode.getData().getPredecessors()) {
-                if (this.taskScc.containsKey(pre)) {
-                    continue;
-                }
-
-                final GraphNode<Task> preNode = this.graph.get(pre);
-                preNode.setDataWeight(Math.max(0, preNode.getDataWeight() - cnaUseWeight));
-                assert (preNode.getDataWeight() >= 0);
-            }
+            this.addGhostNode(ghostTask, ghostCombineNodes);
         }
 
-        final int maxBonusCount = this.graph.get(taskNode).getDataWeight();
+        final int BACK_WEIGHT_CAPACITY = 0;
 
-        graphNodeDataWeightRestore();
+        final int[] backWeights = new int[this.tasks.length];
+        final int[] weights = new int[this.graph.size()];
 
-        return maxBonusCount;
+
+        this.removeGhostNode(ghostTask, ghostCombineNodes);
+
+        return -1;
     }
+
 
     // ---
 
-    private void graphNodeDataWeightRestore() {
-        for (final Task task : this.tasks) {
-            final GraphNode<Task> node = this.graph.get(task);
-            node.setDataWeight(this.taskEstimateBackup.get(task));
-        }
-    }
+//    private void graphNodeDataWeightRestore() {
+//        for (final Task task : this.tasks) {
+//            final GraphNode<Task> node = this.graph.get(task);
+//            node.setDataWeight(this.taskEstimateBackup.get(task));
+//        }
+//    }
 
-    // Transposed
-    private HashMap<Task, GraphNode<Task>> getTransposedGraph() {
+    // create
+    private HashMap<Task, DirectedGraphNode<Task>> getGraph() {
         // O(n) + O(ne)
 
-        final HashMap<Task, GraphNode<Task>> outTransposedGraph = new HashMap<>(this.tasks.length);
+        final HashMap<Task, DirectedGraphNode<Task>> outGraph = new HashMap<>(this.tasks.length);
 
-        for (final Task data : this.tasks) {
-            final GraphNode<Task> transposedNode = new GraphNode<>(data);
-            transposedNode.setDataWeight(data.getEstimate());
-            outTransposedGraph.put(data, transposedNode);
+        for (final Task task : this.tasks) {
+            final DirectedGraphNode<Task> outNode = new DirectedGraphNode<>(task);
+            outGraph.put(task, outNode);
         }
 
-        for (final Task data : this.tasks) {
-            for (final Task neighbor : data.getPredecessors()) {
-                assert (outTransposedGraph.containsKey(neighbor));
+        for (final Task task : this.tasks) {
+            for (final Task preTask : task.getPredecessors()) {
+                assert (outGraph.containsKey(preTask));
 
-                final GraphNode<Task> transposedNode = outTransposedGraph.get(neighbor);
-                transposedNode.addNeighbor(outTransposedGraph.get(data));
+                final DirectedGraphNode<Task> outPreNode = outGraph.get(preTask);
+                outPreNode.addNext(outGraph.get(task));
             }
         }
 
-        return outTransposedGraph;
+        return outGraph;
     }
 
-    // bfs
-    private void bfsNode(final Task startNode,
-                         final boolean[] isDiscovered,
-                         final LinkedList<Task> outNodeList) {
-        final LinkedList<Task> bfsQueue = new LinkedList<>();
+    private HashMap<Task, DirectedGraphBackNode<Task>> getBackGraph() {
+        // O(n) + O(ne)
+
+        final HashMap<Task, DirectedGraphBackNode<Task>> outBackGraph = new HashMap<>(this.tasks.length);
+
+        for (final Task task : this.tasks) {
+            final DirectedGraphBackNode<Task> outBackNode = new DirectedGraphBackNode<>(task);
+            outBackGraph.put(task, outBackNode);
+        }
+
+        for (final Task task : this.tasks) {
+            final DirectedGraphBackNode<Task> outBackNode = outBackGraph.get(task);
+
+            for (final Task preTask : task.getPredecessors()) {
+                assert (outBackGraph.containsKey(preTask));
+
+                outBackNode.addPre(outBackGraph.get(preTask));
+            }
+        }
+
+        return outBackGraph;
+    }
+
+    private LinkedList<WeightNode<DirectedGraphBackNode<Task>>> bfsBackNodeAllPathSumEstimate(final DirectedGraphBackNode<Task> startNode) {
+        final LinkedList<WeightNode<DirectedGraphBackNode<Task>>> bfsQueue = new LinkedList<>();
+        final LinkedList<WeightNode<DirectedGraphBackNode<Task>>> outEndSumEstimate = new LinkedList<>();
 
         {
-            if (this.taskScc.containsKey(startNode)) {
-                return;
-            }
+            assert (!this.taskScc.containsKey(startNode.getData()));
 
-            if (isDiscovered[this.taskIndex.get(startNode)]) {
-                return;
-            }
-
-            isDiscovered[this.taskIndex.get(startNode)] = true;
-            bfsQueue.addLast(startNode);
+            bfsQueue.addLast(new WeightNode<>(startNode.getData().getEstimate(), startNode));
         }
 
         while (!bfsQueue.isEmpty()) {
-            final Task node = bfsQueue.poll();
+            final WeightNode<DirectedGraphBackNode<Task>> weightNode = bfsQueue.poll();
 
-            outNodeList.addFirst(node);
-
-            for (final Task predecessor : node.getPredecessors()) {
-                if (this.taskScc.containsKey(predecessor)) {
-                    continue;
-                }
-
-                if (isDiscovered[this.taskIndex.get(predecessor)]) {
-                    continue;
-                }
-
-                isDiscovered[this.taskIndex.get(predecessor)] = true;
-                bfsQueue.addLast(predecessor);
-            }
-        }
-    }
-
-    private LinkedList<WeightNode<Task>> bfsNodeAllPathSumEstimate(final Task startNode) {
-        final LinkedList<WeightNode<Task>> bfsQueue = new LinkedList<>();
-        final LinkedList<WeightNode<Task>> outEndSumEstimate = new LinkedList<>();
-
-        {
-            assert (!this.taskScc.containsKey(startNode));
-
-            bfsQueue.addLast(new WeightNode<>(startNode.getEstimate(), startNode));
-        }
-
-        while (!bfsQueue.isEmpty()) {
-            final WeightNode<Task> node = bfsQueue.poll();
-
-            if (node.getData().getPredecessors().size() == 0) {
-                outEndSumEstimate.add(node);
+            if (weightNode.getData().getPreNodes().size() == 0) {
+                outEndSumEstimate.add(weightNode);
             }
 
-            for (final Task predecessor : node.getData().getPredecessors()) {
-                if (this.taskScc.containsKey(predecessor)) {
+            for (final DirectedGraphBackNode<Task> preNode : weightNode.getData().getPreNodes()) {
+                if (this.taskScc.containsKey(preNode.getData())) {
                     continue;
                 }
 
-                bfsQueue.addLast(new WeightNode<>(node.getWeight() + predecessor.getEstimate(), predecessor));
+                bfsQueue.addLast(new WeightNode<>(weightNode.getWeight() + preNode.getData().getEstimate(), preNode));
             }
         }
 
         return outEndSumEstimate;
     }
 
-    private Stack<GraphNode<Task>> getBfsPostOrderStack(final Task startNode,
-                                                        final boolean[] isDiscovered) {
-        final LinkedList<Task> bfsFirstQueue = new LinkedList<>();
-        final Stack<GraphNode<Task>> bfsSecondStack = new Stack<>();
+    private Stack<DirectedGraphNode<Task>> getBfsPostOrderStack(final DirectedGraphBackNode<Task> startNode,
+                                                                final boolean[] isDiscovered) {
+        final LinkedList<DirectedGraphBackNode<Task>> bfsFirstQueue = new LinkedList<>();
+        final Stack<DirectedGraphNode<Task>> bfsSecondStack = new Stack<>();
 
         {
-            assert (!this.taskScc.containsKey(startNode));
+            assert (!this.taskScc.containsKey(startNode.getData()));
 
             bfsFirstQueue.addLast(startNode);
         }
 
         while (!bfsFirstQueue.isEmpty()) {
-            final Task now = bfsFirstQueue.poll();
+            final DirectedGraphBackNode<Task> now = bfsFirstQueue.poll();
 
-            final GraphNode<Task> graphNode = this.graph.get(now);
+            final DirectedGraphNode<Task> graphNode = this.graph.get(now.getData());
             bfsSecondStack.push(graphNode);
 
-            for (final Task predecessor : now.getPredecessors()) {
-                if (this.taskScc.containsKey(predecessor)) {
+            for (final DirectedGraphBackNode<Task> preNode : now.getPreNodes()) {
+                if (this.taskScc.containsKey(preNode.getData())) {
                     continue;
                 }
 
-                if (isDiscovered[this.taskIndex.get(predecessor)]) {
+                if (isDiscovered[this.backGraphIndex.get(preNode)]) {
                     continue;
                 }
 
-                isDiscovered[this.taskIndex.get(predecessor)] = true;
-                bfsFirstQueue.addLast(predecessor);
+                isDiscovered[this.backGraphIndex.get(preNode)] = true;
+                bfsFirstQueue.addLast(preNode);
             }
         }
 
         return bfsSecondStack;
     }
 
-    // topological sort
-    private LinkedList<GraphNode<Task>> topologicalSort(final HashMap<GraphNode<Task>, Boolean> outScc) {
-        // O(n + e) + O(n + e) + O(n + e)
+    // library
+    // ghost
+    private void addGhostNode(final Task ghostTask, final LinkedList<Task> predecessors) {
+        final DirectedGraphNode<Task> ghostNode = new DirectedGraphNode<>(ghostTask);
+        final DirectedGraphBackNode<Task> ghostBackNode = new DirectedGraphBackNode<>(ghostTask);
 
-        final LinkedList<GraphNode<Task>> dfsPostOrderNodeReverseList = new LinkedList<>();
-        topologicalSortDfsPostOrderGraph(dfsPostOrderNodeReverseList);
+        for (final Task preTask : predecessors) {
+            this.backGraph.get(preTask).addPre(ghostBackNode);
 
-        // get scc groups with size > 1
+            ghostNode.addNext(this.graph.get(preTask));
+        }
+
+        this.graph.put(ghostTask, ghostNode);
+        this.backGraph.put(ghostTask, ghostBackNode);
+    }
+
+    private void removeGhostNode(final Task ghostTask, final LinkedList<Task> predecessors) {
+        final DirectedGraphNode<Task> ghostNode = this.graph.get(ghostTask);
+        final DirectedGraphBackNode<Task> ghostBackNode = this.backGraph.get(ghostTask);
+
+        for (final Task preTask : predecessors) {
+            this.backGraph.get(preTask).removePre(ghostBackNode);
+
+//            ghostNode.removeNext(this.graph.get(preTask));
+        }
+
+        this.graph.remove(ghostTask);
+        this.backGraph.remove(ghostTask);
+    }
+
+    // bfs
+    private void bfs(final HashMap<Task, Boolean> sccOrNull,
+                         final DirectedGraphBackNode<Task> startNode,
+                         final boolean[] isDiscovered,
+                         final LinkedList<Task> outNodeList) {
+        final LinkedList<DirectedGraphBackNode<Task>> bfsQueue = new LinkedList<>();
+
         {
-            final boolean[] tIsDiscovered = new boolean[this.graph.size()];
-            final LinkedList<Task> scc = new LinkedList<>();
+            if (sccOrNull != null) {
+                if (sccOrNull.containsKey(startNode.getData())) {
+                    return;
+                }
+            }
 
-            for (final GraphNode<Task> node : dfsPostOrderNodeReverseList) {
-                if (tIsDiscovered[this.taskIndex.get(node.getData())]) {
+            if (isDiscovered[this.backGraphIndex.get(startNode)]) {
+                return;
+            }
+
+            isDiscovered[this.backGraphIndex.get(startNode)] = true;
+            bfsQueue.addLast(startNode);
+        }
+
+        while (!bfsQueue.isEmpty()) {
+            final DirectedGraphBackNode<Task> backNode = bfsQueue.poll();
+
+            outNodeList.addFirst(backNode.getData());
+
+            for (final DirectedGraphBackNode<Task> preNode : backNode.getPreNodes()) {
+                if (sccOrNull != null) {
+                    if (sccOrNull.containsKey(preNode.getData())) {
+                        continue;
+                    }
+                }
+
+                if (isDiscovered[this.backGraphIndex.get(preNode)]) {
                     continue;
                 }
 
-                topologicalSortDfsPostOrderNodeRecursive(node.getData(), tIsDiscovered, scc);
+                isDiscovered[this.backGraphIndex.get(preNode)] = true;
+                bfsQueue.addLast(preNode);
+            }
+        }
+    }
+
+    private void dfsPostOrderReverse(final HashMap<Task, Boolean> sccOrNull,
+                                     final HashMap<Task, DirectedGraphNode<Task>> graph,
+                                     final LinkedList<Task> outPostOrderNodeReverseList) {
+        // O(n + e)
+        final boolean[] isDiscovered = new boolean[graph.size()];
+
+        for (final DirectedGraphNode<Task> node : graph.values()) {
+            if (sccOrNull != null) {
+                if (sccOrNull.containsKey(node.getData())) {
+                    continue;
+                }
+            }
+
+            if (isDiscovered[this.graphIndex.get(node)]) {
+                continue;
+            }
+
+            dfsPostOrderReverseRecursive(sccOrNull, node, isDiscovered, outPostOrderNodeReverseList);
+        }
+    }
+
+    private void dfsPostOrderReverseRecursive(final HashMap<Task, Boolean> sccOrNull,
+                                              final DirectedGraphNode<Task> startNode,
+                                              final boolean[] isDiscovered,
+                                              final LinkedList<Task> outPostOrderNodeReverseList) {
+        isDiscovered[this.graphIndex.get(startNode)] = true;
+
+        for (final DirectedGraphNode<Task> node : startNode.getNextNodes()) {
+            if (sccOrNull != null) {
+                if (sccOrNull.containsKey(node.getData())) {
+                    continue;
+                }
+            }
+
+            if (isDiscovered[this.graphIndex.get(node)]) {
+                continue;
+            }
+
+            dfsPostOrderReverseRecursive(sccOrNull, node, isDiscovered, outPostOrderNodeReverseList);
+        }
+
+        outPostOrderNodeReverseList.addFirst(startNode.getData());
+    }
+
+    private void dfsPostOrderReverseRecursive(final HashMap<Task, Boolean> sccOrNull,
+                                              final DirectedGraphBackNode<Task> startNode,
+                                              final boolean[] isDiscovered,
+                                              final LinkedList<Task> outPostOrderNodeReverseList) {
+        isDiscovered[this.backGraphIndex.get(startNode)] = true;
+
+        for (final DirectedGraphBackNode<Task> node : startNode.getPreNodes()) {
+            if (sccOrNull != null) {
+                if (sccOrNull.containsKey(node.getData())) {
+                    continue;
+                }
+            }
+
+            if (isDiscovered[this.backGraphIndex.get(node)]) {
+                continue;
+            }
+
+            dfsPostOrderReverseRecursive(sccOrNull, node, isDiscovered, outPostOrderNodeReverseList);
+        }
+
+        outPostOrderNodeReverseList.addFirst(startNode.getData());
+    }
+
+    // topological sort
+    private LinkedList<Task> topologicalSort(final boolean includeScc, final HashMap<Task, Boolean> outScc) {
+        // O(n + e) + O(n + e) + O(n + e)
+
+        final LinkedList<Task> dfsPostOrderNodeReverseList = new LinkedList<>();
+        dfsPostOrderReverse(null, this.graph, dfsPostOrderNodeReverseList);
+
+        // get scc groups with size > 1
+        {
+            final boolean[] backIsDiscovered = new boolean[this.backGraph.size()];
+            final LinkedList<Task> scc = new LinkedList<>();
+
+            for (final Task task : dfsPostOrderNodeReverseList) {
+                final DirectedGraphBackNode<Task> backNode = this.backGraph.get(task);
+
+                if (backIsDiscovered[this.backGraphIndex.get(backNode)]) {
+                    continue;
+                }
+
+                dfsPostOrderReverseRecursive(null, backNode, backIsDiscovered, scc);
 
                 assert (scc.size() >= 1);
 
                 if (scc.size() > 1) {
                     for (final Task skip : scc) {
-                        outScc.put(this.graph.get(skip), true);
+                        outScc.put(skip, true);
                     }
                 }
 
@@ -314,89 +411,16 @@ public final class Project {
             }
         }
 
-        // get sortedList
-        final LinkedList<GraphNode<Task>> outSortedList = new LinkedList<>();
-        topologicalSortDfsPostOrderGraph(dfsPostOrderNodeReverseList, outSortedList);
 
+        // get sortedList
+        final LinkedList<Task> outSortedList = new LinkedList<>();
+        final boolean[] isDiscovered = new boolean[this.graph.size()];
+        if (includeScc) {
+            dfsPostOrderReverseRecursive(outScc, this.graph.get(dfsPostOrderNodeReverseList.getFirst()), isDiscovered, outSortedList);
+        } else {
+            dfsPostOrderReverseRecursive(null, this.graph.get(dfsPostOrderNodeReverseList.getFirst()), isDiscovered, outSortedList);
+        }
 
         return outSortedList;
-    }
-
-    // ---
-
-    // topological sort
-    private void topologicalSortDfsPostOrderNodeRecursive(final Task startNode,
-                                                          final boolean[] isDiscovered,
-                                                          final LinkedList<Task> outPostOrderNodeReverseList) {
-        isDiscovered[this.taskIndex.get(startNode)] = true;
-
-        for (final Task node : startNode.getPredecessors()) {
-            if (this.taskScc.containsKey(node)) {
-                continue;
-            }
-
-            if (isDiscovered[this.taskIndex.get(node)]) {
-                continue;
-            }
-
-            topologicalSortDfsPostOrderNodeRecursive(node, isDiscovered, outPostOrderNodeReverseList);
-        }
-
-        outPostOrderNodeReverseList.addFirst(startNode);
-    }
-
-    private void topologicalSortDfsPostOrderGraph(final LinkedList<GraphNode<Task>> outPostOrderNodeReverseList) {
-        // O(n + e)
-
-        final boolean[] isDiscovered = new boolean[this.graph.size()];
-
-        for (GraphNode<Task> node : this.graph.values()) {
-            if (this.graphNodeScc.containsKey(node)) {
-                continue;
-            }
-
-            if (isDiscovered[this.graphNodeIndex.get(node)]) {
-                continue;
-            }
-
-            topologicalSortDfsPostOrderNodeRecursive(node, isDiscovered, outPostOrderNodeReverseList);
-        }
-    }
-
-    private void topologicalSortDfsPostOrderGraph(final LinkedList<GraphNode<Task>> taskList, final LinkedList<GraphNode<Task>> outPostOrderNodeReverseList) {
-        // O(n + e)
-        final boolean[] isDiscovered = new boolean[taskList.size()];
-
-        for (final GraphNode<Task> node : taskList) {
-            if (this.graphNodeScc.containsKey(node)) {
-                continue;
-            }
-
-            if (isDiscovered[this.graphNodeIndex.get(node)]) {
-                continue;
-            }
-
-            topologicalSortDfsPostOrderNodeRecursive(node, isDiscovered, outPostOrderNodeReverseList);
-        }
-    }
-
-    private void topologicalSortDfsPostOrderNodeRecursive(final GraphNode<Task> startNode,
-                                                          final boolean[] isDiscovered,
-                                                          final LinkedList<GraphNode<Task>> outPostOrderNodeReverseList) {
-        isDiscovered[this.graphNodeIndex.get(startNode)] = true;
-
-        for (final GraphNode<Task> node : startNode.getNeighbors()) {
-            if (this.graphNodeScc.containsKey(node)) {
-                continue;
-            }
-
-            if (isDiscovered[this.graphNodeIndex.get(node)]) {
-                continue;
-            }
-
-            topologicalSortDfsPostOrderNodeRecursive(node, isDiscovered, outPostOrderNodeReverseList);
-        }
-
-        outPostOrderNodeReverseList.addFirst(startNode);
     }
 }

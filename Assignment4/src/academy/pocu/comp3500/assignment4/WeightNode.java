@@ -1,7 +1,7 @@
 package academy.pocu.comp3500.assignment4;
 
 public final class WeightNode<T> {
-    private int weight;
+    private final int weight;
     private final T data;
 
     // ---
@@ -13,12 +13,11 @@ public final class WeightNode<T> {
 
     // ---
 
-
-    public int getWeight() {
+    public final int getWeight() {
         return weight;
     }
 
-    public T getData() {
+    public final T getData() {
         return data;
     }
 }
