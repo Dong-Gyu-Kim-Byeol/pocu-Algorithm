@@ -100,20 +100,62 @@ public final class Project {
     }
 
     public final int findMaxBonusCount(final String task) {
-//        assert (this.taskMapWithOutCycle.containsKey(task));
-//        final Task taskNode = this.taskMapWithOutCycle.get(task);
-//
-//        final HashMap<Task, Integer> isDiscoveredAndEstimate = new HashMap<>();
-//        final LinkedList<TaskPrePath<GraphNode<Task>>> paths = new LinkedList<>();
-//
-//        if ( final Task t this.sortedGraphNodeWithoutCycle)
-//
-//        bfsAllPathsNodeToLeafNode(taskNode, isDiscoveredAndEstimate, paths);
+        assert (this.taskMapWithOutCycle.containsKey(task));
+        final Task taskNode = this.taskMapWithOutCycle.get(task);
 
-        return 0;
+        final boolean[] isDiscovered = new boolean[this.graph.size()];
+        final Stack<GraphNode<Task>> bfsPostOrderStack = getBfsPostOrderStack(taskNode, isDiscovered);
+
+        while (!bfsPostOrderStack.isEmpty()) {
+            final GraphNode<Task> nowNode = bfsPostOrderStack.pop();
+
+            int sccCount = 0;
+
+            int preWeightSum = 0;
+            for (final Task pre : nowNode.getData().getPredecessors()) {
+                if (this.taskScc.containsKey(pre)) {
+                    ++sccCount;
+                    continue;
+                }
+
+                final GraphNode<Task> preNode = this.graph.get(pre);
+                preWeightSum += preNode.getDataWeight();
+            }
+
+            if (nowNode.getData().getPredecessors().size() == sccCount) {
+                preWeightSum = nowNode.getDataWeight();
+            }
+
+            int cnaUseWeight = Math.min(nowNode.getDataWeight(), preWeightSum);
+            nowNode.setDataWeight(cnaUseWeight);
+            assert (nowNode.getDataWeight() >= 0);
+
+            for (final Task pre : nowNode.getData().getPredecessors()) {
+                if (this.taskScc.containsKey(pre)) {
+                    continue;
+                }
+
+                final GraphNode<Task> preNode = this.graph.get(pre);
+                preNode.setDataWeight(Math.max(0, preNode.getDataWeight() - cnaUseWeight));
+                assert (preNode.getDataWeight() >= 0);
+            }
+        }
+
+        final int maxBonusCount = this.graph.get(taskNode).getDataWeight();
+
+        graphNodeDataWeightRestore();
+
+        return maxBonusCount;
     }
 
     // ---
+
+    private void graphNodeDataWeightRestore() {
+        for (final Task task : this.tasks) {
+            final GraphNode<Task> node = this.graph.get(task);
+            node.setDataWeight(this.taskEstimateBackup.get(task));
+        }
+    }
 
     // Transposed
     private HashMap<Task, GraphNode<Task>> getTransposedGraph() {
@@ -123,6 +165,7 @@ public final class Project {
 
         for (final Task data : this.tasks) {
             final GraphNode<Task> transposedNode = new GraphNode<>(data);
+            transposedNode.setDataWeight(data.getEstimate());
             outTransposedGraph.put(data, transposedNode);
         }
 
@@ -206,39 +249,39 @@ public final class Project {
         return outEndSumEstimate;
     }
 
-//    private void bfsPostRecursive(final Task startNode,
-//                                  final boolean[] isDiscovered) {
-//        final LinkedList<WeightNode<Task>> bfsFirstQueue = new LinkedList<>();
-//        final Stack<WeightNode<Task>> bfsSecondStack = new Stack<>();
-//
-//        {
-//            if (this.taskScc.containsKey(startNode)) {
-//                return;
-//            }
-//
-//            bfsFirstQueue.addLast(new WeightNode<Task>(startNode.getEstimate(), startNode, null));
-//        }
-//
-//        while (!bfsFirstQueue.isEmpty()) {
-//            final WeightNode<Task> now = bfsFirstQueue.poll();
-//
-//            final Task nowTask = now.getData();
-//
-//            for (final Task predecessor : nowTask.getPredecessors()) {
-//                if (this.taskScc.containsKey(predecessor)) {
-//                    continue;
-//                }
-//
-//                isDiscovered[this.taskIndex.get(predecessor)] = true;
-//                bfsFirstQueue.addLast(predecessor);
-//                bfsSecondStack.push();
-//            }
-//        }
-//
-//        while (!bfsSecondStack.isEmpty()) {
-//            final WeightNode<Task> now = bfsSecondStack.pop();
-//        }
-//    }
+    private Stack<GraphNode<Task>> getBfsPostOrderStack(final Task startNode,
+                                                        final boolean[] isDiscovered) {
+        final LinkedList<Task> bfsFirstQueue = new LinkedList<>();
+        final Stack<GraphNode<Task>> bfsSecondStack = new Stack<>();
+
+        {
+            assert (!this.taskScc.containsKey(startNode));
+
+            bfsFirstQueue.addLast(startNode);
+        }
+
+        while (!bfsFirstQueue.isEmpty()) {
+            final Task now = bfsFirstQueue.poll();
+
+            final GraphNode<Task> graphNode = this.graph.get(now);
+            bfsSecondStack.push(graphNode);
+
+            for (final Task predecessor : now.getPredecessors()) {
+                if (this.taskScc.containsKey(predecessor)) {
+                    continue;
+                }
+
+                if (isDiscovered[this.taskIndex.get(predecessor)]) {
+                    continue;
+                }
+
+                isDiscovered[this.taskIndex.get(predecessor)] = true;
+                bfsFirstQueue.addLast(predecessor);
+            }
+        }
+
+        return bfsSecondStack;
+    }
 
     // topological sort
     private LinkedList<GraphNode<Task>> topologicalSort(final HashMap<GraphNode<Task>, Boolean> outScc) {
