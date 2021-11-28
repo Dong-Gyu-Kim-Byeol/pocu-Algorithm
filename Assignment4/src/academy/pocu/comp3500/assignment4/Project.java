@@ -7,8 +7,10 @@ import java.util.LinkedList;
 
 public final class Project {
     private final Task[] tasks;
-    private final HashMap<String, Task> tasksWithOutCycle;
     private final HashMap<Task, GraphNode<Task>> graph;
+
+    final LinkedList<GraphNode<Task>> sortedWithoutCycle;
+    private final HashMap<String, Task> taskMapWithOutCycle;
 
     private final HashMap<Task, Integer> taskIndex;
     private final HashMap<GraphNode<Task>, Integer> graphNodeIndex;
@@ -21,7 +23,6 @@ public final class Project {
 
     public Project(final Task[] tasks) {
         this.tasks = tasks;
-        this.tasksWithOutCycle = new HashMap<>(tasks.length);
         this.graph = getTransposedGraph();
 
         {
@@ -43,9 +44,10 @@ public final class Project {
         this.taskScc = new HashMap<>(tasks.length);
         this.graphNodeScc = new HashMap<>(tasks.length);
 
-        final LinkedList<GraphNode<Task>> sortedWithoutCycle = topologicalSort(false, this.graphNodeScc);
+        this.sortedWithoutCycle = topologicalSort(this.graphNodeScc);
+        this.taskMapWithOutCycle = new HashMap<>(tasks.length);
         for (final GraphNode<Task> node : sortedWithoutCycle) {
-            this.tasksWithOutCycle.put(node.getData().getTitle(), node.getData());
+            this.taskMapWithOutCycle.put(node.getData().getTitle(), node.getData());
         }
 
         for (final GraphNode<Task> node : this.graphNodeScc.keySet()) {
@@ -56,12 +58,12 @@ public final class Project {
     // ---
 
     public final int findTotalManMonths(final String task) {
-        assert (this.tasksWithOutCycle.containsKey(task));
-        final Task taskNode = this.tasksWithOutCycle.get(task);
+        assert (this.taskMapWithOutCycle.containsKey(task));
+        final Task taskNode = this.taskMapWithOutCycle.get(task);
 
         final boolean[] isDiscovered = new boolean[this.graph.size()];
         final LinkedList<Task> searchNodes = new LinkedList<>();
-        dfsNode(taskNode, isDiscovered, searchNodes);
+        bfsNode(taskNode, isDiscovered, searchNodes);
 
         int manMonths = 0;
 
@@ -73,14 +75,14 @@ public final class Project {
     }
 
     public final int findMinDuration(final String task) {
-        assert (this.tasksWithOutCycle.containsKey(task));
-        final Task taskNode = this.tasksWithOutCycle.get(task);
+        assert (this.taskMapWithOutCycle.containsKey(task));
+        final Task taskNode = this.taskMapWithOutCycle.get(task);
         final HashMap<Task, Integer> isDiscoveredAndEstimate = new HashMap<>();
         final LinkedList<LinkedList<Task>> searchNodeLists = new LinkedList<>();
 
         int maxManMonths = 0;
 
-        dfsAllPathsNodeToLeafNode(taskNode, isDiscoveredAndEstimate, searchNodeLists);
+        bfsAllPathsNodeToLeafNode(taskNode, isDiscoveredAndEstimate, searchNodeLists);
 
         for (final LinkedList<Task> searchNodeList : searchNodeLists) {
             int manMonths = 0;
@@ -97,8 +99,8 @@ public final class Project {
     }
 
     public final int findMaxBonusCount(final String task) {
-        assert (this.tasksWithOutCycle.containsKey(task));
-        final Task taskNode = this.tasksWithOutCycle.get(task);
+        assert (this.taskMapWithOutCycle.containsKey(task));
+        final Task taskNode = this.taskMapWithOutCycle.get(task);
 
         final HashMap<Task, Integer> isDiscoveredAndEstimate = new HashMap<>();
         final LinkedList<LinkedList<Task>> searchNodeLists = new LinkedList<>();
@@ -273,9 +275,115 @@ public final class Project {
         }
     }
 
+    // bfs
+    private void bfsNode(final Task startNode,
+                         final boolean[] isDiscovered,
+                         final LinkedList<Task> outNodeList) {
+        final LinkedList<Task> bfsQueue = new LinkedList<>();
+
+        {
+            if (this.taskScc.containsKey(startNode)) {
+                return;
+            }
+
+            if (isDiscovered[this.taskIndex.get(startNode)]) {
+                return;
+            }
+
+            isDiscovered[this.taskIndex.get(startNode)] = true;
+            bfsQueue.addLast(startNode);
+        }
+
+        while (!bfsQueue.isEmpty()) {
+            final Task node = bfsQueue.poll();
+
+            outNodeList.addFirst(node);
+
+            for (final Task predecessor : node.getPredecessors()) {
+                if (this.taskScc.containsKey(predecessor)) {
+                    continue;
+                }
+
+                if (isDiscovered[this.taskIndex.get(predecessor)]) {
+                    continue;
+                }
+
+                isDiscovered[this.taskIndex.get(predecessor)] = true;
+                bfsQueue.addLast(predecessor);
+            }
+        }
+    }
+
+    private void bfsAllPathsNodeToLeafNode(final Task target,
+                                           final HashMap<Task, Integer> isDiscoveredAndCapacity,
+                                           final LinkedList<LinkedList<Task>> outNodeLists) {
+
+        final LinkedList<GraphPrePath<GraphNode<Task>>> paths = new LinkedList<>();
+        final LinkedList<GraphPrePath<GraphNode<Task>>> bfsQueue = new LinkedList<>();
+
+        for (final GraphNode<Task> startNode : this.sortedWithoutCycle) {
+
+            {
+                if (this.taskScc.containsKey(startNode.getData())) {
+                    continue;
+                }
+
+//                if (isDiscoveredAndCapacity.containsKey(startNode)) {
+//                    return;
+//                }
+
+                if (startNode.getData().getPredecessors().size() != 0) {
+                    continue;
+                }
+
+                isDiscoveredAndCapacity.put(startNode.getData(), startNode.getData().getEstimate());
+                bfsQueue.addLast(new GraphPrePath<>(startNode, null));
+            }
+
+            while (!bfsQueue.isEmpty()) {
+                final GraphPrePath<GraphNode<Task>> now = bfsQueue.poll();
+                final GraphNode<Task> nowNode = now.getData();
+
+                if (target.equals(nowNode.getData())) {
+                    paths.add(now);
+                    continue;
+                }
+
+                for (final GraphNode<Task> neighborNode : nowNode.getNeighbors()) {
+                    if (this.taskScc.containsKey(neighborNode.getData())) {
+                        continue;
+                    }
+
+//                    if (isDiscovered[this.taskIndex.get(predecessor)]) {
+//                        continue;
+//                    }
+
+                    isDiscoveredAndCapacity.put(neighborNode.getData(), neighborNode.getData().getEstimate());
+                    bfsQueue.addLast(new GraphPrePath<>(neighborNode, now));
+                }
+            }
+        }
+
+        for (final GraphPrePath<GraphNode<Task>> graphPrePath : paths) {
+            final LinkedList<Task> list = new LinkedList<>();
+            outNodeLists.add(list);
+
+            GraphPrePath<GraphNode<Task>> nowNode = graphPrePath;
+
+            while (true) {
+                list.addFirst(nowNode.getData().getData());
+
+                if (nowNode.getPreOrNull() == null) {
+                    break;
+                }
+
+                nowNode = nowNode.getPreOrNull();
+            }
+        }
+    }
+
     // topological sort
-    private LinkedList<GraphNode<Task>> topologicalSort(final boolean includeCycle,
-                                                        final HashMap<GraphNode<Task>, Boolean> outScc) {
+    private LinkedList<GraphNode<Task>> topologicalSort(final HashMap<GraphNode<Task>, Boolean> outScc) {
         // O(n + e) + O(n + e) + O(n + e)
 
         final LinkedList<GraphNode<Task>> dfsPostOrderNodeReverseList = new LinkedList<>();
@@ -307,11 +415,7 @@ public final class Project {
 
         // get sortedList
         final LinkedList<GraphNode<Task>> outSortedList = new LinkedList<>();
-        if (includeCycle) {
-            topologicalSortDfsPostOrderGraph(dfsPostOrderNodeReverseList, outSortedList);
-        } else {
-            topologicalSortDfsPostOrderGraph(dfsPostOrderNodeReverseList, outSortedList);
-        }
+        topologicalSortDfsPostOrderGraph(dfsPostOrderNodeReverseList, outSortedList);
 
 
         return outSortedList;
