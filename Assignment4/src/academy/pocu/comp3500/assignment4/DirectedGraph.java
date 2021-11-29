@@ -1,7 +1,5 @@
 package academy.pocu.comp3500.assignment4;
 
-import academy.pocu.comp3500.assignment4.project.Task;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -272,8 +270,6 @@ public final class DirectedGraph<D> {
                 break;
             }
 
-            boolean isEnqueue = false;
-
             for (final DirectedGraphNode<D> nextNode : node.getNodes()) {
                 final D nextData = nextNode.getData();
 
@@ -296,12 +292,6 @@ public final class DirectedGraph<D> {
                 final IsTransposedFlow<D> nextIsTransposedFlow = new IsTransposedFlow<>(false, nextData);
                 bfsQueue.addLast(nextIsTransposedFlow);
                 prePath.put(nextIsTransposedFlow, isTransposedFlow);
-
-                isEnqueue = true;
-            }
-
-            if (isEnqueue) {
-                continue;
             }
 
             for (final DirectedGraphNode<D> nextTransposedNode : transposedNode.getNodes()) {
