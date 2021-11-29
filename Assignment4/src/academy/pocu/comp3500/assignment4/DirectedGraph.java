@@ -60,7 +60,7 @@ public final class DirectedGraph<D> {
     // setter
     public final void setScc() {
         this.dataScc.clear();
-        KosarajuScc(this.dataScc);
+        kosarajuScc(this.dataScc);
     }
 
     public final void addNode(final D data, ArrayList<D> dataNodes) {
@@ -272,6 +272,8 @@ public final class DirectedGraph<D> {
                 break;
             }
 
+            boolean isEnqueue = false;
+
             for (final DirectedGraphNode<D> nextNode : node.getNodes()) {
                 final D nextData = nextNode.getData();
 
@@ -294,6 +296,12 @@ public final class DirectedGraph<D> {
                 final IsTransposedFlow<D> nextIsTransposedFlow = new IsTransposedFlow<>(false, nextData);
                 bfsQueue.addLast(nextIsTransposedFlow);
                 prePath.put(nextIsTransposedFlow, isTransposedFlow);
+
+                isEnqueue = true;
+            }
+
+            if (isEnqueue) {
+                continue;
             }
 
             for (final DirectedGraphNode<D> nextTransposedNode : transposedNode.getNodes()) {
@@ -438,7 +446,7 @@ public final class DirectedGraph<D> {
     // ---
 
     // scc Kosaraju
-    private void KosarajuScc(final HashMap<D, Boolean> outScc) {
+    private void kosarajuScc(final HashMap<D, Boolean> outScc) {
         // O(n + e) + O(n + e)
 
         final LinkedList<D> dfsPostOrderNodeReverseList = new LinkedList<>();
