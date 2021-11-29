@@ -4,13 +4,13 @@ import java.util.LinkedList;
 
 public class DirectedGraphBackNode<T> {
     private final T data;
-    private final LinkedList<DirectedGraphBackNode<T>> preNodes;
+    private final LinkedList<DirectedGraphBackNode<T>> backNodes;
 
     // ---
 
     public DirectedGraphBackNode(final T data) {
         this.data = data;
-        this.preNodes = new LinkedList<>();
+        this.backNodes = new LinkedList<>();
     }
 
     // ---
@@ -19,16 +19,16 @@ public class DirectedGraphBackNode<T> {
         return data;
     }
 
-    public final LinkedList<DirectedGraphBackNode<T>> getPreNodes() {
-        return preNodes;
+    public final LinkedList<DirectedGraphBackNode<T>> getBackNodes() {
+        return backNodes;
     }
 
-    public final void addPre(final DirectedGraphBackNode<T> pre) {
-        this.preNodes.add(pre);
+    public final void addBack(final DirectedGraphBackNode<T> back) {
+        this.backNodes.add(back);
     }
 
 
-    public final void removePre(final DirectedGraphBackNode<T> pre) {
-        this.preNodes.remove(pre);
+    public final void removeBack(final DirectedGraphBackNode<T> back) {
+        this.backNodes.remove(back);
     }
 }
