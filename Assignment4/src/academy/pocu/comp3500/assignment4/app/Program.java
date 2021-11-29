@@ -22,11 +22,13 @@ public class Program {
         int minDuration2 = project.findMinDuration("ms2");
         assert (minDuration2 == 32);
 
-        int bonusCount1 = project.findMaxBonusCount("ms1");
-        assert (bonusCount1 == 6);
+        for (int i = 0; i < 5; ++i) {
+            int bonusCount1 = project.findMaxBonusCount("ms1");
+            assert (bonusCount1 == 6);
 
-        int bonusCount2 = project.findMaxBonusCount("ms2");
-        assert (bonusCount2 == 6);
+            int bonusCount2 = project.findMaxBonusCount("ms2");
+            assert (bonusCount2 == 6);
+        }
     }
 
     private static Task[] createTasks() {

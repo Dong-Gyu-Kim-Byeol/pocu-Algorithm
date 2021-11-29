@@ -2,7 +2,6 @@ package academy.pocu.comp3500.assignment4;
 
 import academy.pocu.comp3500.assignment4.project.Task;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -14,7 +13,6 @@ public final class Project {
     private final HashMap<Task, Boolean> taskScc;
 
     private final HashMap<Task, DirectedGraphNode<Task>> graph;
-
     private final HashMap<Task, DirectedGraphBackNode<Task>> backGraph;
 
     // ---
@@ -97,37 +95,14 @@ public final class Project {
                 }
             }
 
-            ghostTask = new Task("ADD", leafCapacitySum);
+            ghostTask = new Task("GHOST", leafCapacitySum);
 
             this.addGhostNode(ghostTask, ghostCombineNodes);
         }
 
         final int[] flow = new int[this.taskIndex.size()];
-        {
-            final int[] backFlow = new int[this.taskIndex.size()];
-            final LinkedList<IsBackFlow<Task>> path = new LinkedList<>();
-            final int[] minRemainCapacity = new int[1];
+        maxFlow(this.taskScc, ghostTask, taskNode, flow, this.taskIndex);
 
-            while (true) {
-                path.clear();
-                minRemainCapacity[0] = 0;
-
-                bfsPathSourceToSinkSkipZeroFlow(this.taskScc, ghostTask, taskNode, flow, backFlow, path, minRemainCapacity);
-
-                if (path.isEmpty()) {
-                    break;
-                }
-
-                for (final IsBackFlow<Task> isBackFlow : path) {
-                    final int index = this.taskIndex.get(isBackFlow.getData());
-                    if (isBackFlow.isBackFlow()) {
-                        backFlow[index] -= minRemainCapacity[0];
-                    } else {
-                        flow[index] += minRemainCapacity[0];
-                    }
-                }
-            }
-        }
 
         {
             assert (flow[this.taskIndex.get(ghostTask)] == flow[this.taskIndex.get(taskNode)]);
@@ -259,7 +234,8 @@ public final class Project {
 
     // library
     // ghost
-    private void addGhostNode(final Task ghostTask, final LinkedList<Task> predecessors) {
+    private void addGhostNode(final Task ghostTask,
+                              final LinkedList<Task> predecessors) {
         final DirectedGraphNode<Task> ghostNode = new DirectedGraphNode<>(ghostTask);
         final DirectedGraphBackNode<Task> ghostBackNode = new DirectedGraphBackNode<>(ghostTask);
 
@@ -275,7 +251,8 @@ public final class Project {
         this.taskIndex.put(ghostTask, this.taskIndex.size());
     }
 
-    private void removeGhostNode(final Task ghostTask, final LinkedList<Task> predecessors) {
+    private void removeGhostNode(final Task ghostTask,
+                                 final LinkedList<Task> predecessors) {
         final DirectedGraphNode<Task> ghostNode = this.graph.get(ghostTask);
         final DirectedGraphBackNode<Task> ghostBackNode = this.backGraph.get(ghostTask);
 
@@ -337,18 +314,96 @@ public final class Project {
         }
     }
 
-    private void bfsPathSourceToSinkSkipZeroFlow(final HashMap<Task, Boolean> skipOrNull,
-                                                 final Task source,
-                                                 final Task skin,
-                                                 final int[] flow,
-                                                 final int[] backFlow,
-                                                 final LinkedList<IsBackFlow<Task>> outPath,
-                                                 final int[] outMinRemainCapacity) {
+    private void bfsAllPathsStartToAllLeafNodeCanOverlap(final HashMap<Task, Boolean> skipOrNull,
+                                                         final DirectedGraphBackNode<Task> startNode,
+                                                         final LinkedList<LinkedList<Task>> outPaths) {
+
+        assert (outPaths.isEmpty());
+
+        final LinkedList<PrePath<DirectedGraphBackNode<Task>>> ends = new LinkedList<>();
+        final LinkedList<PrePath<DirectedGraphBackNode<Task>>> bfsQueue = new LinkedList<>();
+
+        {
+            assert (skipOrNull == null || (!skipOrNull.containsKey(startNode.getData())));
+
+            bfsQueue.addLast(new PrePath<>(startNode, null));
+        }
+
+        while (!bfsQueue.isEmpty()) {
+            final PrePath<DirectedGraphBackNode<Task>> now = bfsQueue.poll();
+
+            if (now.getData().getBackNodes().isEmpty()) {
+                ends.add(now);
+            }
+
+            for (final DirectedGraphBackNode<Task> nextBackNode : now.getData().getBackNodes()) {
+                if (skipOrNull != null) {
+                    if (skipOrNull.containsKey(nextBackNode.getData())) {
+                        continue;
+                    }
+                }
+
+                bfsQueue.addLast(new PrePath<>(nextBackNode, now));
+            }
+        }
+
+        for (PrePath<DirectedGraphBackNode<Task>> prePath : ends) {
+            final LinkedList<Task> path = new LinkedList<>();
+            outPaths.add(path);
+            while (prePath != null) {
+                path.addFirst(prePath.getData().getData());
+
+                prePath = prePath.getPre();
+            }
+        }
+    }
+
+    private void maxFlow(final HashMap<Task, Boolean> skipOrNull,
+                         final Task source,
+                         final Task sink,
+                         final int[] outFlow,
+                         final HashMap<Task, Integer> indexes) {
+
+        assert (outFlow.length == indexes.size());
+
+        final int[] backFlow = new int[indexes.size()];
+        final LinkedList<IsBackFlow<Task>> path = new LinkedList<>();
+        final int[] minRemainCapacity = new int[1];
+
+        while (true) {
+            path.clear();
+            minRemainCapacity[0] = 0;
+
+            bfsShortestPathSourceToSinkSkipZeroFlow(skipOrNull, source, sink, outFlow, backFlow, this.taskIndex, path, minRemainCapacity);
+
+            if (path.isEmpty()) {
+                break;
+            }
+
+            for (final IsBackFlow<Task> isBackFlow : path) {
+                final int index = indexes.get(isBackFlow.getData());
+                if (isBackFlow.isBackFlow()) {
+                    backFlow[index] -= minRemainCapacity[0];
+                } else {
+                    outFlow[index] += minRemainCapacity[0];
+                }
+            }
+        }
+    }
+
+    private void bfsShortestPathSourceToSinkSkipZeroFlow(final HashMap<Task, Boolean> skipOrNull,
+                                                         final Task source,
+                                                         final Task sink,
+                                                         final int[] flow,
+                                                         final int[] backFlow,
+                                                         final HashMap<Task, Integer> indexes,
+                                                         final LinkedList<IsBackFlow<Task>> outPath,
+                                                         final int[] outMinRemainCapacity) {
 
         assert (outPath.isEmpty());
         assert (outMinRemainCapacity.length == 1);
 
-        final boolean[] isDiscovered = new boolean[this.taskIndex.size()];
+        final boolean[] isDiscovered = new boolean[indexes.size()];
 
         final LinkedList<IsBackFlow<Task>> bfsQueue = new LinkedList<>();
 
@@ -357,15 +412,15 @@ public final class Project {
         {
             assert (skipOrNull == null || (!skipOrNull.containsKey(source)));
 
-            if (isDiscovered[this.taskIndex.get(source)]) {
+            if (isDiscovered[indexes.get(source)]) {
                 return;
             }
 
-            if (source.getEstimate() - flow[this.taskIndex.get(source)] == 0) {
+            if (source.getEstimate() - flow[indexes.get(source)] == 0) {
                 return;
             }
 
-            isDiscovered[this.taskIndex.get(source)] = true;
+            isDiscovered[indexes.get(source)] = true;
             bfsQueue.addLast(new IsBackFlow<>(false, source));
         }
 
@@ -375,7 +430,7 @@ public final class Project {
             final DirectedGraphNode<Task> node = this.graph.get(isBackFlow.getData());
             final DirectedGraphBackNode<Task> backNode = this.backGraph.get(isBackFlow.getData());
 
-            if (isBackFlow.getData().equals(skin)) {
+            if (isBackFlow.getData().equals(sink)) {
                 break;
             }
 
@@ -388,16 +443,16 @@ public final class Project {
                     }
                 }
 
-                if (isDiscovered[this.taskIndex.get(nextTask)]) {
+                if (isDiscovered[indexes.get(nextTask)]) {
                     continue;
                 }
 
-                assert (flow[this.taskIndex.get(nextTask)] >= 0);
-                if (nextTask.getEstimate() - flow[this.taskIndex.get(nextTask)] == 0) {
+                assert (flow[indexes.get(nextTask)] >= 0);
+                if (nextTask.getEstimate() - flow[indexes.get(nextTask)] == 0) {
                     continue;
                 }
 
-                isDiscovered[this.taskIndex.get(nextTask)] = true;
+                isDiscovered[indexes.get(nextTask)] = true;
                 final IsBackFlow<Task> nextIsBackFlow = new IsBackFlow<>(false, nextTask);
                 bfsQueue.addLast(nextIsBackFlow);
                 prePath.put(nextIsBackFlow, isBackFlow);
@@ -412,17 +467,17 @@ public final class Project {
                     }
                 }
 
-                if (isDiscovered[this.taskIndex.get(nextBackTask)]) {
+                if (isDiscovered[indexes.get(nextBackTask)]) {
                     continue;
                 }
 
                 final int BACK_FLOW_CAPACITY = 0;
-                assert (backFlow[this.taskIndex.get(nextBackTask)] <= 0);
-                if (BACK_FLOW_CAPACITY - backFlow[this.taskIndex.get(nextBackTask)] == 0) {
+                assert (backFlow[indexes.get(nextBackTask)] <= 0);
+                if (BACK_FLOW_CAPACITY - backFlow[indexes.get(nextBackTask)] == 0) {
                     continue;
                 }
 
-                isDiscovered[this.taskIndex.get(nextBackTask)] = true;
+                isDiscovered[indexes.get(nextBackTask)] = true;
                 final IsBackFlow<Task> nextIsBackFlow = new IsBackFlow<>(true, nextBackTask);
                 bfsQueue.addLast(nextIsBackFlow);
                 prePath.put(nextIsBackFlow, isBackFlow);
@@ -431,19 +486,20 @@ public final class Project {
 
         assert (isBackFlow != null);
 
-        if (!skin.equals(isBackFlow.getData())) {
+        if (!sink.equals(isBackFlow.getData())) {
             return;
         }
 
         outMinRemainCapacity[0] = Integer.MAX_VALUE;
         while (isBackFlow != null) {
-            outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], isBackFlow.getData().getEstimate() - flow[this.taskIndex.get(isBackFlow.getData())]);
+            outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], Math.abs(isBackFlow.getData().getEstimate() - flow[indexes.get(isBackFlow.getData())]));
             outPath.addFirst(isBackFlow);
 
             isBackFlow = prePath.get(isBackFlow);
         }
     }
 
+    // dfs
     private void dfsPostOrderReverse(final HashMap<Task, Boolean> skipOrNull,
                                      final HashMap<Task, DirectedGraphNode<Task>> graph,
                                      final LinkedList<Task> outPostOrderNodeReverseList) {
@@ -536,7 +592,8 @@ public final class Project {
     }
 
     // topological sort
-    private LinkedList<Task> topologicalSort(final boolean includeScc, final HashMap<Task, Boolean> outScc) {
+    private LinkedList<Task> topologicalSort(final boolean includeScc,
+                                             final HashMap<Task, Boolean> outScc) {
         // O(n + e) + O(n + e) + O(n + e)
 
         final LinkedList<Task> dfsPostOrderNodeReverseList = new LinkedList<>();
