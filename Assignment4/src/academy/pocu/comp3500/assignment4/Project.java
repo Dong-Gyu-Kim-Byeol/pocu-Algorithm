@@ -400,6 +400,8 @@ public final class Project {
                                                          final LinkedList<IsBackFlow<Task>> outPath,
                                                          final int[] outMinRemainCapacity) {
 
+        final int BACK_FLOW_CAPACITY = 0;
+
         assert (outPath.isEmpty());
         assert (outMinRemainCapacity.length == 1);
 
@@ -471,7 +473,7 @@ public final class Project {
                     continue;
                 }
 
-                final int BACK_FLOW_CAPACITY = 0;
+
                 assert (backFlow[indexes.get(nextBackTask)] <= 0);
                 if (BACK_FLOW_CAPACITY - backFlow[indexes.get(nextBackTask)] == 0) {
                     continue;
@@ -492,7 +494,11 @@ public final class Project {
 
         outMinRemainCapacity[0] = Integer.MAX_VALUE;
         while (isBackFlow != null) {
-            outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], Math.abs(isBackFlow.getData().getEstimate() - flow[indexes.get(isBackFlow.getData())]));
+            if (isBackFlow.isBackFlow()) {
+                outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], Math.abs(BACK_FLOW_CAPACITY - flow[indexes.get(isBackFlow.getData())]));
+            } else {
+                outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], isBackFlow.getData().getEstimate() - flow[indexes.get(isBackFlow.getData())]);
+            }
             outPath.addFirst(isBackFlow);
 
             isBackFlow = prePath.get(isBackFlow);
