@@ -205,9 +205,11 @@ public final class DirectedGraph<D> {
             for (final IsTransposedFlow<D> isTransposedFlow : path) {
                 final int index = this.dataIndex.get(isTransposedFlow.getData());
                 if (isTransposedFlow.isTransposedFlow()) {
-                    transposedFlow[index] -= minRemainCapacity[0];
+                    transposedFlow[index] += minRemainCapacity[0];
+                    outFlow[index] -= minRemainCapacity[0];
                 } else {
                     outFlow[index] += minRemainCapacity[0];
+                    transposedFlow[index] -= minRemainCapacity[0];
                 }
             }
         }
@@ -329,9 +331,12 @@ public final class DirectedGraph<D> {
         outMinRemainCapacity[0] = Integer.MAX_VALUE;
         while (isTransposedFlow != null) {
             if (isTransposedFlow.isTransposedFlow()) {
-                outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], Math.abs(BACK_FLOW_CAPACITY - flow[this.dataIndex.get(isTransposedFlow.getData())]));
+                final int flowCount = transposedFlow[this.dataIndex.get(isTransposedFlow.getData())];
+                outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], BACK_FLOW_CAPACITY - flowCount);
             } else {
-                outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], this.getDataWeight.apply(isTransposedFlow.getData()) - flow[this.dataIndex.get(isTransposedFlow.getData())]);
+                final int capacity = this.getDataWeight.apply(isTransposedFlow.getData());
+                final int flowCount = flow[this.dataIndex.get(isTransposedFlow.getData())];
+                outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], capacity - flowCount);
             }
             outPath.addFirst(isTransposedFlow);
 
