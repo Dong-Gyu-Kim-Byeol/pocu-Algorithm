@@ -38,6 +38,6 @@ public final class Task {
 
     @Override
     public final String toString() {
-        return this.getTitle() + "   " + this.estimate;
+        return String.format("%s : %d", this.getTitle(), this.estimate);
     }
 }

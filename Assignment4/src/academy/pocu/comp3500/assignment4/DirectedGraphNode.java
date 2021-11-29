@@ -4,13 +4,13 @@ import java.util.LinkedList;
 
 public final class DirectedGraphNode<T> {
     private final T data;
-    private final LinkedList<DirectedGraphNode<T>> nextNodes;
+    private final LinkedList<DirectedGraphNode<T>> nodes;
 
     // ---
 
     public DirectedGraphNode(final T data) {
         this.data = data;
-        this.nextNodes = new LinkedList<>();
+        this.nodes = new LinkedList<>();
     }
 
     // ---
@@ -19,15 +19,15 @@ public final class DirectedGraphNode<T> {
         return data;
     }
 
-    public final LinkedList<DirectedGraphNode<T>> getNextNodes() {
-        return nextNodes;
+    public final LinkedList<DirectedGraphNode<T>> getNodes() {
+        return nodes;
     }
 
-    public final void addNext(final DirectedGraphNode<T> next) {
-        this.nextNodes.add(next);
+    public final void addNode(final DirectedGraphNode<T> node) {
+        this.nodes.add(node);
     }
 
-    public final void removeNext(final DirectedGraphNode<T> next) {
-        this.nextNodes.remove(next);
+    public final void removeNode(final DirectedGraphNode<T> node) {
+        this.nodes.remove(node);
     }
 }
