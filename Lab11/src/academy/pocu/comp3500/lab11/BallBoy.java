@@ -47,7 +47,7 @@ public class BallBoy {
                 }
             }
 
-            graph = new DirectedGraph<>(false, pointArray, pointEdgeArrayMap, weightEdgeArrayMap);
+            graph = new DirectedGraph<Point>(false, pointArray, pointEdgeArrayMap, weightEdgeArrayMap);
         } // end create graph
 
         final ArrayList<DirectedGraphNode<Point>> tspNodeList = graph.tsp2Approximation(false, startPoint);
