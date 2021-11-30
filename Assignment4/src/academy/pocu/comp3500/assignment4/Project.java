@@ -8,7 +8,7 @@ import java.util.LinkedList;
 
 public final class Project {
     private final HashMap<String, TaskData> taskDataMap;
-    private final DirectedGraph<TaskData> graph;
+    private final Graph<TaskData> graph;
 
     // ---
 
@@ -30,22 +30,28 @@ public final class Project {
                 tempTaskDataMap.put(task, taskData);
             }
 
-            final HashMap<TaskData, ArrayList<TaskData>> taskDataArrayNodes = new HashMap<>(tasks.length);
+            final HashMap<TaskData, ArrayList<TaskData>> edgeArrayMap = new HashMap<>(tasks.length);
+            final HashMap<TaskData, ArrayList<Integer>> edgeWeightArrayMap = new HashMap<>(tasks.length);
 
             for (final Task task : tasks) {
                 assert (tempTaskDataMap.containsKey(task));
 
-                final ArrayList<TaskData> taskDataNodes = new ArrayList<>(task.getPredecessors().size());
-                taskDataArrayNodes.put(tempTaskDataMap.get(task), taskDataNodes);
+                final ArrayList<TaskData> edgeArray = new ArrayList<>(task.getPredecessors().size());
+                edgeArrayMap.put(tempTaskDataMap.get(task), edgeArray);
 
-                for (final Task taskNode : task.getPredecessors()) {
-                    assert (tempTaskDataMap.containsKey(taskNode));
+                final ArrayList<Integer> edgeWeightArray = new ArrayList<>(task.getPredecessors().size());
+                edgeWeightArrayMap.put(tempTaskDataMap.get(task), edgeWeightArray);
 
-                    taskDataNodes.add(tempTaskDataMap.get(taskNode));
+                for (final Task predecessor : task.getPredecessors()) {
+                    assert (tempTaskDataMap.containsKey(predecessor));
+
+                    final TaskData preTaskData = tempTaskDataMap.get(predecessor);
+                    edgeArray.add(preTaskData);
+                    edgeWeightArray.add(preTaskData.getEstimate());
                 }
             }
 
-            this.graph = new DirectedGraph<>(taskDataArray, taskDataArrayNodes, TaskData::getEstimate);
+            this.graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
         }
     }
 
@@ -55,13 +61,14 @@ public final class Project {
         assert (this.taskDataMap.containsKey(task));
         final TaskData taskNode = this.taskDataMap.get(task);
 
-        final LinkedList<DirectedGraphNode<TaskData>> searchNodes = new LinkedList<>();
+        final LinkedList<GraphNode<TaskData>> searchNodes = new LinkedList<>();
         this.graph.bfs(true, taskNode, false, searchNodes);
 
         int manMonths = 0;
 
-        for (final DirectedGraphNode<TaskData> node : searchNodes) {
-            manMonths += node.getData().getEstimate();
+        for (final GraphNode<TaskData> node : searchNodes) {
+            final TaskData data = node.getData();
+            manMonths += data.getEstimate();
         }
 
         return manMonths;
@@ -69,12 +76,45 @@ public final class Project {
 
     public final int findMinDuration(final String task) {
         assert (this.taskDataMap.containsKey(task));
-        final TaskData taskNode = this.taskDataMap.get(task);
+        final TaskData startData = this.taskDataMap.get(task);
 
-        final LinkedList<WeightNode<DirectedGraphNode<TaskData>>> sums = this.graph.bfsNodeAllPathSumWeightSkipSccAndWithoutDiscovered(taskNode, false);
+        final LinkedList<WeightNode<GraphNode<TaskData>>> sums = new LinkedList<>();
+        {
+
+            final HashMap<TaskData, Boolean> scc = this.graph.getDataScc();
+            final HashMap<TaskData, GraphNode<TaskData>> graph = this.graph.getGraph();
+
+            final LinkedList<WeightNode<GraphNode<TaskData>>> bfsQueue = new LinkedList<>();
+            {
+                final GraphNode<TaskData> startNode = graph.get(startData);
+                assert (!scc.containsKey(startNode.getData()));
+
+                bfsQueue.addLast(new WeightNode<>(startData.getEstimate(), startNode));
+            }
+
+            while (!bfsQueue.isEmpty()) {
+                final WeightNode<GraphNode<TaskData>> weightNode = bfsQueue.poll();
+
+                final GraphNode<TaskData> node = weightNode.getData();
+                if (node.getEdges().size() == 0) {
+                    sums.add(weightNode);
+                }
+
+                for (final GraphEdge<TaskData> edge : node.getEdges().values()) {
+                    final GraphNode<TaskData> nextNode = edge.getNode2();
+                    final TaskData nextData = nextNode.getData();
+
+                    if (scc.containsKey(nextData)) {
+                        continue;
+                    }
+
+                    bfsQueue.addLast(new WeightNode<>(weightNode.getWeight() + nextData.getEstimate(), nextNode));
+                }
+            }
+        }
 
         int max = 0;
-        for (final WeightNode<DirectedGraphNode<TaskData>> snm : sums) {
+        for (final WeightNode<GraphNode<TaskData>> snm : sums) {
             max = Math.max(max, snm.getWeight());
         }
 
@@ -82,42 +122,43 @@ public final class Project {
     }
 
     public final int findMaxBonusCount(final String task) {
-        assert (this.taskDataMap.containsKey(task));
-        final TaskData taskNode = this.taskDataMap.get(task);
+//        assert (this.taskDataMap.containsKey(task));
+//        final TaskData taskNode = this.taskDataMap.get(task);
+//
+//        final ArrayList<TaskData> ghostCombineNodes;
+//        final TaskData ghostTask;
+//        {
+//
+//            final LinkedList<GraphNode<TaskData>> searchNodes = new LinkedList<>();
+//            this.graph.bfs(true, taskNode, false, searchNodes);
+//
+//            int leafCapacitySum = 0;
+//            ghostCombineNodes = new ArrayList<>(searchNodes.size());
+//            for (final GraphNode<TaskData> node : searchNodes) {
+//                if (node.getEdges().size() == 0) {
+//                    ghostCombineNodes.add(node.getData());
+//                    leafCapacitySum += node.getData().getEstimate();
+//                }
+//            }
+//
+//            ghostTask = new TaskData("GHOST", leafCapacitySum);
+//            this.graph.addTransposedNode(ghostTask, ghostCombineNodes);
+//        }
+//
+//        final int[] flow = new int[this.graph.nodeCount()];
+//        final int[] flowIndex = new int[2];
+////        this.graph.maxFlow(true, ghostTask, taskNode, true, flow, flowIndex);
+//        this.graph.maxFlow(true, taskNode, ghostTask, false, flow, flowIndex);
+//
+//
+//        {
+//            assert (flow[flowIndex[0]] == flow[flowIndex[1]]);
+//
+//            this.graph.removeTransposedNode(ghostTask, ghostCombineNodes);
+//
+//            return flow[flowIndex[0]];
+//        }
 
-        final ArrayList<TaskData> ghostCombineNodes;
-        final TaskData ghostTask;
-        {
-
-            final LinkedList<DirectedGraphNode<TaskData>> searchNodes = new LinkedList<>();
-            this.graph.bfs(true, taskNode, false, searchNodes);
-
-            int leafCapacitySum = 0;
-            ghostCombineNodes = new ArrayList<>(searchNodes.size());
-            for (final DirectedGraphNode<TaskData> node : searchNodes) {
-                if (node.getNodes().size() == 0) {
-                    ghostCombineNodes.add(node.getData());
-                    leafCapacitySum += node.getData().getEstimate();
-                }
-            }
-
-            ghostTask = new TaskData("GHOST", leafCapacitySum);
-            this.graph.addTransposedNode(ghostTask, ghostCombineNodes);
-        }
-
-        final int[] flow = new int[this.graph.nodeCount()];
-        final int[] flowIndex = new int[2];
-//        this.graph.maxFlow(true, ghostTask, taskNode, true, flow, flowIndex);
-        this.graph.maxFlow(true, taskNode, ghostTask, false, flow, flowIndex);
-
-
-        {
-            assert (flow[flowIndex[0]] == flow[flowIndex[1]]);
-
-            this.graph.removeTransposedNode(ghostTask, ghostCombineNodes);
-
-            return flow[flowIndex[0]];
-        }
+        return -1;
     }
-
 }
