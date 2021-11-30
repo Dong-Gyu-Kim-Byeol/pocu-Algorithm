@@ -3,7 +3,7 @@ package academy.pocu.comp3500.lab11;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class DisjointSet<D> {
+public final class DisjointSet<D> {
     private class SetNode {
         private D parent;
         private int size;
@@ -27,7 +27,9 @@ public class DisjointSet<D> {
         }
     }
 
-    public D find(final D node) {
+    // ---
+
+    public final D find(final D node) {
         assert (this.sets.containsKey(node));
 
         SetNode n = this.sets.get(node);
@@ -41,7 +43,7 @@ public class DisjointSet<D> {
         return n.parent;
     }
 
-    public void union(final D node1, final D node2) {
+    public final void union(final D node1, final D node2) {
         assert (this.sets.containsKey(node1));
         assert (this.sets.containsKey(node2));
 

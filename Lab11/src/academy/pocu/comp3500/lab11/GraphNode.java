@@ -2,13 +2,13 @@ package academy.pocu.comp3500.lab11;
 
 import java.util.HashMap;
 
-public final class DirectedGraphNode<T> {
+public final class GraphNode<T> {
     private final T data;
-    private final HashMap<T, DirectedGraphNodeEdge<T>> edges;
+    private final HashMap<T, GraphEdge<T>> edges;
 
     // ---
 
-    public DirectedGraphNode(final T data) {
+    public GraphNode(final T data) {
         this.data = data;
         this.edges = new HashMap<>();
     }
@@ -19,16 +19,16 @@ public final class DirectedGraphNode<T> {
         return data;
     }
 
-    public final HashMap<T, DirectedGraphNodeEdge<T>> getEdges() {
+    public final HashMap<T, GraphEdge<T>> getEdges() {
         return edges;
     }
 
-    public final void addNode(final DirectedGraphNodeEdge<T> edge) {
+    public final void addNode(final GraphEdge<T> edge) {
         assert (!this.edges.containsKey(edge.getNode2().getData()));
         this.edges.put(edge.getNode2().getData(), edge);
     }
 
-    public final void removeEdge(final DirectedGraphNodeEdge<T> edge) {
+    public final void removeEdge(final GraphEdge<T> edge) {
         assert (this.edges.containsKey(edge.getNode2().getData()));
         this.edges.remove(edge.getNode2().getData());
     }

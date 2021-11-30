@@ -1,13 +1,13 @@
 package academy.pocu.comp3500.lab11;
 
-public final class DirectedGraphNodeEdge<T> {
+public final class GraphEdge<T> {
     private final int weight;
-    private final DirectedGraphNode<T> node1;
-    private final DirectedGraphNode<T> node2;
+    private final GraphNode<T> node1;
+    private final GraphNode<T> node2;
 
     // ---
 
-    public DirectedGraphNodeEdge(final int weight, final DirectedGraphNode<T> from, final DirectedGraphNode<T> to) {
+    public GraphEdge(final int weight, final GraphNode<T> from, final GraphNode<T> to) {
         this.weight = weight;
         this.node1 = from;
         this.node2 = to;
@@ -19,11 +19,11 @@ public final class DirectedGraphNodeEdge<T> {
         return weight;
     }
 
-    public final DirectedGraphNode<T> getNode1() {
+    public final GraphNode<T> getNode1() {
         return node1;
     }
 
-    public final DirectedGraphNode<T> getNode2() {
+    public final GraphNode<T> getNode2() {
         return node2;
     }
 
