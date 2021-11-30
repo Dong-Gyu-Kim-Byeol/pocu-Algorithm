@@ -8,6 +8,36 @@ import java.util.List;
 
 public class BallBoy {
     public static List<Point> findPath(final Point[] points) {
+        // 모든 n과 e는 원래의 완전 그래프 기준
+        //
+        // 그래프 데이터 준비
+        // O(n + e)
+        //
+        // 그래프 만들기
+        // O(n + e)
+        //
+        // mst edge 준비
+        // O(e)
+        //
+        // mst
+        // O(e정렬) + O(e * disjoint set ( = 실질적으로 e ))
+        // https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Time_complexity
+        //
+        // mst 그래프 데이터 준비
+        // O(n + n)
+        //
+        // mst 그래프 만들기
+        // O(n + n)
+        //
+        // mst 그래프 해밀턴 순회를 위한 dfs
+        // O(n + n)
+        //
+        // 해밀턴 순회를 위한 중복 제거
+        // O(n)
+        //
+        // 노드에서 포인터 추출
+        // O(n)
+
 
         final Point startPoint = new Point(0, 0);
 

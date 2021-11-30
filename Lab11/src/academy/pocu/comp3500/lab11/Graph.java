@@ -37,7 +37,7 @@ public final class Graph<D> {
         }
     }
 
-    //
+    // ---
 
     public final int nodeCount() {
         assert (this.dataIndex.size() == this.graph.size());
@@ -90,7 +90,7 @@ public final class Graph<D> {
         }
 
         // addNodeInTransposedGraph
-        {
+        if (this.transposedGraph != null) {
             {
                 final GraphNode<D> newTransposedNode = new GraphNode<>(data);
                 this.transposedGraph.put(data, newTransposedNode);
@@ -125,7 +125,7 @@ public final class Graph<D> {
         }
 
         // removeNodeInTransposedGraph
-        {
+        if (this.transposedGraph != null) {
             assert (this.transposedGraph.containsKey(data));
 
             for (final D dataEdge : dataEdgeArray) {
@@ -141,13 +141,17 @@ public final class Graph<D> {
         this.dataIndex.remove(data);
 
         this.graph.remove(data);
-        this.transposedGraph.remove(data);
+        if (this.transposedGraph != null) {
+            this.transposedGraph.remove(data);
+        }
     }
 
     public final void addTransposedNode(final D transposedData,
                                         final ArrayList<D> transposedDataEdgeArray,
                                         final ArrayList<Integer> transposedWeightEdgeArray,
                                         final ArrayList<Integer> weightEdgeArray) {
+
+        assert (this.transposedGraph != null);
 
         assert (transposedDataEdgeArray.size() == transposedWeightEdgeArray.size());
         assert (transposedDataEdgeArray.size() == weightEdgeArray.size());
@@ -186,6 +190,9 @@ public final class Graph<D> {
 
     public final void removeTransposedNode(final D transposedData,
                                            final ArrayList<D> transposedDataEdgeArray) {
+
+        assert (this.transposedGraph != null);
+
         // removeTransposedNodeInGraph
         {
             assert (this.graph.containsKey(transposedData));
@@ -421,7 +428,7 @@ public final class Graph<D> {
                 final GraphNode<D> to = edge.getNode2();
                 final D toPoint = to.getData();
 
-                final int dist = edge.getWeight();
+                final int weight = edge.getWeight();
 
                 // add from edge
                 {
@@ -437,7 +444,7 @@ public final class Graph<D> {
                     final ArrayList<Integer> weightEdgeArray = weightEdgeArrayMap.get(fromPoint);
 
                     dataEdgeArray.add(toPoint);
-                    weightEdgeArray.add(dist);
+                    weightEdgeArray.add(weight);
                 }
 
                 // add to edge
@@ -454,7 +461,7 @@ public final class Graph<D> {
                     final ArrayList<Integer> weightEdgeArray = weightEdgeArrayMap.get(toPoint);
 
                     dataEdgeArray.add(fromPoint);
-                    weightEdgeArray.add(dist);
+                    weightEdgeArray.add(weight);
                 }
             }
 
@@ -580,10 +587,8 @@ public final class Graph<D> {
         return outSortedList;
     }
 
-    // ---
-
     // scc Kosaraju
-    private void kosarajuScc(final LinkedList<GraphNode<D>> outScc) {
+    public void kosarajuScc(final LinkedList<GraphNode<D>> outScc) {
         // O(n + e) + O(n + e)
 
         final LinkedList<GraphNode<D>> dfsPostOrderNodeReverseList = new LinkedList<>();
@@ -616,6 +621,8 @@ public final class Graph<D> {
             }
         }
     }
+
+    // ---
 
     // create
     private HashMap<D, GraphNode<D>> createGraph(final ArrayList<D> dataNodeArray,
