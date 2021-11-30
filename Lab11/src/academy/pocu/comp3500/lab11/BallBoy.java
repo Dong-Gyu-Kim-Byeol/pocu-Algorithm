@@ -16,38 +16,39 @@ public class BallBoy {
         final ArrayList<Point> pointArray;
         final HashMap<Point, ArrayList<Point>> pointEdgeArrayMap;
         final HashMap<Point, ArrayList<Integer>> weightEdgeArrayMap;
+        {
+            // create pointArray
+            pointArray = new ArrayList<>(points.length + 1);
+            pointArray.add(startPoint);
 
-        // create pointArray
-        pointArray = new ArrayList<>(points.length + 1);
-        pointArray.add(startPoint);
-
-        for (final Point point : points) {
-            pointArray.add(point);
-        }
-        // end create pointArray
-
-        pointEdgeArrayMap = new HashMap<>(pointArray.size());
-        weightEdgeArrayMap = new HashMap<>(pointArray.size());
-
-        for (final Point point : pointArray) {
-
-            final ArrayList<Point> pointEdgeArray = new ArrayList<>(pointArray.size());
-            pointEdgeArrayMap.put(point, pointEdgeArray);
-
-            final ArrayList<Integer> weightEdgeArray = new ArrayList<>(pointArray.size());
-            weightEdgeArrayMap.put(point, weightEdgeArray);
-
-            for (final Point edgePoint : pointArray) {
-                if (edgePoint.equals(point)) {
-                    continue;
-                }
-
-                pointEdgeArray.add(edgePoint);
-                weightEdgeArray.add(getDistance(point, edgePoint));
+            for (final Point point : points) {
+                pointArray.add(point);
             }
-        }
+            // end create pointArray
 
-        graph = new Graph<Point>(false, pointArray, pointEdgeArrayMap, weightEdgeArrayMap);
+            pointEdgeArrayMap = new HashMap<>(pointArray.size());
+            weightEdgeArrayMap = new HashMap<>(pointArray.size());
+
+            for (final Point point : pointArray) {
+
+                final ArrayList<Point> pointEdgeArray = new ArrayList<>(pointArray.size());
+                pointEdgeArrayMap.put(point, pointEdgeArray);
+
+                final ArrayList<Integer> weightEdgeArray = new ArrayList<>(pointArray.size());
+                weightEdgeArrayMap.put(point, weightEdgeArray);
+
+                for (final Point edgePoint : pointArray) {
+                    if (edgePoint.equals(point)) {
+                        continue;
+                    }
+
+                    pointEdgeArray.add(edgePoint);
+                    weightEdgeArray.add(getDistance(point, edgePoint));
+                }
+            }
+
+            graph = new Graph<Point>(false, pointArray, pointEdgeArrayMap, weightEdgeArrayMap);
+        }
         // end create graph
 
         final ArrayList<GraphNode<Point>> tspNodeList = graph.tsp2Approximation(false, startPoint);

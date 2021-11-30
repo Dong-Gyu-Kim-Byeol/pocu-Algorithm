@@ -403,72 +403,72 @@ public final class Graph<D> {
 
         // create mst graph
         final Graph<D> mstGraph;
-
-        final ArrayList<GraphEdge<D>> mst = this.kruskalMst();
-        if (mst.isEmpty()) {
-            final ArrayList<GraphNode<D>> outTspList = new ArrayList<>(1);
-            final GraphNode<D> startNode = this.graph.get(startData);
-            outTspList.add(startNode);
-            return outTspList;
-        }
-
-        final HashMap<D, ArrayList<D>> dataEdgeArrayMap = new HashMap<>(this.dataIndex.size());
-        final HashMap<D, ArrayList<Integer>> weightEdgeArrayMap = new HashMap<>(this.dataIndex.size());
-
-        for (final GraphEdge<D> edge : mst) {
-            final GraphNode<D> from = edge.getNode1();
-            final D fromPoint = from.getData();
-            final GraphNode<D> to = edge.getNode2();
-            final D toPoint = to.getData();
-
-            final int dist = edge.getWeight();
-
-            // add from edge
-            {
-                if (!dataEdgeArrayMap.containsKey(fromPoint)) {
-
-                    dataEdgeArrayMap.put(fromPoint, new ArrayList<>(mst.size()));
-                }
-                final ArrayList<D> dataEdgeArray = dataEdgeArrayMap.get(fromPoint);
-
-                if (!weightEdgeArrayMap.containsKey(fromPoint)) {
-                    weightEdgeArrayMap.put(fromPoint, new ArrayList<>(mst.size()));
-                }
-                final ArrayList<Integer> weightEdgeArray = weightEdgeArrayMap.get(fromPoint);
-
-                dataEdgeArray.add(toPoint);
-                weightEdgeArray.add(dist);
-            }
-
-            // add to edge
-            {
-                if (!dataEdgeArrayMap.containsKey(toPoint)) {
-
-                    dataEdgeArrayMap.put(toPoint, new ArrayList<>(mst.size()));
-                }
-                final ArrayList<D> dataEdgeArray = dataEdgeArrayMap.get(toPoint);
-
-                if (!weightEdgeArrayMap.containsKey(toPoint)) {
-                    weightEdgeArrayMap.put(toPoint, new ArrayList<>(mst.size()));
-                }
-                final ArrayList<Integer> weightEdgeArray = weightEdgeArrayMap.get(toPoint);
-
-                dataEdgeArray.add(fromPoint);
-                weightEdgeArray.add(dist);
-            }
-        }
-
-        final ArrayList<D> dataArray;
         {
-            dataArray = new ArrayList<>(this.dataIndex.size());
-
-            for (final D data : this.dataIndex.keySet()) {
-                dataArray.add(data);
+            final ArrayList<GraphEdge<D>> mst = this.kruskalMst();
+            if (mst.isEmpty()) {
+                final ArrayList<GraphNode<D>> outTspList = new ArrayList<>(1);
+                final GraphNode<D> startNode = this.graph.get(startData);
+                outTspList.add(startNode);
+                return outTspList;
             }
-        }
 
-        mstGraph = new Graph<>(false, dataArray, dataEdgeArrayMap, weightEdgeArrayMap);
-        // end create mst graph
+            final HashMap<D, ArrayList<D>> dataEdgeArrayMap = new HashMap<>(this.dataIndex.size());
+            final HashMap<D, ArrayList<Integer>> weightEdgeArrayMap = new HashMap<>(this.dataIndex.size());
+
+            for (final GraphEdge<D> edge : mst) {
+                final GraphNode<D> from = edge.getNode1();
+                final D fromPoint = from.getData();
+                final GraphNode<D> to = edge.getNode2();
+                final D toPoint = to.getData();
+
+                final int dist = edge.getWeight();
+
+                // add from edge
+                {
+                    if (!dataEdgeArrayMap.containsKey(fromPoint)) {
+
+                        dataEdgeArrayMap.put(fromPoint, new ArrayList<>(mst.size()));
+                    }
+                    final ArrayList<D> dataEdgeArray = dataEdgeArrayMap.get(fromPoint);
+
+                    if (!weightEdgeArrayMap.containsKey(fromPoint)) {
+                        weightEdgeArrayMap.put(fromPoint, new ArrayList<>(mst.size()));
+                    }
+                    final ArrayList<Integer> weightEdgeArray = weightEdgeArrayMap.get(fromPoint);
+
+                    dataEdgeArray.add(toPoint);
+                    weightEdgeArray.add(dist);
+                }
+
+                // add to edge
+                {
+                    if (!dataEdgeArrayMap.containsKey(toPoint)) {
+
+                        dataEdgeArrayMap.put(toPoint, new ArrayList<>(mst.size()));
+                    }
+                    final ArrayList<D> dataEdgeArray = dataEdgeArrayMap.get(toPoint);
+
+                    if (!weightEdgeArrayMap.containsKey(toPoint)) {
+                        weightEdgeArrayMap.put(toPoint, new ArrayList<>(mst.size()));
+                    }
+                    final ArrayList<Integer> weightEdgeArray = weightEdgeArrayMap.get(toPoint);
+
+                    dataEdgeArray.add(fromPoint);
+                    weightEdgeArray.add(dist);
+                }
+            }
+
+            final ArrayList<D> dataArray;
+            {
+                dataArray = new ArrayList<>(this.dataIndex.size());
+
+                for (final D data : this.dataIndex.keySet()) {
+                    dataArray.add(data);
+                }
+            }
+
+            mstGraph = new Graph<>(false, dataArray, dataEdgeArrayMap, weightEdgeArrayMap);
+        }// end create mst graph
 
         final ArrayList<GraphNode<D>> outMstDfsPreOrderAndAddReturnList;
         {
@@ -548,7 +548,7 @@ public final class Graph<D> {
         }
 
         DisjointSet<GraphNode<D>> set = new DisjointSet<>(nodes);
-        Sort.quickSort(edges, Comparator.comparing(GraphEdge<D>::getWeight));
+        Sort.radixSort(edges, GraphEdge<D>::getWeight);
 
         for (final GraphEdge<D> edge : edges) {
             final GraphNode<D> n1 = edge.getNode1();
