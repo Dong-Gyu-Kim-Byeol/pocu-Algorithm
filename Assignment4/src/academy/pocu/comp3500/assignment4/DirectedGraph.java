@@ -252,7 +252,7 @@ public final class DirectedGraph<D> {
                         assert (edgeFlow >= 0);
                         assert (edgeRemain >= 0);
 
-                        if (edgeRemain == 0) {
+                        if (edgeRemain <= 0) {
                             continue;
                         }
 
@@ -282,7 +282,7 @@ public final class DirectedGraph<D> {
                         assert (edgeTransposedFlow <= 0);
                         assert (edgeTransposedRemain >= 0);
 
-                        if (edgeTransposedRemain == 0) {
+                        if (edgeTransposedRemain <= 0) {
                             continue;
                         }
 

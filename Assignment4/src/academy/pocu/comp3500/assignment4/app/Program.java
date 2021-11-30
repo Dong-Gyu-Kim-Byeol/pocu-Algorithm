@@ -37,7 +37,6 @@ public class Program {
 
             int bonusCount2 = project.findMaxBonusCount("ms2");
             assert (bonusCount2 == 7);
-
         }
 
         {
@@ -56,15 +55,6 @@ public class Program {
 
             int bonusCount2 = project.findMaxBonusCount("ms2");
             assert (bonusCount2 == 7);
-        }
-
-        {
-            Task[] tasks = createTasks4();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 10);
         }
 
     }
@@ -232,63 +222,6 @@ public class Program {
         o.addPredecessor(j, c);  // add c
 
         ms2.addPredecessor(o, p);
-
-        Task[] tasks = new Task[]{
-                a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2, ca, cb, cc
-        };
-
-        return tasks;
-    }
-
-    private static Task[] createTasks4() {
-        Task a = new Task("A", 3);
-        Task b = new Task("B", 5);
-        Task c = new Task("C", 6); // 3 -> 6
-        Task d = new Task("D", 2);
-        Task e = new Task("E", 1);
-        Task f = new Task("F", 2);
-        Task g = new Task("G", 6);
-        Task h = new Task("H", 8);
-        Task i = new Task("I", 2);
-        Task j = new Task("J", 6); // 4 -> 6
-        Task k = new Task("K", 2);
-        Task l = new Task("L", 8);
-        Task m = new Task("M", 7);
-        Task n = new Task("N", 1);
-        Task o = new Task("O", 1);
-        Task p = new Task("P", 6);
-        Task ms1 = new Task("ms1", 6);
-        Task ms2 = new Task("ms2", 20); // 8 -> 11
-
-        Task ca = new Task("CA", 3);
-        Task cb = new Task("CB", 5);
-        Task cc = new Task("CC", 3);
-
-        ca.addPredecessor(ms1, cc);
-        cc.addPredecessor(cb);
-        cb.addPredecessor(ca);
-
-        c.addPredecessor(b);
-        d.addPredecessor(a);
-
-        ms1.addPredecessor(a, c);
-
-        e.addPredecessor(c);
-        f.addPredecessor(g);
-        g.addPredecessor(e);
-
-        i.addPredecessor(h);
-        j.addPredecessor(ms1);
-
-        k.addPredecessor(j);
-        n.addPredecessor(k);
-        m.addPredecessor(n);
-        l.addPredecessor(m);
-
-        p.addPredecessor(i, j);
-        o.addPredecessor(j);
-
-        ms2.addPredecessor(o, p, l, d); // add l, d
 
         Task[] tasks = new Task[]{
                 a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2, ca, cb, cc

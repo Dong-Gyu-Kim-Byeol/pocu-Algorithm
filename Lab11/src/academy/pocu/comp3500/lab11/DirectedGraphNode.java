@@ -24,17 +24,23 @@ public final class DirectedGraphNode<T> {
     }
 
     public final void addNode(final DirectedGraphNodeEdge<T> edge) {
-        assert (!this.edges.containsKey(edge.getTo().getData()));
-        this.edges.put(edge.getTo().getData(), edge);
+        assert (!this.edges.containsKey(edge.getNode2().getData()));
+        this.edges.put(edge.getNode2().getData(), edge);
     }
 
     public final void removeEdge(final DirectedGraphNodeEdge<T> edge) {
-        assert (this.edges.containsKey(edge.getTo().getData()));
-        this.edges.remove(edge.getTo().getData());
+        assert (this.edges.containsKey(edge.getNode2().getData()));
+        this.edges.remove(edge.getNode2().getData());
     }
 
     public final void removeEdge(final T to) {
         assert (this.edges.containsKey(to));
         this.edges.remove(to);
     }
+
+    @Override
+    public final String toString() {
+        return data.toString();
+    }
+
 }

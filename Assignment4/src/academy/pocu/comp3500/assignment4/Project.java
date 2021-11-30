@@ -107,7 +107,8 @@ public final class Project {
 
         final int[] flow = new int[this.graph.nodeCount()];
         final int[] flowIndex = new int[2];
-        this.graph.maxFlow(true, ghostTask, taskNode, true, flow, flowIndex);
+//        this.graph.maxFlow(true, ghostTask, taskNode, true, flow, flowIndex);
+        this.graph.maxFlow(true, taskNode, ghostTask, false, flow, flowIndex);
 
 
         {
