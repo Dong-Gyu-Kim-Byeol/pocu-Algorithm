@@ -303,19 +303,6 @@ public final class DirectedGraph<D> {
                     break;
                 }
 
-//                {
-//                    assert (!isTransposedFlow.isTransposedFlow());
-//
-//                    final D toData = isTransposedFlow.getTo();
-//                    final int iToData = this.dataIndex.get(toData);
-//
-//                    final int edgeCapacity = this.getDataWeight.apply(toData);
-//                    final int edgeFlow = outFlow[iToData];
-//                    final int edgeRemain = edgeCapacity - edgeFlow;
-//
-//                    minRemainCapacity[0] = edgeRemain;
-//                }
-
                 minRemainCapacity[0] = Integer.MAX_VALUE;
                 while (isTransposedFlow != null) {
                     if (isTransposedFlow.isTransposedFlow()) {
@@ -362,19 +349,6 @@ public final class DirectedGraph<D> {
                     transposedFlow[iToData] -= minRemainCapacity[0];
                 }
             }
-
-//            {
-//                final D toData = isTransposedFlow.getTo();
-//                final int iToData = this.dataIndex.get(toData);
-//
-//                if (isTransposedFlow.isTransposedFlow()) {
-//                    transposedFlow[iToData] += minRemainCapacity[0];
-//                    outFlow[iToData] -= minRemainCapacity[0];
-//                } else {
-//                    outFlow[iToData] += minRemainCapacity[0];
-//                    transposedFlow[iToData] -= minRemainCapacity[0];
-//                }
-//            }
         }
 
         assert (outFlow[this.dataIndex.get(source)] == outFlow[this.dataIndex.get(sink)]);
