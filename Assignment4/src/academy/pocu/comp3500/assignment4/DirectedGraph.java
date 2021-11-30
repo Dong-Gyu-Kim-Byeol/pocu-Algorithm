@@ -250,23 +250,19 @@ public final class DirectedGraph<D> {
                 }
             }
 
-            if (isDiscovered[this.dataIndex.get(source)]) {
-                return;
-            }
-
-            if (this.getDataWeight.apply(source) - flow[this.dataIndex.get(source)] == 0) {
-                return;
-            }
-
             isDiscovered[this.dataIndex.get(source)] = true;
-            bfsQueue.addLast(new IsTransposedFlow<>(false, source));
+            final IsTransposedFlow<D> sourceIsTransposedFlow = new IsTransposedFlow<>(false, source);
+            bfsQueue.addLast(sourceIsTransposedFlow);
+            prePath.put(sourceIsTransposedFlow, null);
         }
 
         IsTransposedFlow<D> isTransposedFlow = null;
         while (!bfsQueue.isEmpty()) {
             isTransposedFlow = bfsQueue.poll();
+
             final DirectedGraphNode<D> node = mainGraph.get(isTransposedFlow.getData());
             final DirectedGraphNode<D> transposedNode = transposedGraph.get(isTransposedFlow.getData());
+            final D nodeData = node.getData();
 
             if (isTransposedFlow.getData().equals(sink)) {
                 break;
@@ -285,8 +281,8 @@ public final class DirectedGraph<D> {
                     continue;
                 }
 
-                assert (flow[this.dataIndex.get(nextData)] >= 0);
-                if (this.getDataWeight.apply(nextData) - flow[this.dataIndex.get(nextData)] == 0) {
+                assert (flow[this.dataIndex.get(nodeData)] >= 0);
+                if (this.getDataWeight.apply(nodeData) - flow[this.dataIndex.get(nodeData)] == 0) {
                     continue;
                 }
 
@@ -310,12 +306,12 @@ public final class DirectedGraph<D> {
                 }
 
 
-                assert (transposedFlow[this.dataIndex.get(nextTransposedData)] <= 0);
-                if (BACK_FLOW_CAPACITY - transposedFlow[this.dataIndex.get(nextTransposedData)] == 0) {
+                assert (transposedFlow[this.dataIndex.get(nodeData)] <= 0);
+                if (BACK_FLOW_CAPACITY - transposedFlow[this.dataIndex.get(nodeData)] == 0) {
                     continue;
                 }
 
-                isDiscovered[this.dataIndex.get(nextTransposedData)] = true;
+                isDiscovered[this.dataIndex.get(nodeData)] = true;
                 final IsTransposedFlow<D> nextIsTransposedFlow = new IsTransposedFlow<>(true, nextTransposedData);
                 bfsQueue.addLast(nextIsTransposedFlow);
                 prePath.put(nextIsTransposedFlow, isTransposedFlow);
@@ -330,12 +326,14 @@ public final class DirectedGraph<D> {
 
         outMinRemainCapacity[0] = Integer.MAX_VALUE;
         while (isTransposedFlow != null) {
+            final int iData = this.dataIndex.get(isTransposedFlow.getData());
+
             if (isTransposedFlow.isTransposedFlow()) {
-                final int flowCount = transposedFlow[this.dataIndex.get(isTransposedFlow.getData())];
+                final int flowCount = transposedFlow[iData];
                 outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], BACK_FLOW_CAPACITY - flowCount);
             } else {
                 final int capacity = this.getDataWeight.apply(isTransposedFlow.getData());
-                final int flowCount = flow[this.dataIndex.get(isTransposedFlow.getData())];
+                final int flowCount = flow[iData];
                 outMinRemainCapacity[0] = Math.min(outMinRemainCapacity[0], capacity - flowCount);
             }
             outPath.addFirst(isTransposedFlow);
