@@ -48,6 +48,10 @@ public final class Graph<D> {
         return this.dataIndex.size();
     }
 
+    public final HashMap<D, Integer> getDataIndex() {
+        return dataIndex;
+    }
+
     public final HashMap<D, Boolean> getDataScc() {
         return dataScc;
     }
