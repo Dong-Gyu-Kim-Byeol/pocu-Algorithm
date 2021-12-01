@@ -16,11 +16,11 @@ public final class Project {
         this.taskDataMap = new HashMap<>(tasks.length);
 
         // create graph
-        // create taskDataArray
         {
             final ArrayList<TaskData> taskDataArray = new ArrayList<>(tasks.length);
             final HashMap<Task, TaskData> tempTaskDataMap = new HashMap<>(tasks.length);
 
+            // create taskDataArray
             for (final Task task : tasks) {
                 final TaskData taskData = new TaskData(task.getTitle(), task.getEstimate());
 
@@ -47,7 +47,8 @@ public final class Project {
 
                     final TaskData preTaskData = tempTaskDataMap.get(predecessor);
                     edgeArray.add(preTaskData);
-                    edgeWeightArray.add(preTaskData.getEstimate());
+
+                    edgeWeightArray.add(task.getEstimate());
                 }
             }
 
@@ -80,7 +81,6 @@ public final class Project {
 
         final LinkedList<WeightNode<GraphNode<TaskData>>> sums = new LinkedList<>();
         {
-
             final HashMap<TaskData, Boolean> scc = this.graph.getDataScc();
             final HashMap<TaskData, GraphNode<TaskData>> graph = this.graph.getGraph();
 
@@ -122,43 +122,39 @@ public final class Project {
     }
 
     public final int findMaxBonusCount(final String task) {
-//        assert (this.taskDataMap.containsKey(task));
-//        final TaskData taskNode = this.taskDataMap.get(task);
-//
-//        final ArrayList<TaskData> ghostCombineNodes;
-//        final TaskData ghostTask;
-//        {
-//
-//            final LinkedList<GraphNode<TaskData>> searchNodes = new LinkedList<>();
-//            this.graph.bfs(true, taskNode, false, searchNodes);
-//
-//            int leafCapacitySum = 0;
-//            ghostCombineNodes = new ArrayList<>(searchNodes.size());
-//            for (final GraphNode<TaskData> node : searchNodes) {
-//                if (node.getEdges().size() == 0) {
-//                    ghostCombineNodes.add(node.getData());
-//                    leafCapacitySum += node.getData().getEstimate();
-//                }
-//            }
-//
-//            ghostTask = new TaskData("GHOST", leafCapacitySum);
-//            this.graph.addTransposedNode(ghostTask, ghostCombineNodes);
-//        }
-//
-//        final int[] flow = new int[this.graph.nodeCount()];
-//        final int[] flowIndex = new int[2];
-////        this.graph.maxFlow(true, ghostTask, taskNode, true, flow, flowIndex);
-//        this.graph.maxFlow(true, taskNode, ghostTask, false, flow, flowIndex);
-//
-//
-//        {
-//            assert (flow[flowIndex[0]] == flow[flowIndex[1]]);
-//
-//            this.graph.removeTransposedNode(ghostTask, ghostCombineNodes);
-//
-//            return flow[flowIndex[0]];
-//        }
+        assert (this.taskDataMap.containsKey(task));
+        final TaskData skinData = this.taskDataMap.get(task);
 
-        return -1;
+        final ArrayList<TaskData> ghostEdgeDataArray;
+        final TaskData ghostData;
+        {
+
+            final LinkedList<GraphNode<TaskData>> searchNodes = new LinkedList<>();
+            this.graph.bfs(true, skinData, false, searchNodes);
+
+            int leafCapacitySum = 0;
+            ghostEdgeDataArray = new ArrayList<>(searchNodes.size());
+            for (final GraphNode<TaskData> node : searchNodes) {
+                if (node.getEdges().size() == 0) {
+                    ghostEdgeDataArray.add(node.getData());
+                    leafCapacitySum += node.getData().getEstimate();
+                }
+            }
+
+            final ArrayList<Integer> ghostEdgeWeightArray = new ArrayList<>(ghostEdgeDataArray.size());
+            for (final TaskData edgeData : ghostEdgeDataArray) {
+                ghostEdgeWeightArray.add(edgeData.getEstimate());
+            }
+
+            ghostData = new TaskData("GHOST", leafCapacitySum);
+            this.graph.addTransposedNode(ghostData, ghostEdgeDataArray, ghostEdgeWeightArray, ghostEdgeWeightArray);
+        }
+
+//        final int maxBonusCount = this.graph.maxFlow(true, ghostData, skinData, true);
+        final int maxBonusCount = this.graph.maxFlow(true, skinData, ghostData, false);
+
+        this.graph.removeTransposedNode(ghostData, ghostEdgeDataArray);
+
+        return maxBonusCount;
     }
 }
