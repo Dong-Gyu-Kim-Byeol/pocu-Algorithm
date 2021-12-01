@@ -2,13 +2,13 @@ package academy.pocu.comp3500.assignment4;
 
 import java.util.HashMap;
 
-public final class GraphNode<T> {
+public final class AdjacencyListGraphNode<T> {
     private final T data;
-    private final HashMap<T, GraphEdge<T>> edges;
+    private final HashMap<T, AdjacencyListGraphEdge<T>> edges;
 
     // ---
 
-    public GraphNode(final T data) {
+    public AdjacencyListGraphNode(final T data) {
         this.data = data;
         this.edges = new HashMap<>();
     }
@@ -19,16 +19,16 @@ public final class GraphNode<T> {
         return data;
     }
 
-    public final HashMap<T, GraphEdge<T>> getEdges() {
+    public final HashMap<T, AdjacencyListGraphEdge<T>> getEdges() {
         return edges;
     }
 
-    public final void addNode(final GraphEdge<T> edge) {
+    public final void addNode(final AdjacencyListGraphEdge<T> edge) {
         assert (!this.edges.containsKey(edge.getNode2().getData()));
         this.edges.put(edge.getNode2().getData(), edge);
     }
 
-    public final void removeEdge(final GraphEdge<T> edge) {
+    public final void removeEdge(final AdjacencyListGraphEdge<T> edge) {
         assert (this.edges.containsKey(edge.getNode2().getData()));
         this.edges.remove(edge.getNode2().getData());
     }

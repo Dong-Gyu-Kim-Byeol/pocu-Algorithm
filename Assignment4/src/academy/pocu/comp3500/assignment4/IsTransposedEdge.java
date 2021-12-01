@@ -2,11 +2,11 @@ package academy.pocu.comp3500.assignment4;
 
 public final class IsTransposedEdge<T> {
     private final boolean isTransposedEdge;
-    private final GraphEdge<T> edge;
+    private final AdjacencyListGraphEdge<T> edge;
 
     // ---
 
-    public IsTransposedEdge(final boolean isTransposedEdge, final GraphEdge<T> edge) {
+    public IsTransposedEdge(final boolean isTransposedEdge, final AdjacencyListGraphEdge<T> edge) {
         this.isTransposedEdge = isTransposedEdge;
         this.edge = edge;
     }
@@ -17,7 +17,7 @@ public final class IsTransposedEdge<T> {
         return isTransposedEdge;
     }
 
-    public final GraphEdge<T> getEdge() {
+    public final AdjacencyListGraphEdge<T> getEdge() {
         return edge;
     }
 

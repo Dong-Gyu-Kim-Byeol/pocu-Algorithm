@@ -1,13 +1,13 @@
 package academy.pocu.comp3500.assignment4;
 
-public final class GraphEdge<T> {
+public final class AdjacencyListGraphEdge<T> {
     private final int weight;
-    private final GraphNode<T> node1;
-    private final GraphNode<T> node2;
+    private final AdjacencyListGraphNode<T> node1;
+    private final AdjacencyListGraphNode<T> node2;
 
     // ---
 
-    public GraphEdge(final int weight, final GraphNode<T> from, final GraphNode<T> to) {
+    public AdjacencyListGraphEdge(final int weight, final AdjacencyListGraphNode<T> from, final AdjacencyListGraphNode<T> to) {
         this.weight = weight;
         this.node1 = from;
         this.node2 = to;
@@ -19,11 +19,11 @@ public final class GraphEdge<T> {
         return weight;
     }
 
-    public final GraphNode<T> getNode1() {
+    public final AdjacencyListGraphNode<T> getNode1() {
         return node1;
     }
 
-    public final GraphNode<T> getNode2() {
+    public final AdjacencyListGraphNode<T> getNode2() {
         return node2;
     }
 

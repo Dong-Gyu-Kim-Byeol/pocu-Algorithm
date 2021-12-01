@@ -8,7 +8,7 @@ import java.util.LinkedList;
 
 public final class Project {
     private final HashMap<String, TaskData> taskDataMap;
-    private final Graph<TaskData> graph;
+    private final AdjacencyListGraph<TaskData> graph;
 
     // ---
 
@@ -52,7 +52,7 @@ public final class Project {
                 }
             }
 
-            this.graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
+            this.graph = new AdjacencyListGraph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
         }
     }
 
@@ -62,12 +62,12 @@ public final class Project {
         assert (this.taskDataMap.containsKey(task));
         final TaskData taskNode = this.taskDataMap.get(task);
 
-        final LinkedList<GraphNode<TaskData>> searchNodes = new LinkedList<>();
+        final LinkedList<AdjacencyListGraphNode<TaskData>> searchNodes = new LinkedList<>();
         this.graph.bfs(true, taskNode, false, searchNodes);
 
         int manMonths = 0;
 
-        for (final GraphNode<TaskData> node : searchNodes) {
+        for (final AdjacencyListGraphNode<TaskData> node : searchNodes) {
             final TaskData data = node.getData();
             manMonths += data.getEstimate();
         }
@@ -82,26 +82,26 @@ public final class Project {
         int max = 0;
         {
             final HashMap<TaskData, Boolean> scc = this.graph.getDataScc();
-            final HashMap<TaskData, GraphNode<TaskData>> graph = this.graph.getGraph();
+            final HashMap<TaskData, AdjacencyListGraphNode<TaskData>> graph = this.graph.getGraph();
 
-            final LinkedList<WeightNode<GraphNode<TaskData>>> bfsQueue = new LinkedList<>();
+            final LinkedList<WeightNode<AdjacencyListGraphNode<TaskData>>> bfsQueue = new LinkedList<>();
             {
-                final GraphNode<TaskData> startNode = graph.get(startData);
+                final AdjacencyListGraphNode<TaskData> startNode = graph.get(startData);
                 assert (!scc.containsKey(startNode.getData()));
 
                 bfsQueue.addLast(new WeightNode<>(startData.getEstimate(), startNode));
             }
 
             while (!bfsQueue.isEmpty()) {
-                final WeightNode<GraphNode<TaskData>> weightNode = bfsQueue.poll();
+                final WeightNode<AdjacencyListGraphNode<TaskData>> weightNode = bfsQueue.poll();
 
-                final GraphNode<TaskData> node = weightNode.getData();
+                final AdjacencyListGraphNode<TaskData> node = weightNode.getData();
                 if (node.getEdges().size() == 0) {
                     max = Math.max(max, weightNode.getWeight());
                 }
 
-                for (final GraphEdge<TaskData> edge : node.getEdges().values()) {
-                    final GraphNode<TaskData> nextNode = edge.getNode2();
+                for (final AdjacencyListGraphEdge<TaskData> edge : node.getEdges().values()) {
+                    final AdjacencyListGraphNode<TaskData> nextNode = edge.getNode2();
                     final TaskData nextData = nextNode.getData();
 
                     if (scc.containsKey(nextData)) {
@@ -124,12 +124,12 @@ public final class Project {
         final TaskData ghostData;
         {
 
-            final LinkedList<GraphNode<TaskData>> searchNodes = new LinkedList<>();
+            final LinkedList<AdjacencyListGraphNode<TaskData>> searchNodes = new LinkedList<>();
             this.graph.bfs(true, skinData, false, searchNodes);
 
             int leafCapacitySum = 0;
             ghostEdgeDataArray = new ArrayList<>(searchNodes.size());
-            for (final GraphNode<TaskData> node : searchNodes) {
+            for (final AdjacencyListGraphNode<TaskData> node : searchNodes) {
                 if (node.getEdges().size() == 0) {
                     ghostEdgeDataArray.add(node.getData());
                     leafCapacitySum += node.getData().getEstimate();
@@ -163,8 +163,8 @@ public final class Project {
 
         final int BACK_FLOW_CAPACITY = 0;
 
-        final HashMap<TaskData, GraphNode<TaskData>> mainGraph = this.graph.getTransposedGraph();
-        final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getGraph();
+        final HashMap<TaskData, AdjacencyListGraphNode<TaskData>> mainGraph = this.graph.getTransposedGraph();
+        final HashMap<TaskData, AdjacencyListGraphNode<TaskData>> transposedGraph = this.graph.getGraph();
 //        final HashMap<TaskData, GraphNode<TaskData>> mainGraph = this.graph.getGraph();
 //        final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getTransposedGraph();
 
@@ -173,7 +173,7 @@ public final class Project {
         final int[] nodeBackFlowArray = new int[dataIndex.size()];
 
         final int[] capacity = new int[dataIndex.size()];
-        for (final GraphNode<TaskData> node : mainGraph.values()) {
+        for (final AdjacencyListGraphNode<TaskData> node : mainGraph.values()) {
             final TaskData data = node.getData();
             final int iData = dataIndex.get(data);
             capacity[iData] = data.getEstimate();
@@ -204,8 +204,8 @@ public final class Project {
                     final TaskData nodeData = bfsQueue.poll();
                     final int iNodeData = dataIndex.get(nodeData);
 
-                    final GraphNode<TaskData> node = mainGraph.get(nodeData);
-                    final GraphNode<TaskData> transposedNode = transposedGraph.get(nodeData);
+                    final AdjacencyListGraphNode<TaskData> node = mainGraph.get(nodeData);
+                    final AdjacencyListGraphNode<TaskData> transposedNode = transposedGraph.get(nodeData);
 
                     final IsTransposedEdge<TaskData> nowIsTransposedFlow = bfsEdgeQueue.poll();
 
@@ -225,8 +225,8 @@ public final class Project {
                     assert (nodeRemain >= 0);
 
                     if (nodeRemain > 0 || nowIsTransposedFlow == null || nowIsTransposedFlow.isTransposedEdge()) {
-                        for (final GraphEdge<TaskData> nextEdge : node.getEdges().values()) {
-                            final GraphNode<TaskData> nextNode = nextEdge.getNode2();
+                        for (final AdjacencyListGraphEdge<TaskData> nextEdge : node.getEdges().values()) {
+                            final AdjacencyListGraphNode<TaskData> nextNode = nextEdge.getNode2();
                             final TaskData nextData = nextNode.getData();
                             final int iNextData = dataIndex.get(nextData);
 
@@ -263,8 +263,8 @@ public final class Project {
 //                    assert (transposedNodeRemain >= 0);
 //
 //                    if (transposedNodeRemain > 0 || nowIsTransposedFlow == null || !nowIsTransposedFlow.isTransposedEdge()) {
-                        for (final GraphEdge<TaskData> nextTransposedEdge : transposedNode.getEdges().values()) {
-                            final GraphNode<TaskData> nextTransposedNode = nextTransposedEdge.getNode2();
+                        for (final AdjacencyListGraphEdge<TaskData> nextTransposedEdge : transposedNode.getEdges().values()) {
+                            final AdjacencyListGraphNode<TaskData> nextTransposedNode = nextTransposedEdge.getNode2();
                             final TaskData nextTransposedData = nextTransposedNode.getData();
                             final int iNextTransposedData = dataIndex.get(nextTransposedData);
 
@@ -302,13 +302,13 @@ public final class Project {
                 int minRemainCapacity = Integer.MAX_VALUE;
 
                 while (lastEdge != null) {
-                    final GraphEdge<TaskData> edge = lastEdge.getEdge();
+                    final AdjacencyListGraphEdge<TaskData> edge = lastEdge.getEdge();
 
-                    final GraphNode<TaskData> from = edge.getNode1();
+                    final AdjacencyListGraphNode<TaskData> from = edge.getNode1();
                     final TaskData fromData = from.getData();
                     final int iFromData = dataIndex.get(fromData);
 
-                    final GraphNode<TaskData> to = edge.getNode2();
+                    final AdjacencyListGraphNode<TaskData> to = edge.getNode2();
                     final TaskData toData = to.getData();
                     final int iToData = dataIndex.get(toData);
 
@@ -338,13 +338,13 @@ public final class Project {
 
                 while (!path.isEmpty()) {
                     final IsTransposedEdge<TaskData> isTransposedFlow = path.poll();
-                    final GraphEdge<TaskData> edge = isTransposedFlow.getEdge();
+                    final AdjacencyListGraphEdge<TaskData> edge = isTransposedFlow.getEdge();
 
-                    final GraphNode<TaskData> from = edge.getNode1();
+                    final AdjacencyListGraphNode<TaskData> from = edge.getNode1();
                     final TaskData fromData = from.getData();
                     final int iFromData = dataIndex.get(fromData);
 
-                    final GraphNode<TaskData> to = edge.getNode2();
+                    final AdjacencyListGraphNode<TaskData> to = edge.getNode2();
                     final TaskData toData = to.getData();
                     final int iToData = dataIndex.get(toData);
 
