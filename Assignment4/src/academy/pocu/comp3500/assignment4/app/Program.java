@@ -57,6 +57,51 @@ public class Program {
             assert (bonusCount2 == 7);
         }
 
+        {
+            Task[] tasks = createTasksTestBackEdge1();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms1");
+            assert (bonusCount2 == 2);
+        }
+
+    }
+
+    private static Task[] createTasksTestBackEdge1() {
+        Task a = new Task("A", 2);
+        Task b = new Task("B", 1);
+        Task c = new Task("C", 1);
+        Task d = new Task("D", 2);
+        Task e = new Task("E", 2);
+        Task f = new Task("F", 2);
+        Task g = new Task("G", 2);
+        Task ms1 = new Task("ms1", 6);
+
+        Task ca = new Task("CA", 3);
+        Task cb = new Task("CB", 5);
+        Task cc = new Task("CC", 3);
+
+        ms1.addPredecessor(c, g);
+
+        c.addPredecessor(b, e);
+        b.addPredecessor(a);
+
+        e.addPredecessor(d);
+        d.addPredecessor(a);
+
+        g.addPredecessor(f);
+        f.addPredecessor(b);
+
+        ca.addPredecessor(f, cc);
+        cc.addPredecessor(cb);
+        cb.addPredecessor(ca);
+
+        Task[] tasks = new Task[]{
+                a, b, c, d, e, f, g, ms1, cc, ca, cb,
+        };
+
+        return tasks;
     }
 
     private static Task[] createTasks() {

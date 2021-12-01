@@ -340,12 +340,6 @@ public final class Project {
 
                     flow[iFromData][iToData] += minRemainCapacity;
                     flow[iToData][iFromData] -= minRemainCapacity;
-
-//                    if (isTransposedFlow.isTransposedEdge()) {
-//                        capacity[iFromData] += minRemainCapacity;
-//                    } else {
-//                        capacity[iFromData] -= minRemainCapacity;
-//                    }
                 }
 
                 outTotalFlow += minRemainCapacity;
