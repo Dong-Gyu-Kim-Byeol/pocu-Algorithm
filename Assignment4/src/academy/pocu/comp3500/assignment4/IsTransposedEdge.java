@@ -23,6 +23,6 @@ public final class IsTransposedEdge<T> {
 
     @Override
     public final String toString() {
-        return String.format("edge : %s", this.edge.toString());
+        return String.format("isTransposedEdge: %s  /  edge : %s", this.isTransposedEdge ? "Transposed" : "origin", this.edge.toString());
     }
 }

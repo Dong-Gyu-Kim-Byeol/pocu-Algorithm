@@ -145,7 +145,7 @@ public final class Project {
             this.graph.addTransposedNode(ghostData, ghostEdgeDataArray, ghostEdgeWeightArray, ghostEdgeWeightArray);
         }
 
-//        final int maxBonusCount = this.graph.maxFlow(true, ghostData, skinData, true);
+//        final int maxBonusCount = this.maxFlow(ghostData, skinData);
         final int maxBonusCount = this.maxFlow(skinData, ghostData);
 
         this.graph.removeTransposedNode(ghostData, ghostEdgeDataArray);
@@ -166,6 +166,8 @@ public final class Project {
 
         final HashMap<TaskData, GraphNode<TaskData>> mainGraph = this.graph.getGraph();
         final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getTransposedGraph();
+//        final HashMap<TaskData, GraphNode<TaskData>> mainGraph = this.graph.getTransposedGraph();
+//        final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getGraph();
 
         final int[][] flow = new int[dataIndex.size()][dataIndex.size()];
         final int[] capacity = new int[dataIndex.size()];
@@ -309,7 +311,7 @@ public final class Project {
 
                         minRemainCapacity = Math.min(minRemainCapacity, edgeTransposedRemain);
                     } else {
-                        final int edgeCapacity = edge.getWeight();
+                        final int edgeCapacity = capacity[iFromData];
 
                         final int edgeFlow = flow[iFromData][iToData];
                         assert (edgeFlow >= 0);
