@@ -79,6 +79,7 @@ public final class Project {
         assert (this.taskDataMap.containsKey(task));
         final TaskData startData = this.taskDataMap.get(task);
 
+        int max = 0;
         final LinkedList<WeightNode<GraphNode<TaskData>>> sums = new LinkedList<>();
         {
             final HashMap<TaskData, Boolean> scc = this.graph.getDataScc();
@@ -109,13 +110,9 @@ public final class Project {
                     }
 
                     bfsQueue.addLast(new WeightNode<>(weightNode.getWeight() + nextData.getEstimate(), nextNode));
+                    max = Math.max(max, weightNode.getWeight() + nextData.getEstimate());
                 }
             }
-        }
-
-        int max = 0;
-        for (final WeightNode<GraphNode<TaskData>> snm : sums) {
-            max = Math.max(max, snm.getWeight());
         }
 
         return max;
