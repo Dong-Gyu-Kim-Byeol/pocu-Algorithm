@@ -164,10 +164,10 @@ public final class Project {
 
         final int BACK_FLOW_CAPACITY = 0;
 
-        final HashMap<TaskData, GraphNode<TaskData>> mainGraph = this.graph.getGraph();
-        final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getTransposedGraph();
 //        final HashMap<TaskData, GraphNode<TaskData>> mainGraph = this.graph.getTransposedGraph();
 //        final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getGraph();
+        final HashMap<TaskData, GraphNode<TaskData>> mainGraph = this.graph.getGraph();
+        final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getTransposedGraph();
 
         final int[][] flow = new int[dataIndex.size()][dataIndex.size()];
         final int[] capacity = new int[dataIndex.size()];
