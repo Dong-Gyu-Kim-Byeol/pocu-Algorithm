@@ -261,6 +261,10 @@ public final class Project {
                             continue;
                         }
 
+                        if (isDiscovered[iNextTransposedData]) {
+                            continue;
+                        }
+
                         final int edgeTransposedFlow = flow[iNodeData][iNextTransposedData];
                         final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
 
@@ -268,10 +272,6 @@ public final class Project {
                         assert (edgeTransposedRemain >= 0);
 
                         if (edgeTransposedRemain <= 0) {
-                            continue;
-                        }
-
-                        if (isDiscovered[iNextTransposedData]) {
                             continue;
                         }
 
