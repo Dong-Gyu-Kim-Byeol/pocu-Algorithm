@@ -6,8 +6,10 @@ import academy.pocu.comp3500.assignment4.project.Task;
 public class Program {
 
     public static void main(String[] args) {
+
+
         {
-            Task[] tasks = createTasksTestBackEdge();
+            Task[] tasks = createTasksTestBackEdge1();
 
             Project project = new Project(tasks);
 
@@ -16,7 +18,7 @@ public class Program {
         }
 
         {
-            Task[] tasks = createTasksTestBackEdge1();
+            Task[] tasks = createTasksTestBackEdge();
 
             Project project = new Project(tasks);
 
@@ -84,7 +86,7 @@ public class Program {
         Task b = new Task("B", 1);
         Task c = new Task("C", 1);
         Task d = new Task("D", 2);
-        Task e = new Task("F", 2);
+        Task e = new Task("E", 2);
         Task ms1 = new Task("ms1", 6);
 
         Task ca = new Task("CA", 3);
