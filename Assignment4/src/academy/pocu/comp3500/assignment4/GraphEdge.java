@@ -1,6 +1,6 @@
 package academy.pocu.comp3500.assignment4;
 
-public class GraphEdge<T> {
+public final class GraphEdge<T> {
     private final int weight;
     private final GraphNode<T> node1;
     private final GraphNode<T> node2;
@@ -29,6 +29,10 @@ public class GraphEdge<T> {
 
     @Override
     public final String toString() {
+        if (this.node1 == null) {
+            return String.format("from : null, to : [ %s ], weight : %d", node2.toString(), weight);
+        }
+
         return String.format("from : [ %s ], to : [ %s ], weight : %d", node1.toString(), node2.toString(), weight);
     }
 }

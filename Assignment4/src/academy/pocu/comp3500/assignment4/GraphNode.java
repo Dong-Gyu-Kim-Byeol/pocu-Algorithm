@@ -1,17 +1,16 @@
 package academy.pocu.comp3500.assignment4;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 
-public class GraphNode<T> {
+public final class GraphNode<T> {
     private final T data;
-    private final LinkedList<GraphNode<T>> nodes;
+    private final HashMap<T, GraphEdge<T>> edges;
 
     // ---
 
     public GraphNode(final T data) {
         this.data = data;
-        this.nodes = new LinkedList<>();
+        this.edges = new HashMap<>();
     }
 
     // ---
@@ -20,16 +19,23 @@ public class GraphNode<T> {
         return data;
     }
 
-    public final LinkedList<GraphNode<T>> getNodes() {
-        return nodes;
+    public final HashMap<T, GraphEdge<T>> getEdges() {
+        return edges;
     }
 
-    public final void addNode(final GraphNode<T> node) {
-        this.nodes.add(node);
+    public final void addNode(final GraphEdge<T> edge) {
+        assert (!this.edges.containsKey(edge.getNode2().getData()));
+        this.edges.put(edge.getNode2().getData(), edge);
     }
 
-    public final void removeNode(final GraphNode<T> node) {
-        this.nodes.remove(node);
+    public final void removeEdge(final GraphEdge<T> edge) {
+        assert (this.edges.containsKey(edge.getNode2().getData()));
+        this.edges.remove(edge.getNode2().getData());
+    }
+
+    public final void removeEdge(final T to) {
+        assert (this.edges.containsKey(to));
+        this.edges.remove(to);
     }
 
     @Override
