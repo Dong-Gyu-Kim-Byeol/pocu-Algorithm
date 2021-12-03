@@ -3,7 +3,7 @@ package academy.pocu.comp3500.assignment4.app;
 import academy.pocu.comp3500.assignment4.Graph;
 import academy.pocu.comp3500.assignment4.GraphEdge;
 import academy.pocu.comp3500.assignment4.Project;
-import academy.pocu.comp3500.assignment4.TaskData;
+//import academy.pocu.comp3500.assignment4.TaskData;
 import academy.pocu.comp3500.assignment4.project.Task;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class Program {
         }
 
         {
-            Graph<TaskData> graph = createTasksTestBackEdge2();
+            Graph<Task> graph = createTasksTestBackEdge2();
         }
 
         // ---
@@ -168,7 +168,7 @@ public class Program {
         return tasks;
     }
 
-    private static Graph<TaskData> createTasksTestBackEdge2() {
+    private static Graph<Task> createTasksTestBackEdge2() {
         Task a = new Task("A", -1);
         Task b = new Task("B", -1);
         Task c = new Task("C", -1);
@@ -237,54 +237,42 @@ public class Program {
 
         // create graph
 
-        final ArrayList<TaskData> taskDataArray = new ArrayList<>(tasks.length);
-        final HashMap<Task, TaskData> tempTaskDataMap = new HashMap<>(tasks.length);
-        final HashMap<String, TaskData> taskDataMap = new HashMap<>(tasks.length);
+        final ArrayList<Task> taskDataArray = new ArrayList<>(tasks.length);
 
         // create taskDataArray
         for (final Task task : tasks) {
-            final TaskData taskData = new TaskData(task.getTitle(), task.getEstimate());
-
-            taskDataMap.put(taskData.getTitle(), taskData);
-
-            taskDataArray.add(taskData);
-            tempTaskDataMap.put(task, taskData);
+            taskDataArray.add(task);
         }
 
-        final HashMap<TaskData, ArrayList<TaskData>> edgeArrayMap = new HashMap<>(tasks.length);
-        final HashMap<TaskData, ArrayList<Integer>> edgeWeightArrayMap = new HashMap<>(tasks.length);
+        final HashMap<Task, ArrayList<Task>> edgeArrayMap = new HashMap<>(tasks.length);
+        final HashMap<Task, ArrayList<Integer>> edgeWeightArrayMap = new HashMap<>(tasks.length);
 
         for (final Task task : tasks) {
-            assert (tempTaskDataMap.containsKey(task));
-
-            final ArrayList<TaskData> edgeArray = new ArrayList<>(task.getPredecessors().size());
-            edgeArrayMap.put(tempTaskDataMap.get(task), edgeArray);
+            final ArrayList<Task> edgeArray = new ArrayList<>(task.getPredecessors().size());
+            edgeArrayMap.put(task, edgeArray);
 
             if (task.equals(ms)) {
-                edgeWeightArrayMap.put(tempTaskDataMap.get(task), msEdgeWeightArray);
+                edgeWeightArrayMap.put(task, msEdgeWeightArray);
             } else if (task.equals(a)) {
-                edgeWeightArrayMap.put(tempTaskDataMap.get(task), aEdgeWeightArray);
+                edgeWeightArrayMap.put(task, aEdgeWeightArray);
             } else if (task.equals(b)) {
-                edgeWeightArrayMap.put(tempTaskDataMap.get(task), bEdgeWeightArray);
+                edgeWeightArrayMap.put(task, bEdgeWeightArray);
             } else if (task.equals(c)) {
-                edgeWeightArrayMap.put(tempTaskDataMap.get(task), cEdgeWeightArray);
+                edgeWeightArrayMap.put(task, cEdgeWeightArray);
             } else if (task.equals(d)) {
-                edgeWeightArrayMap.put(tempTaskDataMap.get(task), dEdgeWeightArray);
+                edgeWeightArrayMap.put(task, dEdgeWeightArray);
             } else {
-                edgeWeightArrayMap.put(tempTaskDataMap.get(task), new ArrayList<>());
+                edgeWeightArrayMap.put(task, new ArrayList<>());
             }
 
             for (final Task predecessor : task.getPredecessors()) {
-                assert (tempTaskDataMap.containsKey(predecessor));
-
-                final TaskData preTaskData = tempTaskDataMap.get(predecessor);
-                edgeArray.add(preTaskData);
+                edgeArray.add(predecessor);
             }
         }
 
-        Graph<TaskData> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
+        Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
 
-        int bonusCount2 = graph.maxFlow(false, taskDataMap.get(ms.getTitle()), taskDataMap.get(start.getTitle()), false);
+        int bonusCount2 = graph.maxFlow(false, ms, start, false);
         assert (bonusCount2 == 5);
 
         return graph;
