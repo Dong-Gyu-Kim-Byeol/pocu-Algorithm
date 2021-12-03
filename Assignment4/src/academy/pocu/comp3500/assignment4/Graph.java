@@ -782,6 +782,16 @@ public class Graph<D> {
         return outTransposedGraph;
     }
 
+    private void copyEdgeWeight(final int[][] source, final int[][] dest) {
+        assert (source.length <= dest.length);
+        assert (source[0].length <= dest[0].length);
+
+        for (int iFrom = 0; iFrom < source.length; ++iFrom) {
+            for (int iTo = 0; iTo < source[0].length; ++iTo) {
+                dest[iFrom][iTo] = source[iFrom][iTo];
+            }
+        }
+    }
 
     // max flow
     public final int maxFlow(final boolean isSkipScc,
@@ -847,14 +857,5 @@ public class Graph<D> {
         return outTotalFlow;
     }
 
-    private void copyEdgeWeight(final int[][] source, final int[][] dest) {
-        assert (source.length <= dest.length);
-        assert (source[0].length <= dest[0].length);
 
-        for (int iFrom = 0; iFrom < source.length; ++iFrom) {
-            for (int iTo = 0; iTo < source[0].length; ++iTo) {
-                dest[iFrom][iTo] = source[iFrom][iTo];
-            }
-        }
-    }
 }
