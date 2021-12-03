@@ -1,6 +1,6 @@
 package academy.pocu.comp3500.assignment4;
 
-public class GraphEdge<T> {
+public final class GraphEdge<T> {
     private final int weight;
     private final GraphNode<T> node1;
     private final GraphNode<T> node2;
