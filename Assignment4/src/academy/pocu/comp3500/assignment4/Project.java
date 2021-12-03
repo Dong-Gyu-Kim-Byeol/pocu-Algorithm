@@ -171,20 +171,6 @@ public final class Project {
         final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getTransposedGraph();
 
         final int[][] flow = new int[dataIndex.size()][dataIndex.size()];
-        final int[][] capacity = new int[dataIndex.size()][dataIndex.size()];
-        {
-            for (final GraphNode<TaskData> from : mainGraph.values()) {
-                final TaskData fromData = from.getData();
-                final int iFrom = dataIndex.get(fromData);
-
-                for (final GraphEdge<TaskData> edge : from.getEdges().values()) {
-                    final TaskData toData = edge.getNode2().getData();
-                    final int iTo = dataIndex.get(toData);
-
-                    capacity[iFrom][iTo] = edge.getWeight();
-                }
-            }
-        }
 
         final int[] nodeFlowArray = new int[dataIndex.size()];
         final int[] nodeCapacityArray = new int[dataIndex.size()];
@@ -342,6 +328,18 @@ public final class Project {
                         assert (edgeRemain > 0);
 
                         minRemainCapacity = Math.min(minRemainCapacity, edgeRemain);
+
+                        if (!preEdgeMap.get(isTransposedEdge).isTransposedEdge()) {
+                            final int nodeCap = nodeCapacityArray[iFromData];
+
+                            final int nodeFlow = nodeFlowArray[iFromData];
+                            assert (nodeFlow >= 0);
+
+                            final int nodeRemain = nodeCap - nodeFlow;
+                            assert (nodeRemain > 0);
+
+                            minRemainCapacity = Math.min(minRemainCapacity, nodeRemain);
+                        }
                     }
                 }
 

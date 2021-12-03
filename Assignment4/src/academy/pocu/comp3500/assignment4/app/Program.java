@@ -22,6 +22,17 @@ public class Program {
         }
 
         {
+            Task[] tasks = createTasks();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms2");
+            assert (bonusCount2 == 6);
+        }
+
+
+
+        {
             Task[] tasks = createTasksTestBackEdge();
 
             Project project = new Project(tasks);
