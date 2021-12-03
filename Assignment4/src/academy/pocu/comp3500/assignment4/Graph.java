@@ -827,7 +827,7 @@ public final class Graph<D> {
                     final D toData = to.getData();
                     final int iToData = this.dataIndex.get(toData);
 
-                    if (lastEdge.isTransposedEdge()) {
+                    if (isTransposedEdge.isTransposedEdge()) {
                         final int edgeTransposedFlow = flow[iFromData][iToData];
                         assert (edgeTransposedFlow < 0);
 

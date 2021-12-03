@@ -1,11 +1,20 @@
 package academy.pocu.comp3500.assignment4.app;
 
+import academy.pocu.comp3500.assignment4.Graph;
+import academy.pocu.comp3500.assignment4.GraphEdge;
 import academy.pocu.comp3500.assignment4.Project;
+import academy.pocu.comp3500.assignment4.TaskData;
 import academy.pocu.comp3500.assignment4.project.Task;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Program {
 
     public static void main(String[] args) {
+        {
+            Graph<TaskData> graph = createTasksTestBackEdge2();
+        }
 
         // ---
 
@@ -146,6 +155,128 @@ public class Program {
         };
 
         return tasks;
+    }
+
+    private static Graph<TaskData> createTasksTestBackEdge2() {
+        Task a = new Task("A", -1);
+        Task b = new Task("B", -1);
+        Task c = new Task("C", -1);
+        Task d = new Task("D", -1);
+        Task ms = new Task("ms", -1);
+        Task start = new Task("start", -1);
+
+        ms.addPredecessor(b, a);
+        final int[] msW = new int[]{2, 7};
+        final ArrayList<Integer> msEdgeWeightArray = new ArrayList<>(ms.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : ms.getPredecessors()) {
+                msEdgeWeightArray.add(msW[i]);
+                ++i;
+            }
+        }
+
+        a.addPredecessor(c);
+        final int[] aW = new int[]{5};
+        final ArrayList<Integer> aEdgeWeightArray = new ArrayList<>(a.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : a.getPredecessors()) {
+                aEdgeWeightArray.add(aW[i]);
+                ++i;
+            }
+        }
+
+        b.addPredecessor(c, d);
+        final int[] bW = new int[]{2, 4};
+        final ArrayList<Integer> bEdgeWeightArray = new ArrayList<>(b.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : b.getPredecessors()) {
+                bEdgeWeightArray.add(bW[i]);
+                ++i;
+            }
+        }
+
+        c.addPredecessor(d, start);
+        final int[] cW = new int[]{1, 2};
+        final ArrayList<Integer> cEdgeWeightArray = new ArrayList<>(c.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : c.getPredecessors()) {
+                cEdgeWeightArray.add(cW[i]);
+                ++i;
+            }
+        }
+
+        d.addPredecessor(start);
+        final int[] dW = new int[]{9};
+        final ArrayList<Integer> dEdgeWeightArray = new ArrayList<>(d.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : d.getPredecessors()) {
+                dEdgeWeightArray.add(dW[i]);
+                ++i;
+            }
+        }
+
+        Task[] tasks = new Task[]{
+                a, b, c, d, ms, start,
+        };
+
+        // create graph
+
+        final ArrayList<TaskData> taskDataArray = new ArrayList<>(tasks.length);
+        final HashMap<Task, TaskData> tempTaskDataMap = new HashMap<>(tasks.length);
+        final HashMap<String, TaskData> taskDataMap = new HashMap<>(tasks.length);
+
+        // create taskDataArray
+        for (final Task task : tasks) {
+            final TaskData taskData = new TaskData(task.getTitle(), task.getEstimate());
+
+            taskDataMap.put(taskData.getTitle(), taskData);
+
+            taskDataArray.add(taskData);
+            tempTaskDataMap.put(task, taskData);
+        }
+
+        final HashMap<TaskData, ArrayList<TaskData>> edgeArrayMap = new HashMap<>(tasks.length);
+        final HashMap<TaskData, ArrayList<Integer>> edgeWeightArrayMap = new HashMap<>(tasks.length);
+
+        for (final Task task : tasks) {
+            assert (tempTaskDataMap.containsKey(task));
+
+            final ArrayList<TaskData> edgeArray = new ArrayList<>(task.getPredecessors().size());
+            edgeArrayMap.put(tempTaskDataMap.get(task), edgeArray);
+
+            if (task.equals(ms)) {
+                edgeWeightArrayMap.put(tempTaskDataMap.get(task), msEdgeWeightArray);
+            } else if (task.equals(a)) {
+                edgeWeightArrayMap.put(tempTaskDataMap.get(task), aEdgeWeightArray);
+            } else if (task.equals(b)) {
+                edgeWeightArrayMap.put(tempTaskDataMap.get(task), bEdgeWeightArray);
+            } else if (task.equals(c)) {
+                edgeWeightArrayMap.put(tempTaskDataMap.get(task), cEdgeWeightArray);
+            } else if (task.equals(d)) {
+                edgeWeightArrayMap.put(tempTaskDataMap.get(task), dEdgeWeightArray);
+            } else {
+                edgeWeightArrayMap.put(tempTaskDataMap.get(task), new ArrayList<>());
+            }
+
+            for (final Task predecessor : task.getPredecessors()) {
+                assert (tempTaskDataMap.containsKey(predecessor));
+
+                final TaskData preTaskData = tempTaskDataMap.get(predecessor);
+                edgeArray.add(preTaskData);
+            }
+        }
+
+        Graph<TaskData> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
+
+        int bonusCount2 = graph.maxFlow(false, taskDataMap.get(ms.getTitle()), taskDataMap.get(start.getTitle()), false);
+        assert (bonusCount2 == 5);
+
+        return graph;
     }
 
     private static Task[] createTasks() {
