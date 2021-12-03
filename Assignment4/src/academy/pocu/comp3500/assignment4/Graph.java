@@ -816,7 +816,7 @@ public final class Graph<D> {
                 int minRemainCapacity = Integer.MAX_VALUE;
 
 
-                for(IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
+                for (IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
                     final GraphEdge<D> edge = isTransposedEdge.getEdge();
 
                     final GraphNode<D> from = edge.getNode1();
@@ -848,7 +848,7 @@ public final class Graph<D> {
                     }
                 }
 
-                for(IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
+                for (IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
                     final GraphEdge<D> edge = isTransposedFlow.getEdge();
 
                     final GraphNode<D> from = edge.getNode1();

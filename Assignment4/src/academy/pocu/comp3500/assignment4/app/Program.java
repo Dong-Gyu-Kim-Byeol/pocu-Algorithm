@@ -13,6 +13,24 @@ public class Program {
 
     public static void main(String[] args) {
         {
+            Task[] tasks = createTasksTestBackEdge1();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms1");
+            assert (bonusCount2 == 2);
+        }
+
+        {
+            Task[] tasks = createTasksTestBackEdge();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms1");
+            assert (bonusCount2 == 2);
+        }
+
+        {
             Graph<TaskData> graph = createTasksTestBackEdge2();
         }
 
@@ -68,40 +86,22 @@ public class Program {
             int bonusCount2 = project.findMaxBonusCount("ms2");
             assert (bonusCount2 == 7);
         }
-
-        {
-            Task[] tasks = createTasksTestBackEdge1();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms1");
-            assert (bonusCount2 == 2);
-        }
-
-        {
-            Task[] tasks = createTasksTestBackEdge();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms1");
-            assert (bonusCount2 == 2);
-        }
-
     }
 
     private static Task[] createTasksTestBackEdge() {
         Task a = new Task("A", 2);
         Task b = new Task("B", 1);
-        Task c = new Task("C", 1);
+
         Task d = new Task("D", 2);
         Task e = new Task("E", 2);
+        Task c = new Task("C", 1);
         Task ms1 = new Task("ms1", 6);
 
         Task ca = new Task("CA", 3);
         Task cb = new Task("CB", 5);
         Task cc = new Task("CC", 3);
 
-        ms1.addPredecessor(c, e);
+        ms1.addPredecessor(e, c);
 
         c.addPredecessor(b, d);
         b.addPredecessor(a);
