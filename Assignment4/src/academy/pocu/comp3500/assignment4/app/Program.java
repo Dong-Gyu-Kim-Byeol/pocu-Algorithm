@@ -7,24 +7,7 @@ public class Program {
 
     public static void main(String[] args) {
 
-
-        {
-            Task[] tasks = createTasksTestBackEdge1();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms1");
-            assert (bonusCount2 == 2);
-        }
-
-        {
-            Task[] tasks = createTasksTestBackEdge();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms1");
-            assert (bonusCount2 == 2);
-        }
+        // ---
 
         {
             Task[] tasks = createTasks();
@@ -77,7 +60,23 @@ public class Program {
             assert (bonusCount2 == 7);
         }
 
+        {
+            Task[] tasks = createTasksTestBackEdge1();
 
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms1");
+            assert (bonusCount2 == 2);
+        }
+
+        {
+            Task[] tasks = createTasksTestBackEdge();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms1");
+            assert (bonusCount2 == 2);
+        }
 
     }
 

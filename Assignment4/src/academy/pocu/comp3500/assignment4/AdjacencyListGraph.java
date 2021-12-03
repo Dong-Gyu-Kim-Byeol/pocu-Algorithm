@@ -115,13 +115,13 @@ public final class AdjacencyListGraph<D> {
         this.dataIndex.put(data, this.dataIndex.size());
     }
 
-    public final void removeNode(final D data,
+    public final void removeNode(final D removeData,
                                  final ArrayList<D> edgeDataArray) {
 
         // removeNodeInGraph
         {
-            assert (this.graph.containsKey(data));
-            final AdjacencyListGraphNode<D> removeNode = this.graph.get(data);
+            assert (this.graph.containsKey(removeData));
+            final AdjacencyListGraphNode<D> removeNode = this.graph.get(removeData);
 
             for (final D dataEdge : edgeDataArray) {
                 assert (this.graph.containsKey(dataEdge));
@@ -132,23 +132,23 @@ public final class AdjacencyListGraph<D> {
 
         // removeNodeInTransposedGraph
         if (this.transposedGraph != null) {
-            assert (this.transposedGraph.containsKey(data));
+            assert (this.transposedGraph.containsKey(removeData));
 
             for (final D dataEdge : edgeDataArray) {
                 assert (this.transposedGraph.containsKey(dataEdge));
 
                 final AdjacencyListGraphNode<D> transposedNode = this.transposedGraph.get(dataEdge);
-                transposedNode.removeEdge(data);
+                transposedNode.removeEdge(removeData);
             }
         }
 
 
-        assert (this.dataIndex.containsKey(data));
-        this.dataIndex.remove(data);
+        assert (this.dataIndex.containsKey(removeData));
+        this.dataIndex.remove(removeData);
 
-        this.graph.remove(data);
+        this.graph.remove(removeData);
         if (this.transposedGraph != null) {
-            this.transposedGraph.remove(data);
+            this.transposedGraph.remove(removeData);
         }
     }
 
@@ -266,7 +266,7 @@ public final class AdjacencyListGraph<D> {
 
             for (final AdjacencyListGraphEdge<D> nextEdge : node.getEdges().values()) {
                 if (isSkipScc) {
-                    if (this.dataScc.containsKey(startNode.getData())) {
+                    if (this.dataScc.containsKey(nextEdge.getNode2().getData())) {
                         continue;
                     }
                 }
@@ -344,7 +344,7 @@ public final class AdjacencyListGraph<D> {
 
         for (final AdjacencyListGraphEdge<D> edge : startNode.getEdges().values()) {
             if (isSkipScc) {
-                if (this.dataScc.containsKey(startNode.getData())) {
+                if (this.dataScc.containsKey(edge.getNode2().getData())) {
                     continue;
                 }
             }
@@ -394,7 +394,7 @@ public final class AdjacencyListGraph<D> {
 
             for (final AdjacencyListGraphEdge<D> nextEdge : node.getEdges().values()) {
                 if (isSkipScc) {
-                    if (this.dataScc.containsKey(startNode.getData())) {
+                    if (this.dataScc.containsKey(nextEdge.getNode2().getData())) {
                         continue;
                     }
                 }
@@ -533,7 +533,7 @@ public final class AdjacencyListGraph<D> {
 
         for (final AdjacencyListGraphEdge<D> edge : startNode.getEdges().values()) {
             if (isSkipScc) {
-                if (this.dataScc.containsKey(startNode.getData())) {
+                if (this.dataScc.containsKey(edge.getNode2().getData())) {
                     continue;
                 }
             }
