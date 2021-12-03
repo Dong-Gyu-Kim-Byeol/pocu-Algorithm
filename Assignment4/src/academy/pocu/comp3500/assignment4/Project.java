@@ -171,6 +171,20 @@ public final class Project {
         final HashMap<TaskData, GraphNode<TaskData>> transposedGraph = this.graph.getTransposedGraph();
 
         final int[][] flow = new int[dataIndex.size()][dataIndex.size()];
+        final int[][] capacity = new int[dataIndex.size()][dataIndex.size()];
+        {
+            for (final GraphNode<TaskData> from : mainGraph.values()) {
+                final TaskData fromData = from.getData();
+                final int iFrom = dataIndex.get(fromData);
+
+                for (final GraphEdge<TaskData> edge : from.getEdges().values()) {
+                    final TaskData toData = edge.getNode2().getData();
+                    final int iTo = dataIndex.get(toData);
+
+                    capacity[iFrom][iTo] = edge.getWeight();
+                }
+            }
+        }
         final LinkedList<IsTransposedEdge<TaskData>> path = new LinkedList<>();
 
         final LinkedList<IsTransposedEdge<TaskData>> bfsEdgeQueue = new LinkedList<>();
@@ -223,11 +237,11 @@ public final class Project {
                             continue;
                         }
 
-                        if (isDiscovered[iNextTransposedData]) {
-                            continue;
-                        }
-
-                        isDiscovered[dataIndex.get(nodeData)] = true;
+//                        if (isDiscovered[iNextTransposedData]) {
+//                            continue;
+//                        }
+//
+//                        isDiscovered[dataIndex.get(nodeData)] = true;
 
                         final IsTransposedEdge<TaskData> nextIsTransposedFlow = new IsTransposedEdge<>(true, nextTransposedEdge);
                         bfsEdgeQueue.addLast(nextIsTransposedFlow);

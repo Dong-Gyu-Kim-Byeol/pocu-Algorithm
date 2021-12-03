@@ -710,7 +710,6 @@ public final class Graph<D> {
         final HashMap<D, GraphNode<D>> transposedGraph = !mainIsTransposedGraph ? this.transposedGraph : this.graph;
 
         final int[][] flow = new int[this.dataIndex.size()][this.dataIndex.size()];
-        final LinkedList<IsTransposedEdge<D>> path = new LinkedList<>();
 
         final LinkedList<IsTransposedEdge<D>> bfsEdgeQueue = new LinkedList<>();
         final HashMap<IsTransposedEdge<D>, IsTransposedEdge<D>> preEdgeMap = new HashMap<>();
@@ -814,16 +813,13 @@ public final class Graph<D> {
                     break;
                 }
 
-                assert (path.isEmpty());
                 int minRemainCapacity = Integer.MAX_VALUE;
 
-                while (true) {
-                    final GraphEdge<D> edge = lastEdge.getEdge();
+
+                for(IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
+                    final GraphEdge<D> edge = isTransposedEdge.getEdge();
 
                     final GraphNode<D> from = edge.getNode1();
-                    if (from == null) {
-                        break;
-                    }
                     final D fromData = from.getData();
                     final int iFromData = this.dataIndex.get(fromData);
 
@@ -850,13 +846,9 @@ public final class Graph<D> {
 
                         minRemainCapacity = Math.min(minRemainCapacity, edgeRemain);
                     }
-                    path.addFirst(lastEdge);
-
-                    lastEdge = preEdgeMap.get(lastEdge);
                 }
 
-                while (!path.isEmpty()) {
-                    final IsTransposedEdge<D> isTransposedFlow = path.poll();
+                for(IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
                     final GraphEdge<D> edge = isTransposedFlow.getEdge();
 
                     final GraphNode<D> from = edge.getNode1();
