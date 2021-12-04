@@ -147,15 +147,14 @@ public final class Project {
     public final int maxFlow(final Task source,
                              final Task sink) {
 
-        final HashMap<Task, Integer> dataIndex = this.graph.getDataIndex();
+        final HashMap<Task, Integer> dataIndex = this.graph.getIndexMap();
         final HashMap<Task, GraphNode<Task>> mainGraph = this.graph.getGraph();
         final HashMap<Task, GraphNode<Task>> transposedGraph = this.graph.getTransposedGraph();
 
         int outTotalFlow = 0;
 
         final int BACK_FLOW_CAPACITY = 0;
-//        final int[][] flow = new int[dataIndex.size()][dataIndex.size()];
-        final HashMap<GraphEdge<Task>, Integer> mainFlow = new HashMap<>();
+        final HashMap<GraphEdge<Task>, Integer> mainFlow = new HashMap<>(dataIndex.size());
         {
             {
                 final boolean[] isDiscovered = new boolean[dataIndex.size()];
@@ -190,7 +189,7 @@ public final class Project {
             }
         }
 
-        final HashMap<GraphEdge<Task>, Integer> transposedFlow = new HashMap<>();
+        final HashMap<GraphEdge<Task>, Integer> transposedFlow = new HashMap<>(dataIndex.size());
         {
             {
                 final boolean[] isDiscovered = new boolean[dataIndex.size()];
@@ -239,178 +238,165 @@ public final class Project {
         final HashMap<IsTransposedEdge<Task>, IsTransposedEdge<Task>> preEdgeMap = new HashMap<>();
 
         while (true) {
+
+            final boolean[] isDiscovered = new boolean[dataIndex.size()];
+            bfsEdgeQueue.clear();
+            preEdgeMap.clear();
+
             {
-                final boolean[] isDiscovered = new boolean[dataIndex.size()];
-                bfsEdgeQueue.clear();
-                preEdgeMap.clear();
+                isDiscovered[dataIndex.get(source)] = true;
+                bfsEdgeQueue.addLast(new IsTransposedEdge<>(false, new GraphEdge<>(0, null, mainGraph.get(source))));
+            }
 
-                {
-                    isDiscovered[dataIndex.get(source)] = true;
-                    bfsEdgeQueue.addLast(new IsTransposedEdge<>(false, new GraphEdge<>(0, null, mainGraph.get(source))));
-                }
+            IsTransposedEdge<Task> lastEdge = null;
+            // bfs
+            while (!bfsEdgeQueue.isEmpty()) {
+                final IsTransposedEdge<Task> nowIsTransposedFlow = bfsEdgeQueue.poll();
+                final Task nodeData = nowIsTransposedFlow.getEdge().getNode2().getData();
+                final int iNodeData = dataIndex.get(nodeData);
 
-                IsTransposedEdge<Task> lastEdge = null;
-                // bfs
-                while (!bfsEdgeQueue.isEmpty()) {
-                    final IsTransposedEdge<Task> nowIsTransposedFlow = bfsEdgeQueue.poll();
-                    final Task nodeData = nowIsTransposedFlow.getEdge().getNode2().getData();
-                    final int iNodeData = dataIndex.get(nodeData);
-
-                    if (nodeData.equals(sink)) {
-                        lastEdge = nowIsTransposedFlow;
-                        break;
-                    }
-
-                    final GraphNode<Task> transposedNode = transposedGraph.get(nodeData);
-                    for (final GraphEdge<Task> nextTransposedEdge : transposedNode.getEdges().values()) {
-                        final GraphNode<Task> nextTransposedNode = nextTransposedEdge.getNode2();
-                        final Task nextTransposedData = nextTransposedNode.getData();
-                        final int iNextTransposedData = dataIndex.get(nextTransposedData);
-
-                        assert (!nextTransposedData.equals(nodeData));
-
-                        final int edgeTransposedFlow = transposedFlow.get(nextTransposedEdge);
-                        final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
-
-                        assert (edgeTransposedFlow <= 0);
-                        assert (edgeTransposedRemain >= 0);
-
-                        if (edgeTransposedRemain <= 0) {
-                            continue;
-                        }
-
-//                        if (isDiscovered[iNextTransposedData]) {
-//                            continue;
-//                        }
-//
-//                        isDiscovered[dataIndex.get(nodeData)] = true;
-
-                        final IsTransposedEdge<Task> nextIsTransposedFlow = new IsTransposedEdge<>(true, nextTransposedEdge);
-                        bfsEdgeQueue.addLast(nextIsTransposedFlow);
-                        preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
-                    }
-
-
-                    final GraphNode<Task> node = mainGraph.get(nodeData);
-                    final int nodeFlow = nodeFlowArray[iNodeData];
-                    final int nodeCap = nodeCapacityArray[iNodeData];
-                    final int nodeRemain = nodeCap - nodeFlow;
-
-                    assert (nodeFlow >= 0);
-                    assert (nodeRemain >= 0);
-
-                    if (nodeRemain <= 0 && !nowIsTransposedFlow.isTransposedEdge()) {
-                        continue;
-                    }
-
-                    for (final GraphEdge<Task> nextEdge : node.getEdges().values()) {
-                        final GraphNode<Task> nextNode = nextEdge.getNode2();
-                        final Task nextData = nextNode.getData();
-                        final int iNextData = dataIndex.get(nextData);
-
-                        assert (!nextData.equals(nodeData));
-
-//                        if (isSkipScc) {
-//                            if (this.dataScc.containsKey(nextData)) {
-//                                continue;
-//                            }
-//                        }
-
-                        final int edgeFlow = mainFlow.get(nextEdge);
-                        final int edgeCap = nextEdge.getWeight();
-                        final int edgeRemain = edgeCap - edgeFlow;
-
-                        assert (edgeFlow >= 0);
-                        assert (edgeRemain >= 0);
-
-                        if (edgeRemain <= 0) {
-                            continue;
-                        }
-
-                        if (isDiscovered[iNextData]) {
-                            continue;
-                        }
-
-                        isDiscovered[iNextData] = true;
-
-                        final IsTransposedEdge<Task> nextIsTransposedFlow = new IsTransposedEdge<>(false, nextEdge);
-                        bfsEdgeQueue.addLast(nextIsTransposedFlow);
-                        preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
-                    }
-                } // end bfs
-
-                if (lastEdge == null) {
+                if (nodeData.equals(sink)) {
+                    lastEdge = nowIsTransposedFlow;
                     break;
                 }
 
-                int minRemainCapacity = Integer.MAX_VALUE;
+                final GraphNode<Task> transposedNode = transposedGraph.get(nodeData);
+                for (final GraphEdge<Task> nextTransposedEdge : transposedNode.getEdges().values()) {
+                    final GraphNode<Task> nextTransposedNode = nextTransposedEdge.getNode2();
+                    final Task nextTransposedData = nextTransposedNode.getData();
 
+                    assert (!nextTransposedData.equals(nodeData));
 
-                for (IsTransposedEdge<Task> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
-                    final GraphEdge<Task> edge = isTransposedEdge.getEdge();
+                    final int edgeTransposedFlow = transposedFlow.get(nextTransposedEdge);
+                    final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
 
-                    final GraphNode<Task> from = edge.getNode1();
-                    final Task fromData = from.getData();
-                    final int iFromData = dataIndex.get(fromData);
+                    assert (edgeTransposedFlow <= 0);
+                    assert (edgeTransposedRemain >= 0);
 
-                    if (isTransposedEdge.isTransposedEdge()) {
-                        final int edgeTransposedFlow = transposedFlow.get(edge);
-                        assert (edgeTransposedFlow < 0);
-
-                        final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
-                        assert (edgeTransposedRemain > 0);
-
-                        minRemainCapacity = Math.min(minRemainCapacity, edgeTransposedRemain);
-                    } else {
-                        final int edgeCapacity = edge.getWeight();
-
-                        final int edgeFlow = mainFlow.get(edge);
-                        assert (edgeFlow >= 0);
-
-                        final int edgeRemain = edgeCapacity - edgeFlow;
-                        assert (edgeRemain > 0);
-
-                        minRemainCapacity = Math.min(minRemainCapacity, edgeRemain);
-
-                        if (!preEdgeMap.get(isTransposedEdge).isTransposedEdge()) {
-                            final int nodeCap = nodeCapacityArray[iFromData];
-
-                            final int nodeFlow = nodeFlowArray[iFromData];
-                            assert (nodeFlow >= 0);
-
-                            final int nodeRemain = nodeCap - nodeFlow;
-                            assert (nodeRemain > 0);
-
-                            minRemainCapacity = Math.min(minRemainCapacity, nodeRemain);
-                        }
+                    if (edgeTransposedRemain <= 0) {
+                        continue;
                     }
+
+                    final IsTransposedEdge<Task> nextIsTransposedFlow = new IsTransposedEdge<>(true, nextTransposedEdge);
+                    bfsEdgeQueue.addLast(nextIsTransposedFlow);
+                    preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
                 }
 
-                for (IsTransposedEdge<Task> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
-                    final GraphEdge<Task> edge = isTransposedFlow.getEdge();
 
-                    final GraphNode<Task> from = edge.getNode1();
-                    final Task fromData = from.getData();
-                    final int iFromData = dataIndex.get(fromData);
+                final GraphNode<Task> node = mainGraph.get(nodeData);
+                final int nodeFlow = nodeFlowArray[iNodeData];
+                final int nodeCap = nodeCapacityArray[iNodeData];
+                final int nodeRemain = nodeCap - nodeFlow;
 
-                    if (isTransposedFlow.isTransposedEdge()) {
-                        transposedFlow.put(edge, transposedFlow.get(edge) + minRemainCapacity);
-                        final GraphEdge<Task> mainEdge = mainGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
-                        mainFlow.put(mainEdge, mainFlow.get(mainEdge) - minRemainCapacity);
-                    } else {
-                        mainFlow.put(edge, mainFlow.get(edge) + minRemainCapacity);
-                        final GraphEdge<Task> transposedEdge = transposedGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
-                        transposedFlow.put(transposedEdge, transposedFlow.get(transposedEdge) - minRemainCapacity);
-                    }
+                assert (nodeFlow >= 0);
+                assert (nodeRemain >= 0);
 
-                    if (!isTransposedFlow.isTransposedEdge()) {
-                        nodeFlowArray[iFromData] += minRemainCapacity;
-                        nodeFlowArray[iFromData] = Math.min(nodeCapacityArray[iFromData], nodeFlowArray[iFromData]);
-                    }
+                if (nodeRemain <= 0 && !nowIsTransposedFlow.isTransposedEdge()) {
+                    continue;
                 }
 
-                outTotalFlow += minRemainCapacity;
+                for (final GraphEdge<Task> nextEdge : node.getEdges().values()) {
+                    final GraphNode<Task> nextNode = nextEdge.getNode2();
+                    final Task nextData = nextNode.getData();
+                    final int iNextData = dataIndex.get(nextData);
+
+                    assert (!nextData.equals(nodeData));
+
+                    final int edgeFlow = mainFlow.get(nextEdge);
+                    final int edgeCap = nextEdge.getWeight();
+                    final int edgeRemain = edgeCap - edgeFlow;
+
+                    assert (edgeFlow >= 0);
+                    assert (edgeRemain >= 0);
+
+                    if (edgeRemain <= 0) {
+                        continue;
+                    }
+
+                    if (isDiscovered[iNextData]) {
+                        continue;
+                    }
+
+                    isDiscovered[iNextData] = true;
+
+                    final IsTransposedEdge<Task> nextIsTransposedFlow = new IsTransposedEdge<>(false, nextEdge);
+                    bfsEdgeQueue.addLast(nextIsTransposedFlow);
+                    preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
+                }
+            } // end bfs
+
+            if (lastEdge == null) {
+                break;
             }
+
+            int minRemainCapacity = Integer.MAX_VALUE;
+
+
+            for (IsTransposedEdge<Task> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
+                final GraphEdge<Task> edge = isTransposedEdge.getEdge();
+
+                final GraphNode<Task> from = edge.getNode1();
+                final Task fromData = from.getData();
+                final int iFromData = dataIndex.get(fromData);
+
+                if (isTransposedEdge.isTransposedEdge()) {
+                    final int edgeTransposedFlow = transposedFlow.get(edge);
+                    assert (edgeTransposedFlow < 0);
+
+                    final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
+                    assert (edgeTransposedRemain > 0);
+
+                    minRemainCapacity = Math.min(minRemainCapacity, edgeTransposedRemain);
+                } else {
+                    final int edgeCapacity = edge.getWeight();
+
+                    final int edgeFlow = mainFlow.get(edge);
+                    assert (edgeFlow >= 0);
+
+                    final int edgeRemain = edgeCapacity - edgeFlow;
+                    assert (edgeRemain > 0);
+
+                    minRemainCapacity = Math.min(minRemainCapacity, edgeRemain);
+
+                    if (!preEdgeMap.get(isTransposedEdge).isTransposedEdge()) {
+                        final int nodeCap = nodeCapacityArray[iFromData];
+
+                        final int nodeFlow = nodeFlowArray[iFromData];
+                        assert (nodeFlow >= 0);
+
+                        final int nodeRemain = nodeCap - nodeFlow;
+                        assert (nodeRemain > 0);
+
+                        minRemainCapacity = Math.min(minRemainCapacity, nodeRemain);
+                    }
+                }
+            }
+
+            for (IsTransposedEdge<Task> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
+                final GraphEdge<Task> edge = isTransposedFlow.getEdge();
+
+                final GraphNode<Task> from = edge.getNode1();
+                final Task fromData = from.getData();
+                final int iFromData = dataIndex.get(fromData);
+
+                if (isTransposedFlow.isTransposedEdge()) {
+                    transposedFlow.put(edge, transposedFlow.get(edge) + minRemainCapacity);
+                    final GraphEdge<Task> mainEdge = mainGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
+                    mainFlow.put(mainEdge, mainFlow.get(mainEdge) - minRemainCapacity);
+                } else {
+                    mainFlow.put(edge, mainFlow.get(edge) + minRemainCapacity);
+                    final GraphEdge<Task> transposedEdge = transposedGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
+                    transposedFlow.put(transposedEdge, transposedFlow.get(transposedEdge) - minRemainCapacity);
+                }
+
+                if (!isTransposedFlow.isTransposedEdge()) {
+                    nodeFlowArray[iFromData] += minRemainCapacity;
+                    nodeFlowArray[iFromData] = Math.min(nodeCapacityArray[iFromData], nodeFlowArray[iFromData]);
+                }
+            }
+
+            outTotalFlow += minRemainCapacity;
+
         }
 
         return outTotalFlow;

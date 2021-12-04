@@ -11,7 +11,12 @@ public class Program {
 
     public static void main(String[] args) {
         {
-            Graph<Task> graph = createTasksTestBackEdge2();
+            Task[] tasks = createTasksTestBackEdge();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms1");
+            assert (bonusCount2 == 2);
         }
 
         {
@@ -24,44 +29,8 @@ public class Program {
         }
 
         {
-            Task[] tasks = createTasksTestBackEdge();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms1");
-            assert (bonusCount2 == 2);
+            checkTasksTestBackEdge2();
         }
-
-
-
-        {
-            Task[] tasks = createTasks2();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 7);
-        }
-
-        {
-            Task[] tasks = createTasks2();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 7);
-        }
-
-        {
-            Task[] tasks = createTasks3();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 7);
-        }
-
-        // ---
 
         {
             Task[] tasks = createTasks();
@@ -88,12 +57,21 @@ public class Program {
         }
 
         {
-            Task[] tasks = createTasks();
+            Task[] tasks = createTasks2();
 
             Project project = new Project(tasks);
 
             int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 6);
+            assert (bonusCount2 == 7);
+        }
+
+        {
+            Task[] tasks = createTasks3();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms2");
+            assert (bonusCount2 == 7);
         }
     }
 
@@ -123,11 +101,9 @@ public class Program {
         cc.addPredecessor(cb);
         cb.addPredecessor(ca);
 
-        Task[] tasks = new Task[]{
+        return new Task[]{
                 a, b, c, d, e, ms1, cc, ca, cb,
         };
-
-        return tasks;
     }
 
     private static Task[] createTasksTestBackEdge1() {
@@ -159,14 +135,12 @@ public class Program {
         cc.addPredecessor(cb);
         cb.addPredecessor(ca);
 
-        Task[] tasks = new Task[]{
+        return new Task[]{
                 a, b, c, d, e, f, g, ms1, cc, ca, cb,
         };
-
-        return tasks;
     }
 
-    private static Graph<Task> createTasksTestBackEdge2() {
+    private static void checkTasksTestBackEdge2() {
         Task a = new Task("A", -1);
         Task b = new Task("B", -1);
         Task c = new Task("C", -1);
@@ -272,8 +246,6 @@ public class Program {
 
         int bonusCount2 = graph.maxFlow(false, ms, start, false);
         assert (bonusCount2 == 5);
-
-        return graph;
     }
 
     private static Task[] createTasks() {
@@ -326,11 +298,9 @@ public class Program {
 
         ms2.addPredecessor(o, p);
 
-        Task[] tasks = new Task[]{
+        return new Task[]{
                 a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2, ca, cb, cc
         };
-
-        return tasks;
     }
 
     private static Task[] createTasks2() {
@@ -383,11 +353,9 @@ public class Program {
 
         ms2.addPredecessor(o, p);
 
-        Task[] tasks = new Task[]{
+        return new Task[]{
                 a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2, ca, cb, cc
         };
-
-        return tasks;
     }
 
     private static Task[] createTasks3() {
@@ -440,10 +408,8 @@ public class Program {
 
         ms2.addPredecessor(o, p);
 
-        Task[] tasks = new Task[]{
+        return new Task[]{
                 a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2, ca, cb, cc
         };
-
-        return tasks;
     }
 }
