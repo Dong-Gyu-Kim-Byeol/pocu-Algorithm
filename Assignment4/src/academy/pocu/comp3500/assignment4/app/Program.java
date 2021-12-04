@@ -21,14 +21,7 @@ public class Program {
             assert (bonusCount2 == 2);
         }
 
-        {
-            Task[] tasks = createTasks();
 
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 6);
-        }
 
 
 
@@ -43,6 +36,33 @@ public class Program {
 
         {
             Graph<Task> graph = createTasksTestBackEdge2();
+        }
+
+        {
+            Task[] tasks = createTasks2();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms2");
+            assert (bonusCount2 == 7);
+        }
+
+        {
+            Task[] tasks = createTasks2();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms2");
+            assert (bonusCount2 == 7);
+        }
+
+        {
+            Task[] tasks = createTasks3();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms2");
+            assert (bonusCount2 == 7);
         }
 
         // ---
@@ -72,30 +92,12 @@ public class Program {
         }
 
         {
-            Task[] tasks = createTasks2();
+            Task[] tasks = createTasks();
 
             Project project = new Project(tasks);
 
             int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 7);
-        }
-
-        {
-            Task[] tasks = createTasks2();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 7);
-        }
-
-        {
-            Task[] tasks = createTasks3();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms2");
-            assert (bonusCount2 == 7);
+            assert (bonusCount2 == 6);
         }
     }
 
