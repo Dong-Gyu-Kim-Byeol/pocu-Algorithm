@@ -1,9 +1,8 @@
 package academy.pocu.comp3500.assignment4.app;
 
-//import academy.pocu.comp3500.assignment4.Graph;
-//import academy.pocu.comp3500.assignment4.GraphEdge;
+import academy.pocu.comp3500.assignment4.Graph;
+import academy.pocu.comp3500.assignment4.GraphEdge;
 import academy.pocu.comp3500.assignment4.Project;
-//import academy.pocu.comp3500.assignment4.TaskData;
 import academy.pocu.comp3500.assignment4.project.Task;
 
 import java.util.ArrayList;
@@ -12,6 +11,10 @@ import java.util.HashMap;
 public class Program {
 
     public static void main(String[] args) {
+        {
+            Graph<Task> graph = createTasksTestBackEdge2();
+        }
+
         {
             Task[] tasks = createTasks();
 
@@ -54,9 +57,7 @@ public class Program {
             assert (bonusCount2 == 2);
         }
 
-//        {
-//            Graph<Task> graph = createTasksTestBackEdge2();
-//        }
+
 
         {
             Task[] tasks = createTasks2();
@@ -190,115 +191,115 @@ public class Program {
         return tasks;
     }
 
-//    private static Graph<Task> createTasksTestBackEdge2() {
-//        Task a = new Task("A", -1);
-//        Task b = new Task("B", -1);
-//        Task c = new Task("C", -1);
-//        Task d = new Task("D", -1);
-//        Task ms = new Task("ms", -1);
-//        Task start = new Task("start", -1);
-//
-//        ms.addPredecessor(b, a);
-//        final int[] msW = new int[]{2, 7};
-//        final ArrayList<Integer> msEdgeWeightArray = new ArrayList<>(ms.getPredecessors().size());
-//        {
-//            int i = 0;
-//            for (final Task predecessor : ms.getPredecessors()) {
-//                msEdgeWeightArray.add(msW[i]);
-//                ++i;
-//            }
-//        }
-//
-//        a.addPredecessor(c);
-//        final int[] aW = new int[]{5};
-//        final ArrayList<Integer> aEdgeWeightArray = new ArrayList<>(a.getPredecessors().size());
-//        {
-//            int i = 0;
-//            for (final Task predecessor : a.getPredecessors()) {
-//                aEdgeWeightArray.add(aW[i]);
-//                ++i;
-//            }
-//        }
-//
-//        b.addPredecessor(c, d);
-//        final int[] bW = new int[]{2, 4};
-//        final ArrayList<Integer> bEdgeWeightArray = new ArrayList<>(b.getPredecessors().size());
-//        {
-//            int i = 0;
-//            for (final Task predecessor : b.getPredecessors()) {
-//                bEdgeWeightArray.add(bW[i]);
-//                ++i;
-//            }
-//        }
-//
-//        c.addPredecessor(d, start);
-//        final int[] cW = new int[]{1, 2};
-//        final ArrayList<Integer> cEdgeWeightArray = new ArrayList<>(c.getPredecessors().size());
-//        {
-//            int i = 0;
-//            for (final Task predecessor : c.getPredecessors()) {
-//                cEdgeWeightArray.add(cW[i]);
-//                ++i;
-//            }
-//        }
-//
-//        d.addPredecessor(start);
-//        final int[] dW = new int[]{9};
-//        final ArrayList<Integer> dEdgeWeightArray = new ArrayList<>(d.getPredecessors().size());
-//        {
-//            int i = 0;
-//            for (final Task predecessor : d.getPredecessors()) {
-//                dEdgeWeightArray.add(dW[i]);
-//                ++i;
-//            }
-//        }
-//
-//        Task[] tasks = new Task[]{
-//                a, b, c, d, ms, start,
-//        };
-//
-//        // create graph
-//
-//        final ArrayList<Task> taskDataArray = new ArrayList<>(tasks.length);
-//
-//        // create taskDataArray
-//        for (final Task task : tasks) {
-//            taskDataArray.add(task);
-//        }
-//
-//        final HashMap<Task, ArrayList<Task>> edgeArrayMap = new HashMap<>(tasks.length);
-//        final HashMap<Task, ArrayList<Integer>> edgeWeightArrayMap = new HashMap<>(tasks.length);
-//
-//        for (final Task task : tasks) {
-//            final ArrayList<Task> edgeArray = new ArrayList<>(task.getPredecessors().size());
-//            edgeArrayMap.put(task, edgeArray);
-//
-//            if (task.equals(ms)) {
-//                edgeWeightArrayMap.put(task, msEdgeWeightArray);
-//            } else if (task.equals(a)) {
-//                edgeWeightArrayMap.put(task, aEdgeWeightArray);
-//            } else if (task.equals(b)) {
-//                edgeWeightArrayMap.put(task, bEdgeWeightArray);
-//            } else if (task.equals(c)) {
-//                edgeWeightArrayMap.put(task, cEdgeWeightArray);
-//            } else if (task.equals(d)) {
-//                edgeWeightArrayMap.put(task, dEdgeWeightArray);
-//            } else {
-//                edgeWeightArrayMap.put(task, new ArrayList<>());
-//            }
-//
-//            for (final Task predecessor : task.getPredecessors()) {
-//                edgeArray.add(predecessor);
-//            }
-//        }
-//
-//        Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
-//
-//        int bonusCount2 = graph.maxFlow(false, ms, start, false);
-//        assert (bonusCount2 == 5);
-//
-//        return graph;
-//    }
+    private static Graph<Task> createTasksTestBackEdge2() {
+        Task a = new Task("A", -1);
+        Task b = new Task("B", -1);
+        Task c = new Task("C", -1);
+        Task d = new Task("D", -1);
+        Task ms = new Task("ms", -1);
+        Task start = new Task("start", -1);
+
+        ms.addPredecessor(b, a);
+        final int[] msW = new int[]{2, 7};
+        final ArrayList<Integer> msEdgeWeightArray = new ArrayList<>(ms.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : ms.getPredecessors()) {
+                msEdgeWeightArray.add(msW[i]);
+                ++i;
+            }
+        }
+
+        a.addPredecessor(c);
+        final int[] aW = new int[]{5};
+        final ArrayList<Integer> aEdgeWeightArray = new ArrayList<>(a.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : a.getPredecessors()) {
+                aEdgeWeightArray.add(aW[i]);
+                ++i;
+            }
+        }
+
+        b.addPredecessor(c, d);
+        final int[] bW = new int[]{2, 4};
+        final ArrayList<Integer> bEdgeWeightArray = new ArrayList<>(b.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : b.getPredecessors()) {
+                bEdgeWeightArray.add(bW[i]);
+                ++i;
+            }
+        }
+
+        c.addPredecessor(d, start);
+        final int[] cW = new int[]{1, 2};
+        final ArrayList<Integer> cEdgeWeightArray = new ArrayList<>(c.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : c.getPredecessors()) {
+                cEdgeWeightArray.add(cW[i]);
+                ++i;
+            }
+        }
+
+        d.addPredecessor(start);
+        final int[] dW = new int[]{9};
+        final ArrayList<Integer> dEdgeWeightArray = new ArrayList<>(d.getPredecessors().size());
+        {
+            int i = 0;
+            for (final Task predecessor : d.getPredecessors()) {
+                dEdgeWeightArray.add(dW[i]);
+                ++i;
+            }
+        }
+
+        Task[] tasks = new Task[]{
+                a, b, c, d, ms, start,
+        };
+
+        // create graph
+
+        final ArrayList<Task> taskDataArray = new ArrayList<>(tasks.length);
+
+        // create taskDataArray
+        for (final Task task : tasks) {
+            taskDataArray.add(task);
+        }
+
+        final HashMap<Task, ArrayList<Task>> edgeArrayMap = new HashMap<>(tasks.length);
+        final HashMap<Task, ArrayList<Integer>> edgeWeightArrayMap = new HashMap<>(tasks.length);
+
+        for (final Task task : tasks) {
+            final ArrayList<Task> edgeArray = new ArrayList<>(task.getPredecessors().size());
+            edgeArrayMap.put(task, edgeArray);
+
+            if (task.equals(ms)) {
+                edgeWeightArrayMap.put(task, msEdgeWeightArray);
+            } else if (task.equals(a)) {
+                edgeWeightArrayMap.put(task, aEdgeWeightArray);
+            } else if (task.equals(b)) {
+                edgeWeightArrayMap.put(task, bEdgeWeightArray);
+            } else if (task.equals(c)) {
+                edgeWeightArrayMap.put(task, cEdgeWeightArray);
+            } else if (task.equals(d)) {
+                edgeWeightArrayMap.put(task, dEdgeWeightArray);
+            } else {
+                edgeWeightArrayMap.put(task, new ArrayList<>());
+            }
+
+            for (final Task predecessor : task.getPredecessors()) {
+                edgeArray.add(predecessor);
+            }
+        }
+
+        Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
+
+        int bonusCount2 = graph.maxFlow(false, ms, start, false);
+        assert (bonusCount2 == 5);
+
+        return graph;
+    }
 
     private static Task[] createTasks() {
         Task a = new Task("A", 3);
