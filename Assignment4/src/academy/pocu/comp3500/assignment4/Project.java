@@ -139,7 +139,8 @@ public final class Project {
             this.graph.addTransposedNode(ghostData, ghostEdgeDataArray, ghostEdgeWeightArray, leafNodeToGhostEdgeWeightArray);
         }
 
-        final int maxBonusCount = this.maxFlow(skinData, ghostData);
+//        final int maxBonusCount = this.maxFlow(skinData, ghostData);
+        final int maxBonusCount = this.graph.maxFlow(false, skinData, ghostData, false);
 
         this.graph.removeTransposedNode(ghostData);
 
