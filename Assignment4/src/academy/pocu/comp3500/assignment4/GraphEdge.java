@@ -2,8 +2,6 @@ package academy.pocu.comp3500.assignment4;
 
 public final class GraphEdge<T> {
     private final int weight;
-    private int flow;
-
     private final GraphNode<T> node1;
     private final GraphNode<T> node2;
 
@@ -16,14 +14,6 @@ public final class GraphEdge<T> {
     }
 
     // ---
-
-    public final int getFlow() {
-        return flow;
-    }
-
-    public final void setFlow(int flow) {
-        this.flow = flow;
-    }
 
     public final int getWeight() {
         return weight;
