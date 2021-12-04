@@ -24,13 +24,13 @@ public class BallBoy {
         // https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Time_complexity
         //
         // mst 그래프 데이터 준비
-        // O(n + n)
+        // O(n + n( = mst e)) (mst e == g n-1)
         //
         // mst 그래프 만들기
-        // O(n + n)
+        // O(n + n( = mst e)) (mst e == g n-1)
         //
         // mst 그래프 해밀턴 순회를 위한 dfs
-        // O(n + n)
+        // O(n + n( = mst e))
         //
         // 해밀턴 순회를 위한 중복 제거
         // O(n)

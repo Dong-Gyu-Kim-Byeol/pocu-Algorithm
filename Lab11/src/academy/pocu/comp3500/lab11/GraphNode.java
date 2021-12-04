@@ -42,5 +42,4 @@ public final class GraphNode<T> {
     public final String toString() {
         return data.toString();
     }
-
 }

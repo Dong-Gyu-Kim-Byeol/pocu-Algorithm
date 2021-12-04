@@ -446,6 +446,12 @@ public final class Graph<D> {
         // create mst graph
         final Graph<D> mstGraph;
         {
+            // mst edge 준비
+            // O(e)
+            //
+            // mst
+            // O(e정렬) + O(e * disjoint set ( = 실질적으로 e ))
+            // https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Time_complexity
             final ArrayList<GraphEdge<D>> mst = this.kruskalMst();
             if (mst.isEmpty()) {
                 final ArrayList<GraphNode<D>> outTspList = new ArrayList<>(1);
@@ -454,6 +460,8 @@ public final class Graph<D> {
                 return outTspList;
             }
 
+            // mst 그래프 데이터 준비
+            // O(n + n( = mst e)) (mst e == g n-1)
             final HashMap<D, ArrayList<D>> dataEdgeArrayMap = new HashMap<>(this.indexMap.size());
             final HashMap<D, ArrayList<Integer>> weightEdgeArrayMap = new HashMap<>(this.indexMap.size());
 
@@ -509,11 +517,15 @@ public final class Graph<D> {
                 }
             }
 
+            // mst 그래프 만들기
+            // O(n + n( = mst e)) (mst e == g n-1)
             mstGraph = new Graph<>(false, dataArray, dataEdgeArrayMap, weightEdgeArrayMap);
         }// end create mst graph
 
         final ArrayList<GraphNode<D>> outMstDfsPreOrderAndAddReturnList;
         {
+            // mst 그래프 해밀턴 순회를 위한 dfs
+            // O(n + n( = mst e))
             final boolean[] isDiscovered = new boolean[this.indexMap.size()];
             outMstDfsPreOrderAndAddReturnList = new ArrayList<>(mstGraph.nodeCount() * 2);
             mstGraph.dfsPreOrderAndAddReturnRecursive(isSkipScc, startData, false, isDiscovered, outMstDfsPreOrderAndAddReturnList);
@@ -521,6 +533,8 @@ public final class Graph<D> {
 
         final ArrayList<GraphNode<D>> outTspList;
         {
+            // 해밀턴 순회를 위한 중복 제거
+            // O(n)
             outTspList = new ArrayList<>(mstGraph.nodeCount());
 
             final boolean[] isDiscovered = new boolean[this.indexMap.size()];
@@ -583,6 +597,8 @@ public final class Graph<D> {
         ArrayList<GraphNode<D>> nodes = new ArrayList<>(this.graph.size());
         ArrayList<GraphEdge<D>> edges = new ArrayList<>(this.graph.size() * this.graph.size());
 
+        // mst edge 준비
+        // O(e)
         for (final GraphNode<D> node : this.graph.values()) {
             nodes.add(node);
             for (final GraphEdge<D> edge : node.getEdges().values()) {
@@ -590,6 +606,9 @@ public final class Graph<D> {
             }
         }
 
+        // mst
+        // O(e정렬) + O(e * disjoint set ( = 실질적으로 e ))
+        // https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Time_complexity
         DisjointSet<GraphNode<D>> set = new DisjointSet<>(nodes);
         Sort.radixSort(edges, GraphEdge::getWeight);
 

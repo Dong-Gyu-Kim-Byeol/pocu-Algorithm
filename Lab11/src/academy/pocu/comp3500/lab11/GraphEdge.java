@@ -29,6 +29,10 @@ public final class GraphEdge<T> {
 
     @Override
     public final String toString() {
-        return String.format("from : [ %s ], to : [ %s ], weight : %d", node1.toString(), node2.toString(), weight);
+        if (this.node1 == null) {
+            return String.format("from : null, to : [ %s ], weight : %d", node2, weight);
+        }
+
+        return String.format("from : [ %s ], to : [ %s ], weight : %d", node1, node2, weight);
     }
 }

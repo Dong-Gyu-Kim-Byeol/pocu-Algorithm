@@ -199,10 +199,6 @@ public final class Sort {
         quickSortRecursive(objects, comparator, 0, objects.length - 1);
     }
 
-    public static <T> void quickSort(final ArrayList<T> objects, final Comparator<T> comparator) {
-        quickSortRecursive(objects, comparator, 0, objects.size() - 1);
-    }
-
     public static void quickSort(final char[] array) {
         quickSortRecursive(array, 0, array.length - 1);
     }
@@ -211,12 +207,6 @@ public final class Sort {
         final T temp = objects[o1];
         objects[o1] = objects[o2];
         objects[o2] = temp;
-    }
-
-    public static <T> void swap(final ArrayList<T> objects, final int o1, final int o2) {
-        final T temp = objects.get(o1);
-        objects.set(o1, objects.get(o2));
-        objects.set(o2, temp);
     }
 
     public static void swap(final char[] array, final int i1, final int i2) {
@@ -233,20 +223,6 @@ public final class Sort {
     }
 
     public static <T> void quickSortRecursive(final T[] objects, final Comparator<T> comparator, final int left, final int right) {
-        if (left >= right) {
-            return;
-        }
-
-        final int pivotPos = chooseMedianPivotPos(objects, comparator, left, right);
-        swap(objects, pivotPos, right);
-
-        final int sortedPivotPos = partition(objects, comparator, left, right);
-
-        quickSortRecursive(objects, comparator, left, sortedPivotPos - 1);
-        quickSortRecursive(objects, comparator, sortedPivotPos + 1, right);
-    }
-
-    public static <T> void quickSortRecursive(final ArrayList<T> objects, final Comparator<T> comparator, final int left, final int right) {
         if (left >= right) {
             return;
         }
@@ -330,20 +306,6 @@ public final class Sort {
         }
     }
 
-    public static <T> int chooseMedianPivotPos(final ArrayList<T> objects, final Comparator<T> comparator, final int left, final int right) {
-        final int mid = (left + right) / 2;
-
-        if ((comparator.compare(objects.get(mid), objects.get(left)) < 0 && comparator.compare(objects.get(left), objects.get(right)) < 0)
-                || (comparator.compare(objects.get(right), objects.get(left)) < 0 && comparator.compare(objects.get(left), objects.get(mid)) < 0)) {
-            return left;
-        } else if ((comparator.compare(objects.get(left), objects.get(mid)) < 0 && comparator.compare(objects.get(mid), objects.get(right)) < 0)
-                || (comparator.compare(objects.get(right), objects.get(mid)) < 0 && comparator.compare(objects.get(mid), objects.get(left)) < 0)) {
-            return mid;
-        } else {
-            return right;
-        }
-    }
-
     public static int chooseMedianPivotPos(final char[] array, final int left, final int right) {
         final int mid = (left + right) / 2;
 
@@ -366,26 +328,6 @@ public final class Sort {
         int pointer = left - 1;
         for (int i = left; i < right; ++i) {
             final int compare = comparator.compare(objects[i], objects[pivot]);
-            if (compare < 0) {
-                ++pointer;
-                swap(objects, pointer, i);
-            }
-        }
-
-        pivot = pointer + 1;
-        swap(objects, pivot, right);
-
-        return pivot;
-    }
-
-    public static <T> int partition(final ArrayList<T> objects, final Comparator<T> comparator, final int left, final int right) {
-        assert (left < right);
-
-        int pivot = right;
-
-        int pointer = left - 1;
-        for (int i = left; i < right; ++i) {
-            final int compare = comparator.compare(objects.get(i), objects.get(pivot));
             if (compare < 0) {
                 ++pointer;
                 swap(objects, pointer, i);
