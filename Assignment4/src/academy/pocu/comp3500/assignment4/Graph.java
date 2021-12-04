@@ -83,6 +83,9 @@ public final class Graph<D> {
         assert (edgeDataArray.size() == transposedEdgeWeightArray.size());
         assert (edgeDataArray.size() == edgeWeightArray.size());
 
+        assert (!this.dataIndex.containsKey(data));
+        this.dataIndex.put(data, this.dataIndex.size());
+
         // addNodeInGraph
         {
             final GraphNode<D> newNode = new GraphNode<>(data);
@@ -110,45 +113,38 @@ public final class Graph<D> {
                 transposedNode.addNode(new GraphEdge<>(transposedEdgeWeightArray.get(i), transposedNode, this.transposedGraph.get(data)));
             }
         }
-
-        assert (!this.dataIndex.containsKey(data));
-        this.dataIndex.put(data, this.dataIndex.size());
     }
 
-    public final void removeNode(final D data,
-                                 final ArrayList<D> edgeDataArray) {
-
-        // removeNodeInGraph
-        {
-            assert (this.graph.containsKey(data));
-            final GraphNode<D> removeNode = this.graph.get(data);
-
-            for (final D dataEdge : edgeDataArray) {
-                assert (this.graph.containsKey(dataEdge));
-
-                removeNode.removeEdge(dataEdge);
-            }
-        }
+    public final void removeNode(final D removeData) {
 
         // removeNodeInTransposedGraph
         if (this.transposedGraph != null) {
-            assert (this.transposedGraph.containsKey(data));
+            assert (this.transposedGraph.containsKey(removeData));
+            final GraphNode<D> removeOriginNode = this.graph.get(removeData);
 
-            for (final D dataEdge : edgeDataArray) {
-                assert (this.transposedGraph.containsKey(dataEdge));
+            for (final GraphEdge<D> fromOriginEdge : removeOriginNode.getEdges().values()) {
+                final D fromData = fromOriginEdge.getNode2().getData();
+                assert (this.transposedGraph.containsKey(fromData));
 
-                final GraphNode<D> transposedNode = this.transposedGraph.get(dataEdge);
-                transposedNode.removeEdge(data);
+                final GraphNode<D> fromTransposedNode = this.transposedGraph.get(fromData);
+                fromTransposedNode.removeEdge(removeData);
             }
         }
 
+        // removeNodeInGraph
+        {
+            assert (this.graph.containsKey(removeData));
+            final GraphNode<D> removeNode = this.graph.get(removeData);
+            removeNode.getEdges().clear();
+        }
 
-        assert (this.dataIndex.containsKey(data));
-        this.dataIndex.remove(data);
 
-        this.graph.remove(data);
+        assert (this.dataIndex.containsKey(removeData));
+        this.dataIndex.remove(removeData);
+
+        this.graph.remove(removeData);
         if (this.transposedGraph != null) {
-            this.transposedGraph.remove(data);
+            this.transposedGraph.remove(removeData);
         }
     }
 
@@ -161,6 +157,9 @@ public final class Graph<D> {
 
         assert (transposedEdgeDataArray.size() == transposedEdgeWeightArray.size());
         assert (transposedEdgeDataArray.size() == edgeWeightArray.size());
+
+        assert (!this.dataIndex.containsKey(transposedData));
+        this.dataIndex.put(transposedData, this.dataIndex.size());
 
         // addTransposedNodeInTransposedGraph
         {
@@ -189,46 +188,39 @@ public final class Graph<D> {
                 node.addNode(new GraphEdge<>(edgeWeightArray.get(i), node, this.graph.get(transposedData)));
             }
         }
-
-        assert (!this.dataIndex.containsKey(transposedData));
-        this.dataIndex.put(transposedData, this.dataIndex.size());
     }
 
-    public final void removeTransposedNode(final D transposedData,
-                                           final ArrayList<D> transposedEdgeDataArray) {
+    public final void removeTransposedNode(final D removeTransposedData) {
 
         assert (this.transposedGraph != null);
 
         // removeTransposedNodeInGraph
         {
-            assert (this.graph.containsKey(transposedData));
+            assert (this.graph.containsKey(removeTransposedData));
+            final GraphNode<D> removeTransposedNode = this.transposedGraph.get(removeTransposedData);
 
-            for (final D transposedDataEdge : transposedEdgeDataArray) {
-                assert (this.graph.containsKey(transposedDataEdge));
+            for (final GraphEdge<D> fromTransposedDataEdge : removeTransposedNode.getEdges().values()) {
+                final D fromData = fromTransposedDataEdge.getNode2().getData();
+                assert (this.graph.containsKey(fromData));
 
-                final GraphNode<D> node = this.graph.get(transposedDataEdge);
-                node.removeEdge(transposedData);
+                final GraphNode<D> from = this.graph.get(fromData);
+                from.removeEdge(removeTransposedData);
             }
         }
 
         // removeTransposedNodeInTransposedGraph
         {
-            assert (this.transposedGraph.containsKey(transposedData));
-            final GraphNode<D> removeTransposedNode = this.transposedGraph.get(transposedData);
-
-            for (final D transposedDataEdge : transposedEdgeDataArray) {
-                assert (this.transposedGraph.containsKey(transposedDataEdge));
-
-                removeTransposedNode.removeEdge(transposedDataEdge);
-            }
+            assert (this.transposedGraph.containsKey(removeTransposedData));
+            final GraphNode<D> removeTransposedNode = this.transposedGraph.get(removeTransposedData);
+            removeTransposedNode.getEdges().clear();
         }
 
 
-        this.graph.remove(transposedData);
-        this.transposedGraph.remove(transposedData);
+        this.graph.remove(removeTransposedData);
+        this.transposedGraph.remove(removeTransposedData);
 
-        assert (this.dataIndex.containsKey(transposedData));
-        this.dataIndex.remove(transposedData);
+        assert (this.dataIndex.containsKey(removeTransposedData));
+        this.dataIndex.remove(removeTransposedData);
     }
 
     // bfs

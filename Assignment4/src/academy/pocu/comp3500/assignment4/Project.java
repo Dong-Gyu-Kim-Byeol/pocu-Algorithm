@@ -110,7 +110,7 @@ public final class Project {
         assert (this.taskDataMap.containsKey(task));
         final Task skinData = this.taskDataMap.get(task);
 
-        final ArrayList<Task> ghostEdgeDataArray;
+
         final Task ghostData;
         {
 
@@ -118,7 +118,7 @@ public final class Project {
             this.graph.bfs(true, skinData, false, searchNodes);
 
             int leafCapacitySum = 0;
-            ghostEdgeDataArray = new ArrayList<>(searchNodes.size());
+            final ArrayList<Task> ghostEdgeDataArray = new ArrayList<>(searchNodes.size());
             for (final GraphNode<Task> node : searchNodes) {
                 if (node.getEdges().size() == 0) {
                     ghostEdgeDataArray.add(node.getData());
@@ -127,17 +127,19 @@ public final class Project {
             }
 
             final ArrayList<Integer> ghostEdgeWeightArray = new ArrayList<>(ghostEdgeDataArray.size());
+            final ArrayList<Integer> leafNodeToGhostEdgeWeightArray = new ArrayList<>(ghostEdgeDataArray.size());
             for (final Task edgeData : ghostEdgeDataArray) {
                 ghostEdgeWeightArray.add(edgeData.getEstimate());
+                leafNodeToGhostEdgeWeightArray.add(leafCapacitySum);
             }
 
             ghostData = new Task("GHOST", leafCapacitySum);
-            this.graph.addTransposedNode(ghostData, ghostEdgeDataArray, ghostEdgeWeightArray, ghostEdgeWeightArray);
+            this.graph.addTransposedNode(ghostData, ghostEdgeDataArray, ghostEdgeWeightArray, leafNodeToGhostEdgeWeightArray);
         }
 
         final int maxBonusCount = this.maxFlow(skinData, ghostData);
 
-        this.graph.removeTransposedNode(ghostData, ghostEdgeDataArray);
+        this.graph.removeTransposedNode(ghostData);
 
         return maxBonusCount;
     }
@@ -197,12 +199,6 @@ public final class Project {
                         final int iNextTransposedData = dataIndex.get(nextTransposedData);
 
                         assert (!nextTransposedData.equals(nodeData));
-
-//                        if (isSkipScc) {
-//                            if (this.dataScc.containsKey(nextTransposedNode.getData())) {
-//                                continue;
-//                            }
-//                        }
 
                         final int edgeTransposedFlow = flow[iNodeData][iNextTransposedData];
                         final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
