@@ -113,7 +113,6 @@ public final class Project {
 
         final Task ghostData;
         {
-
             final LinkedList<GraphNode<Task>> searchNodes = new LinkedList<>();
             this.graph.bfs(true, skinData, false, searchNodes);
 
