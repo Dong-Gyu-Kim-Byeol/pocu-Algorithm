@@ -11,12 +11,7 @@ public class Program {
 
     public static void main(String[] args) {
         {
-            Task[] tasks = createTasksTestBackEdge();
-
-            Project project = new Project(tasks);
-
-            int bonusCount2 = project.findMaxBonusCount("ms1");
-            assert (bonusCount2 == 2);
+            checkNormalMaxFlow();
         }
 
         {
@@ -29,11 +24,16 @@ public class Program {
         }
 
         {
-            checkTasksTestBackEdge2();
+            Task[] tasks = createTasksTestBackEdge2();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms1");
+            assert (bonusCount2 == 2);
         }
 
         {
-            Task[] tasks = createTasks();
+            Task[] tasks = createTasksDefault();
 
             Project project = new Project(tasks);
 
@@ -57,7 +57,7 @@ public class Program {
         }
 
         {
-            Task[] tasks = createTasks2();
+            Task[] tasks = createTasks1();
 
             Project project = new Project(tasks);
 
@@ -66,7 +66,7 @@ public class Program {
         }
 
         {
-            Task[] tasks = createTasks3();
+            Task[] tasks = createTasks2();
 
             Project project = new Project(tasks);
 
@@ -75,72 +75,7 @@ public class Program {
         }
     }
 
-    private static Task[] createTasksTestBackEdge() {
-        Task a = new Task("A", 2);
-        Task b = new Task("B", 1);
-
-        Task d = new Task("D", 2);
-        Task e = new Task("E", 2);
-        Task c = new Task("C", 1);
-        Task ms1 = new Task("ms1", 6);
-
-        Task ca = new Task("CA", 3);
-        Task cb = new Task("CB", 5);
-        Task cc = new Task("CC", 3);
-
-        ms1.addPredecessor(e, c);
-
-        c.addPredecessor(b, d);
-        b.addPredecessor(a);
-
-        d.addPredecessor(a);
-
-        e.addPredecessor(b);
-
-        ca.addPredecessor(e, cc);
-        cc.addPredecessor(cb);
-        cb.addPredecessor(ca);
-
-        return new Task[]{
-                a, b, c, d, e, ms1, cc, ca, cb,
-        };
-    }
-
-    private static Task[] createTasksTestBackEdge1() {
-        Task a = new Task("A", 2);
-        Task b = new Task("B", 1);
-        Task c = new Task("C", 1);
-        Task d = new Task("D", 2);
-        Task e = new Task("E", 2);
-        Task f = new Task("F", 2);
-        Task g = new Task("G", 2);
-        Task ms1 = new Task("ms1", 6);
-
-        Task ca = new Task("CA", 3);
-        Task cb = new Task("CB", 5);
-        Task cc = new Task("CC", 3);
-
-        ms1.addPredecessor(c, g);
-
-        c.addPredecessor(b, e);
-        b.addPredecessor(a);
-
-        e.addPredecessor(d);
-        d.addPredecessor(a);
-
-        g.addPredecessor(f);
-        f.addPredecessor(b);
-
-        ca.addPredecessor(f, cc);
-        cc.addPredecessor(cb);
-        cb.addPredecessor(ca);
-
-        return new Task[]{
-                a, b, c, d, e, f, g, ms1, cc, ca, cb,
-        };
-    }
-
-    private static void checkTasksTestBackEdge2() {
+    private static void checkNormalMaxFlow() {
         Task a = new Task("A", -1);
         Task b = new Task("B", -1);
         Task c = new Task("C", -1);
@@ -151,56 +86,36 @@ public class Program {
         ms.addPredecessor(b, a);
         final int[] msW = new int[]{2, 7};
         final ArrayList<Integer> msEdgeWeightArray = new ArrayList<>(ms.getPredecessors().size());
-        {
-            int i = 0;
-            for (final Task predecessor : ms.getPredecessors()) {
-                msEdgeWeightArray.add(msW[i]);
-                ++i;
-            }
+        for (int i = 0; i < ms.getPredecessors().size(); ++i) {
+            msEdgeWeightArray.add(msW[i]);
         }
 
         a.addPredecessor(c);
         final int[] aW = new int[]{5};
         final ArrayList<Integer> aEdgeWeightArray = new ArrayList<>(a.getPredecessors().size());
-        {
-            int i = 0;
-            for (final Task predecessor : a.getPredecessors()) {
-                aEdgeWeightArray.add(aW[i]);
-                ++i;
-            }
+        for (int i = 0; i < a.getPredecessors().size(); ++i) {
+            aEdgeWeightArray.add(aW[i]);
         }
 
         b.addPredecessor(c, d);
         final int[] bW = new int[]{2, 4};
         final ArrayList<Integer> bEdgeWeightArray = new ArrayList<>(b.getPredecessors().size());
-        {
-            int i = 0;
-            for (final Task predecessor : b.getPredecessors()) {
-                bEdgeWeightArray.add(bW[i]);
-                ++i;
-            }
+        for (int i = 0; i < b.getPredecessors().size(); ++i) {
+            bEdgeWeightArray.add(bW[i]);
         }
 
         c.addPredecessor(d, start);
         final int[] cW = new int[]{1, 2};
         final ArrayList<Integer> cEdgeWeightArray = new ArrayList<>(c.getPredecessors().size());
-        {
-            int i = 0;
-            for (final Task predecessor : c.getPredecessors()) {
-                cEdgeWeightArray.add(cW[i]);
-                ++i;
-            }
+        for (int i = 0; i < c.getPredecessors().size(); ++i) {
+            cEdgeWeightArray.add(cW[i]);
         }
 
         d.addPredecessor(start);
         final int[] dW = new int[]{9};
         final ArrayList<Integer> dEdgeWeightArray = new ArrayList<>(d.getPredecessors().size());
-        {
-            int i = 0;
-            for (final Task predecessor : d.getPredecessors()) {
-                dEdgeWeightArray.add(dW[i]);
-                ++i;
-            }
+        for (int i = 0; i < d.getPredecessors().size(); ++i) {
+            dEdgeWeightArray.add(dW[i]);
         }
 
         Task[] tasks = new Task[]{
@@ -242,13 +157,78 @@ public class Program {
             }
         }
 
-        Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
+        final Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
 
         int bonusCount2 = graph.maxFlow(false, ms, start, false);
         assert (bonusCount2 == 5);
     }
 
-    private static Task[] createTasks() {
+    private static Task[] createTasksTestBackEdge1() {
+        Task a = new Task("A", 2);
+        Task b = new Task("B", 1);
+
+        Task d = new Task("D", 2);
+        Task e = new Task("E", 2);
+        Task c = new Task("C", 1);
+        Task ms1 = new Task("ms1", 6);
+
+        Task ca = new Task("CA", 3);
+        Task cb = new Task("CB", 5);
+        Task cc = new Task("CC", 3);
+
+        ms1.addPredecessor(e, c);
+
+        c.addPredecessor(b, d);
+        b.addPredecessor(a);
+
+        d.addPredecessor(a);
+
+        e.addPredecessor(b);
+
+        ca.addPredecessor(e, cc);
+        cc.addPredecessor(cb);
+        cb.addPredecessor(ca);
+
+        return new Task[]{
+                a, b, c, d, e, ms1, cc, ca, cb,
+        };
+    }
+
+    private static Task[] createTasksTestBackEdge2() {
+        Task a = new Task("A", 2);
+        Task b = new Task("B", 1);
+        Task c = new Task("C", 1);
+        Task d = new Task("D", 2);
+        Task e = new Task("E", 2);
+        Task f = new Task("F", 2);
+        Task g = new Task("G", 2);
+        Task ms1 = new Task("ms1", 6);
+
+        Task ca = new Task("CA", 3);
+        Task cb = new Task("CB", 5);
+        Task cc = new Task("CC", 3);
+
+        ms1.addPredecessor(c, g);
+
+        c.addPredecessor(b, e);
+        b.addPredecessor(a);
+
+        e.addPredecessor(d);
+        d.addPredecessor(a);
+
+        g.addPredecessor(f);
+        f.addPredecessor(b);
+
+        ca.addPredecessor(f, cc);
+        cc.addPredecessor(cb);
+        cb.addPredecessor(ca);
+
+        return new Task[]{
+                a, b, c, d, e, f, g, ms1, cc, ca, cb,
+        };
+    }
+
+    private static Task[] createTasksDefault() {
         Task a = new Task("A", 3);
         Task b = new Task("B", 5);
         Task c = new Task("C", 3);
@@ -303,7 +283,7 @@ public class Program {
         };
     }
 
-    private static Task[] createTasks2() {
+    private static Task[] createTasks1() {
         Task a = new Task("A", 3);
         Task b = new Task("B", 5);
         Task c = new Task("C", 3);
@@ -358,7 +338,7 @@ public class Program {
         };
     }
 
-    private static Task[] createTasks3() {
+    private static Task[] createTasks2() {
         Task a = new Task("A", 3);
         Task b = new Task("B", 5);
         Task c = new Task("C", 3);

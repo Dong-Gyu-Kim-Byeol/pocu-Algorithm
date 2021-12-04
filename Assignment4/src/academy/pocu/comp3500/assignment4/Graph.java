@@ -3,6 +3,7 @@ package academy.pocu.comp3500.assignment4;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 public final class Graph<D> {
     private final HashMap<D, Integer> indexMap;
@@ -94,7 +95,7 @@ public final class Graph<D> {
             for (int i = 0; i < edgeDataArray.size(); ++i) {
                 assert (this.graph.containsKey(edgeDataArray.get(i)));
 
-                newNode.addNode(new GraphEdge<>(false, edgeWeightArray.get(i), newNode, this.graph.get(edgeDataArray.get(i))));
+                newNode.addNode(new GraphEdge<>(edgeWeightArray.get(i), newNode, this.graph.get(edgeDataArray.get(i))));
             }
         }
 
@@ -110,7 +111,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> transposedNode = this.transposedGraph.get(edgeDataArray.get(i));
 
-                transposedNode.addNode(new GraphEdge<>(true, transposedEdgeWeightArray.get(i), transposedNode, this.transposedGraph.get(data)));
+                transposedNode.addNode(new GraphEdge<>(transposedEdgeWeightArray.get(i), transposedNode, this.transposedGraph.get(data)));
             }
         }
     }
@@ -169,7 +170,7 @@ public final class Graph<D> {
             for (int i = 0; i < transposedEdgeDataArray.size(); ++i) {
                 assert (this.transposedGraph.containsKey(transposedEdgeDataArray.get(i)));
 
-                newTransposedNode.addNode(new GraphEdge<>(true, transposedEdgeWeightArray.get(i), newTransposedNode, this.transposedGraph.get(transposedEdgeDataArray.get(i))));
+                newTransposedNode.addNode(new GraphEdge<>(transposedEdgeWeightArray.get(i), newTransposedNode, this.transposedGraph.get(transposedEdgeDataArray.get(i))));
             }
         }
 
@@ -185,7 +186,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> node = this.graph.get(transposedEdgeDataArray.get(i));
 
-                node.addNode(new GraphEdge<>(false, edgeWeightArray.get(i), node, this.graph.get(transposedData)));
+                node.addNode(new GraphEdge<>(edgeWeightArray.get(i), node, this.graph.get(transposedData)));
             }
         }
     }
@@ -677,17 +678,17 @@ public final class Graph<D> {
 
         final HashMap<GraphEdge<D>, Integer> mainFlow = new HashMap<>(this.indexMap.size());
         {
-            final boolean[] isDiscovered = new boolean[indexMap.size()];
+            final boolean[] isDiscovered = new boolean[this.indexMap.size()];
 
             for (final GraphNode<D> startNode : mainGraph.values()) {
                 final LinkedList<GraphNode<D>> bfsQueue = new LinkedList<>();
 
                 {
-                    if (isDiscovered[indexMap.get(startNode.getData())]) {
+                    if (isDiscovered[this.indexMap.get(startNode.getData())]) {
                         continue;
                     }
 
-                    isDiscovered[indexMap.get(startNode.getData())] = true;
+                    isDiscovered[this.indexMap.get(startNode.getData())] = true;
                     bfsQueue.addLast(startNode);
                 }
 
@@ -697,11 +698,11 @@ public final class Graph<D> {
                     for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                         mainFlow.put(nextEdge, 0);
 
-                        if (isDiscovered[indexMap.get(nextEdge.getNode2().getData())]) {
+                        if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
                             continue;
                         }
 
-                        isDiscovered[indexMap.get(nextEdge.getNode2().getData())] = true;
+                        isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
                         bfsQueue.addLast(nextEdge.getNode2());
                     }
                 }
@@ -710,17 +711,17 @@ public final class Graph<D> {
 
         final HashMap<GraphEdge<D>, Integer> transposedFlow = new HashMap<>(this.indexMap.size());
         {
-            final boolean[] isDiscovered = new boolean[indexMap.size()];
+            final boolean[] isDiscovered = new boolean[this.indexMap.size()];
 
             for (final GraphNode<D> startNode : transposedGraph.values()) {
                 final LinkedList<GraphNode<D>> bfsQueue = new LinkedList<>();
 
                 {
-                    if (isDiscovered[indexMap.get(startNode.getData())]) {
+                    if (isDiscovered[this.indexMap.get(startNode.getData())]) {
                         continue;
                     }
 
-                    isDiscovered[indexMap.get(startNode.getData())] = true;
+                    isDiscovered[this.indexMap.get(startNode.getData())] = true;
                     bfsQueue.addLast(startNode);
                 }
 
@@ -730,19 +731,19 @@ public final class Graph<D> {
                     for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                         transposedFlow.put(nextEdge, 0);
 
-                        if (isDiscovered[indexMap.get(nextEdge.getNode2().getData())]) {
+                        if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
                             continue;
                         }
 
-                        isDiscovered[indexMap.get(nextEdge.getNode2().getData())] = true;
+                        isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
                         bfsQueue.addLast(nextEdge.getNode2());
                     }
                 }
             }
         }
 
-        final LinkedList<GraphEdge<D>> bfsEdgeQueue = new LinkedList<>();
-        final HashMap<GraphEdge<D>, GraphEdge<D>> preEdgeMap = new HashMap<>(this.indexMap.size());
+        final LinkedList<IsTransposedEdge<D>> bfsEdgeQueue = new LinkedList<>();
+        final HashMap<IsTransposedEdge<D>, IsTransposedEdge<D>> preEdgeMap = new HashMap<>();
 
         while (true) {
             final boolean[] isDiscovered = new boolean[this.indexMap.size()];
@@ -751,17 +752,17 @@ public final class Graph<D> {
 
             {
                 isDiscovered[this.indexMap.get(source)] = true;
-                bfsEdgeQueue.addLast(new GraphEdge<>(false, 0, null, mainGraph.get(source)));
+                bfsEdgeQueue.addLast(new IsTransposedEdge<>(false, new GraphEdge<>(0, null, mainGraph.get(source))));
             }
 
-            GraphEdge<D> lastEdge = null;
+            IsTransposedEdge<D> lastEdge = null;
             // bfs
             while (!bfsEdgeQueue.isEmpty()) {
-                final GraphEdge<D> nowEdge = bfsEdgeQueue.poll();
-                final D nodeData = nowEdge.getNode2().getData();
+                final IsTransposedEdge<D> nowIsTransposedFlow = bfsEdgeQueue.poll();
+                final D nodeData = nowIsTransposedFlow.getEdge().getNode2().getData();
 
                 if (nodeData.equals(sink)) {
-                    lastEdge = nowEdge;
+                    lastEdge = nowIsTransposedFlow;
                     break;
                 }
 
@@ -795,8 +796,9 @@ public final class Graph<D> {
 
                     isDiscovered[this.indexMap.get(nodeData)] = true;
 
-                    bfsEdgeQueue.addLast(nextTransposedEdge);
-                    preEdgeMap.put(nextTransposedEdge, nowEdge);
+                    final IsTransposedEdge<D> nextIsTransposedFlow = new IsTransposedEdge<>(true, nextTransposedEdge);
+                    bfsEdgeQueue.addLast(nextIsTransposedFlow);
+                    preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
                 }
 
                 final GraphNode<D> node = mainGraph.get(nodeData);
@@ -830,8 +832,9 @@ public final class Graph<D> {
 
                     isDiscovered[iNextData] = true;
 
-                    bfsEdgeQueue.addLast(nextEdge);
-                    preEdgeMap.put(nextEdge, nowEdge);
+                    final IsTransposedEdge<D> nextIsTransposedFlow = new IsTransposedEdge<>(false, nextEdge);
+                    bfsEdgeQueue.addLast(nextIsTransposedFlow);
+                    preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
                 }
             } // end bfs
 
@@ -842,8 +845,10 @@ public final class Graph<D> {
             int minRemainCapacity = Integer.MAX_VALUE;
 
 
-            for (GraphEdge<D> edge = lastEdge; edge.getNode1() != null; edge = preEdgeMap.get(edge)) {
-                if (edge.isTransposedEdge()) {
+            for (IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
+                final GraphEdge<D> edge = isTransposedEdge.getEdge();
+
+                if (isTransposedEdge.isTransposedEdge()) {
                     final int edgeTransposedFlow = transposedFlow.get(edge);
                     assert (edgeTransposedFlow < 0);
 
@@ -864,8 +869,10 @@ public final class Graph<D> {
                 }
             }
 
-            for (GraphEdge<D> edge = lastEdge; edge.getNode1() != null; edge = preEdgeMap.get(edge)) {
-                if (edge.isTransposedEdge()) {
+            for (IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
+                final GraphEdge<D> edge = isTransposedFlow.getEdge();
+
+                if (isTransposedFlow.isTransposedEdge()) {
                     transposedFlow.put(edge, transposedFlow.get(edge) + minRemainCapacity);
                     final GraphEdge<D> mainEdge = mainGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
                     mainFlow.put(mainEdge, mainFlow.get(mainEdge) - minRemainCapacity);
@@ -873,6 +880,265 @@ public final class Graph<D> {
                     mainFlow.put(edge, mainFlow.get(edge) + minRemainCapacity);
                     final GraphEdge<D> transposedEdge = transposedGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
                     transposedFlow.put(transposedEdge, transposedFlow.get(transposedEdge) - minRemainCapacity);
+                }
+            }
+
+            outTotalFlow += minRemainCapacity;
+        }
+
+        return outTotalFlow;
+    }
+
+    // max flow
+    public final int maxFlowAndNodeCapacity(final boolean isSkipScc,
+                                            final D source,
+                                            final D sink,
+                                            final boolean mainIsTransposedGraph,
+                                            final Function<D, Integer> getNodeCapacity) {
+
+        if (isSkipScc) {
+            assert (!this.dataScc.containsKey(source));
+            assert (!this.dataScc.containsKey(sink));
+        }
+
+        int outTotalFlow = 0;
+
+        final int BACK_FLOW_CAPACITY = 0;
+
+        final HashMap<D, GraphNode<D>> mainGraph = mainIsTransposedGraph ? this.transposedGraph : this.graph;
+        final HashMap<D, GraphNode<D>> transposedGraph = !mainIsTransposedGraph ? this.transposedGraph : this.graph;
+
+        final HashMap<GraphEdge<D>, Integer> mainFlow = new HashMap<>(this.indexMap.size());
+        {
+            final boolean[] isDiscovered = new boolean[this.indexMap.size()];
+
+            for (final GraphNode<D> startNode : mainGraph.values()) {
+                final LinkedList<GraphNode<D>> bfsQueue = new LinkedList<>();
+
+                {
+                    if (isDiscovered[this.indexMap.get(startNode.getData())]) {
+                        continue;
+                    }
+
+                    isDiscovered[this.indexMap.get(startNode.getData())] = true;
+                    bfsQueue.addLast(startNode);
+                }
+
+                while (!bfsQueue.isEmpty()) {
+                    final GraphNode<D> node = bfsQueue.poll();
+
+                    for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
+                        mainFlow.put(nextEdge, 0);
+
+                        if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
+                            continue;
+                        }
+
+                        isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
+                        bfsQueue.addLast(nextEdge.getNode2());
+                    }
+                }
+            }
+        }
+
+        final HashMap<GraphEdge<D>, Integer> transposedFlow = new HashMap<>(this.indexMap.size());
+        {
+            final boolean[] isDiscovered = new boolean[this.indexMap.size()];
+
+            for (final GraphNode<D> startNode : transposedGraph.values()) {
+                final LinkedList<GraphNode<D>> bfsQueue = new LinkedList<>();
+
+                {
+                    if (isDiscovered[this.indexMap.get(startNode.getData())]) {
+                        continue;
+                    }
+
+                    isDiscovered[this.indexMap.get(startNode.getData())] = true;
+                    bfsQueue.addLast(startNode);
+                }
+
+                while (!bfsQueue.isEmpty()) {
+                    final GraphNode<D> node = bfsQueue.poll();
+
+                    for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
+                        transposedFlow.put(nextEdge, 0);
+
+                        if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
+                            continue;
+                        }
+
+                        isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
+                        bfsQueue.addLast(nextEdge.getNode2());
+                    }
+                }
+            }
+        }
+
+        final int[] nodeFlowArray = new int[this.indexMap.size()];
+        final int[] nodeCapacityArray = new int[this.indexMap.size()];
+        {
+            for (final GraphNode<D> from : mainGraph.values()) {
+                final D fromData = from.getData();
+                final int iFrom = this.indexMap.get(fromData);
+                nodeCapacityArray[iFrom] = getNodeCapacity.apply(fromData);
+            }
+        }
+
+        final LinkedList<IsTransposedEdge<D>> bfsEdgeQueue = new LinkedList<>();
+        final HashMap<IsTransposedEdge<D>, IsTransposedEdge<D>> preEdgeMap = new HashMap<>();
+
+        while (true) {
+            final boolean[] isDiscovered = new boolean[this.indexMap.size()];
+            bfsEdgeQueue.clear();
+            preEdgeMap.clear();
+
+            {
+                isDiscovered[this.indexMap.get(source)] = true;
+                bfsEdgeQueue.addLast(new IsTransposedEdge<>(false, new GraphEdge<>(0, null, mainGraph.get(source))));
+            }
+
+            IsTransposedEdge<D> lastEdge = null;
+            // bfs
+            while (!bfsEdgeQueue.isEmpty()) {
+                final IsTransposedEdge<D> nowIsTransposedFlow = bfsEdgeQueue.poll();
+                final D nodeData = nowIsTransposedFlow.getEdge().getNode2().getData();
+                final int iNodeData = this.indexMap.get(nodeData);
+
+                if (nodeData.equals(sink)) {
+                    lastEdge = nowIsTransposedFlow;
+                    break;
+                }
+
+                final GraphNode<D> transposedNode = transposedGraph.get(nodeData);
+                for (final GraphEdge<D> nextTransposedEdge : transposedNode.getEdges().values()) {
+                    final GraphNode<D> nextTransposedNode = nextTransposedEdge.getNode2();
+                    final D nextTransposedData = nextTransposedNode.getData();
+
+                    assert (!nextTransposedData.equals(nodeData));
+
+                    final int edgeTransposedFlow = transposedFlow.get(nextTransposedEdge);
+                    final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
+
+                    assert (edgeTransposedFlow <= 0);
+                    assert (edgeTransposedRemain >= 0);
+
+                    if (edgeTransposedRemain <= 0) {
+                        continue;
+                    }
+
+                    final IsTransposedEdge<D> nextIsTransposedFlow = new IsTransposedEdge<>(true, nextTransposedEdge);
+                    bfsEdgeQueue.addLast(nextIsTransposedFlow);
+                    preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
+                }
+
+                final GraphNode<D> node = mainGraph.get(nodeData);
+                final int nodeFlow = nodeFlowArray[iNodeData];
+                final int nodeCap = nodeCapacityArray[iNodeData];
+                final int nodeRemain = nodeCap - nodeFlow;
+
+                assert (nodeFlow >= 0);
+                assert (nodeRemain >= 0);
+
+                if (nodeRemain <= 0 && !nowIsTransposedFlow.isTransposedEdge()) {
+                    continue;
+                }
+
+                for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
+                    final GraphNode<D> nextNode = nextEdge.getNode2();
+                    final D nextData = nextNode.getData();
+                    final int iNextData = this.indexMap.get(nextData);
+
+                    assert (!nextData.equals(nodeData));
+
+                    final int edgeFlow = mainFlow.get(nextEdge);
+                    final int edgeCap = nextEdge.getWeight();
+                    final int edgeRemain = edgeCap - edgeFlow;
+
+                    assert (edgeFlow >= 0);
+                    assert (edgeRemain >= 0);
+
+                    if (edgeRemain <= 0) {
+                        continue;
+                    }
+
+                    if (isDiscovered[iNextData]) {
+                        continue;
+                    }
+
+                    isDiscovered[iNextData] = true;
+
+                    final IsTransposedEdge<D> nextIsTransposedFlow = new IsTransposedEdge<>(false, nextEdge);
+                    bfsEdgeQueue.addLast(nextIsTransposedFlow);
+                    preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
+                }
+            } // end bfs
+
+            if (lastEdge == null) {
+                break;
+            }
+
+            int minRemainCapacity = Integer.MAX_VALUE;
+
+            for (IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
+                final GraphEdge<D> edge = isTransposedEdge.getEdge();
+
+                final GraphNode<D> from = edge.getNode1();
+                final D fromData = from.getData();
+                final int iFromData = this.indexMap.get(fromData);
+
+                if (isTransposedEdge.isTransposedEdge()) {
+                    final int edgeTransposedFlow = transposedFlow.get(edge);
+                    assert (edgeTransposedFlow < 0);
+
+                    final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
+                    assert (edgeTransposedRemain > 0);
+
+                    minRemainCapacity = Math.min(minRemainCapacity, edgeTransposedRemain);
+                } else {
+                    final int edgeCapacity = edge.getWeight();
+
+                    final int edgeFlow = mainFlow.get(edge);
+                    assert (edgeFlow >= 0);
+
+                    final int edgeRemain = edgeCapacity - edgeFlow;
+                    assert (edgeRemain > 0);
+
+                    minRemainCapacity = Math.min(minRemainCapacity, edgeRemain);
+
+                    if (!preEdgeMap.get(isTransposedEdge).isTransposedEdge()) {
+                        final int nodeCap = nodeCapacityArray[iFromData];
+
+                        final int nodeFlow = nodeFlowArray[iFromData];
+                        assert (nodeFlow >= 0);
+
+                        final int nodeRemain = nodeCap - nodeFlow;
+                        assert (nodeRemain > 0);
+
+                        minRemainCapacity = Math.min(minRemainCapacity, nodeRemain);
+                    }
+                }
+            }
+
+            for (IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
+                final GraphEdge<D> edge = isTransposedFlow.getEdge();
+
+                final GraphNode<D> from = edge.getNode1();
+                final D fromData = from.getData();
+                final int iFromData = this.indexMap.get(fromData);
+
+                if (isTransposedFlow.isTransposedEdge()) {
+                    transposedFlow.put(edge, transposedFlow.get(edge) + minRemainCapacity);
+                    final GraphEdge<D> mainEdge = mainGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
+                    mainFlow.put(mainEdge, mainFlow.get(mainEdge) - minRemainCapacity);
+                } else {
+                    mainFlow.put(edge, mainFlow.get(edge) + minRemainCapacity);
+                    final GraphEdge<D> transposedEdge = transposedGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
+                    transposedFlow.put(transposedEdge, transposedFlow.get(transposedEdge) - minRemainCapacity);
+                }
+
+                if (!isTransposedFlow.isTransposedEdge()) {
+                    nodeFlowArray[iFromData] += minRemainCapacity;
+                    nodeFlowArray[iFromData] = Math.min(nodeCapacityArray[iFromData], nodeFlowArray[iFromData]);
                 }
             }
 
@@ -910,7 +1176,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> to = outGraph.get(toData);
 
-                from.addNode(new GraphEdge<>(false, toWeightEdgeArray.get(i), from, to));
+                from.addNode(new GraphEdge<>(toWeightEdgeArray.get(i), from, to));
             }
         }
 
@@ -937,7 +1203,7 @@ public final class Graph<D> {
                 final GraphNode<D> from = outTransposedGraph.get(fromDataEdge);
 
                 final int edgeWeight = this.graph.get(toData).getEdges().get(from.getData()).getWeight();
-                from.addNode(new GraphEdge<>(true, edgeWeight, from, outTransposedGraph.get(toData)));
+                from.addNode(new GraphEdge<>(edgeWeight, from, outTransposedGraph.get(toData)));
             }
         }
 
