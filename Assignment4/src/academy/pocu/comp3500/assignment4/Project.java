@@ -8,6 +8,7 @@ import java.util.LinkedList;
 
 public final class Project {
     private final HashMap<String, Integer> dataIndex;
+    private final HashMap<Integer, String> titleMap;
 
     private final HashMap<String, Task> taskGraph;
     private final HashMap<String, TransposedTask> transposedTaskGraph;
@@ -17,10 +18,11 @@ public final class Project {
     // ---
 
     public Project(final Task[] tasks) {
-        this.dataIndex = new HashMap<>(tasks.length);
-        this.taskGraph = new HashMap<>(tasks.length);
-        this.transposedTaskGraph = new HashMap<>(tasks.length);
-        this.dataScc = new HashMap<>(tasks.length);
+        this.dataIndex = new HashMap<>(tasks.length + 1);
+        this.titleMap = new HashMap<>(tasks.length + 1);
+        this.taskGraph = new HashMap<>(tasks.length + 1);
+        this.transposedTaskGraph = new HashMap<>(tasks.length + 1);
+        this.dataScc = new HashMap<>(tasks.length + 1);
 
         // create graph
         {
@@ -28,7 +30,9 @@ public final class Project {
             int i = 0;
             for (final Task task : tasks) {
                 this.taskGraph.put(task.getTitle(), task);
-                this.dataIndex.put(task.getTitle(), i++);
+                this.dataIndex.put(task.getTitle(), i);
+                this.titleMap.put(i, task.getTitle());
+                ++i;
             }
 
             final HashMap<Task, ArrayList<Task>> edgeArrayMap = new HashMap<>(tasks.length);
@@ -194,6 +198,7 @@ public final class Project {
             // add ghost
             {
                 this.dataIndex.put(ghostData.getTitle(), this.dataIndex.size());
+                this.titleMap.put(this.titleMap.size(), ghostData.getTitle());
 
                 // addTransposedNodeInTransposedGraph
                 {
@@ -213,6 +218,7 @@ public final class Project {
         // remove ghost
         {
             this.dataIndex.remove(ghostData.getTitle());
+            this.titleMap.remove(this.titleMap.size() - 1);
             this.transposedTaskGraph.remove(ghostData.getTitle());
             ghostData.getNext().clear();
         }
@@ -338,21 +344,6 @@ public final class Project {
 
         final int BACK_FLOW_CAPACITY = 0;
         final int[][] flow = new int[dataIndex.size()][dataIndex.size()];
-        final int[][] capacity = new int[dataIndex.size()][dataIndex.size()];
-        {
-            for (final TransposedTask from : this.transposedTaskGraph.values()) {
-                final String fromData = from.getTitle();
-                final int iFrom = dataIndex.get(fromData);
-
-                for (final TransposedTask to : from.getNext()) {
-                    final String toData = to.getTitle();
-                    final int iTo = this.dataIndex.get(toData);
-
-                    capacity[iFrom][iTo] = from.getEstimate();
-                    capacity[iTo][iFrom] = -1;
-                }
-            }
-        }
 
         final int[] nodeFlowArray = new int[dataIndex.size()];
         final int[] nodeCapacityArray = new int[dataIndex.size()];
@@ -384,30 +375,19 @@ public final class Project {
                 while (!bfsEdgeQueue.isEmpty()) {
                     final IsTransposedTask nowIsTransposedFlow = bfsEdgeQueue.poll();
                     final int iNode = nowIsTransposedFlow.getTo();
+                    final String nodeData = this.titleMap.get(iNode);
 
                     if (iNode == iSink) {
                         lastEdge = nowIsTransposedFlow;
                         break;
                     }
 
-                    for (int iNext = 0; iNext < this.dataIndex.size(); ++iNext) {
-                        final boolean isTransposed = capacity[iNode][iNext] == -1;
-
-                        if (!isTransposed) {
-                            final int nodeFlow = nodeFlowArray[iNode];
-                            final int nodeCap = nodeCapacityArray[iNode];
-                            final int nodeRemain = nodeCap - nodeFlow;
-
-                            assert (nodeFlow >= 0);
-                            assert (nodeRemain >= 0);
-
-                            if (nodeRemain <= 0 && !nowIsTransposedFlow.isTransposedEdge()) {
-                                continue;
-                            }
-                        }
-
-                        if (isTransposed) {
-                            final int edgeTransposedFlow = flow[iNode][iNext];
+                    // back
+                    final Task transposedNode = this.taskGraph.get(nodeData);
+                    if (transposedNode != null) {
+                        for (final Task nextTransposedEdge : transposedNode.getPredecessors()) {
+                            final int iNextTransposed = this.dataIndex.get(nextTransposedEdge.getTitle());
+                            final int edgeTransposedFlow = flow[iNode][iNextTransposed];
                             final int edgeTransposedRemain = BACK_FLOW_CAPACITY - edgeTransposedFlow;
 
                             assert (edgeTransposedFlow <= 0);
@@ -423,31 +403,57 @@ public final class Project {
 //
 //                            isDiscovered[iNext] = true;
 
-                            final IsTransposedTask nextIsTransposedFlow = new IsTransposedTask(true, iNode, iNext);
-                            bfsEdgeQueue.addLast(nextIsTransposedFlow);
-                            preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
-                        } else {
-                            final int edgeFlow = flow[iNode][iNext];
-                            final int edgeCap = capacity[iNode][iNext];
-                            final int edgeRemain = edgeCap - edgeFlow;
-
-                            assert (edgeFlow >= 0);
-                            assert (edgeRemain >= 0);
-
-                            if (edgeRemain <= 0) {
-                                continue;
-                            }
-
-                            if (isDiscovered[iNext]) {
-                                continue;
-                            }
-
-                            isDiscovered[iNext] = true;
-
-                            final IsTransposedTask nextIsTransposedFlow = new IsTransposedTask(false, iNode, iNext);
+                            final IsTransposedTask nextIsTransposedFlow = new IsTransposedTask(true, iNode, iNextTransposed);
                             bfsEdgeQueue.addLast(nextIsTransposedFlow);
                             preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
                         }
+                    }
+
+
+                    final TransposedTask node = this.transposedTaskGraph.get(nodeData);
+                    final int nodeFlow = nodeFlowArray[iNode];
+                    final int nodeCap = nodeCapacityArray[iNode];
+                    final int nodeRemain = nodeCap - nodeFlow;
+
+                    assert (nodeFlow >= 0);
+                    assert (nodeRemain >= 0);
+
+                    if (nodeRemain <= 0 && !nowIsTransposedFlow.isTransposedEdge()) {
+                        continue;
+                    }
+
+                    for (final TransposedTask nextNode : node.getNext()) {
+                        final String nextData = nextNode.getTitle();
+                        final int iNext = dataIndex.get(nextData);
+
+                        assert (!nextData.equals(nodeData));
+
+//                        if (isSkipScc) {
+//                            if (this.dataScc.containsKey(nextData)) {
+//                                continue;
+//                            }
+//                        }
+
+                        final int edgeFlow = flow[iNode][iNext];
+                        final int edgeCap = node.getEstimate();
+                        final int edgeRemain = edgeCap - edgeFlow;
+
+                        assert (edgeFlow >= 0);
+                        assert (edgeRemain >= 0);
+
+                        if (edgeRemain <= 0) {
+                            continue;
+                        }
+
+                        if (isDiscovered[iNext]) {
+                            continue;
+                        }
+
+                        isDiscovered[iNext] = true;
+
+                        final IsTransposedTask nextIsTransposedFlow = new IsTransposedTask(false, iNode, iNext);
+                        bfsEdgeQueue.addLast(nextIsTransposedFlow);
+                        preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
                     }
                 } // end bfs
 
@@ -471,7 +477,7 @@ public final class Project {
 
                         minRemainCapacity = Math.min(minRemainCapacity, edgeTransposedRemain);
                     } else {
-                        final int edgeCapacity = capacity[iFrom][iTo];
+                        final int edgeCapacity = this.transposedTaskGraph.get(this.titleMap.get(iFrom)).getEstimate();
 
                         final int edgeFlow = flow[iFrom][iTo];
                         assert (edgeFlow >= 0);
