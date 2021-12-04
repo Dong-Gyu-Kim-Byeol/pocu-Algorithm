@@ -1,8 +1,6 @@
 package academy.pocu.comp3500.assignment4;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class TransposedTask {
     private final String title;
@@ -28,8 +26,8 @@ public class TransposedTask {
         }
     }
 
-    public List<TransposedTask> getNext() {
-        return Collections.unmodifiableList(this.next);
+    public ArrayList<TransposedTask> getNext() {
+        return this.next;
     }
 
     public int getEstimate() {
