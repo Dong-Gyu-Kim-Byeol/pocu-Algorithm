@@ -342,6 +342,9 @@ public final class Project {
                              final String sink) {
         int outTotalFlow = 0;
 
+        final HashMap<String, TransposedTask> mainGraph = this.transposedTaskGraph;
+        final HashMap<String, Task> transposedGraph = this.taskGraph;
+
         final int BACK_FLOW_CAPACITY = 0;
         final int[][] flow = new int[dataIndex.size()][dataIndex.size()];
 
@@ -383,7 +386,7 @@ public final class Project {
                     }
 
                     // back
-                    final Task transposedNode = this.taskGraph.get(nodeData);
+                    final Task transposedNode = transposedGraph.get(nodeData);
                     if (transposedNode != null) {
                         for (final Task nextTransposedEdge : transposedNode.getPredecessors()) {
                             final int iNextTransposed = this.dataIndex.get(nextTransposedEdge.getTitle());
@@ -410,7 +413,7 @@ public final class Project {
                     }
 
 
-                    final TransposedTask node = this.transposedTaskGraph.get(nodeData);
+                    final TransposedTask node = mainGraph.get(nodeData);
                     final int nodeFlow = nodeFlowArray[iNode];
                     final int nodeCap = nodeCapacityArray[iNode];
                     final int nodeRemain = nodeCap - nodeFlow;
@@ -435,7 +438,7 @@ public final class Project {
 //                        }
 
                         final int edgeFlow = flow[iNode][iNext];
-                        final int edgeCap = node.getEstimate();
+                        final int edgeCap = nextNode.getEstimate();
                         final int edgeRemain = edgeCap - edgeFlow;
 
                         assert (edgeFlow >= 0);
@@ -463,7 +466,6 @@ public final class Project {
 
                 int minRemainCapacity = Integer.MAX_VALUE;
 
-
                 for (IsTransposedTask isTransposedEdge = lastEdge; isTransposedEdge.getFrom() != -1; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
                     final int iFrom = isTransposedEdge.getFrom();
                     final int iTo = isTransposedEdge.getTo();
@@ -477,7 +479,7 @@ public final class Project {
 
                         minRemainCapacity = Math.min(minRemainCapacity, edgeTransposedRemain);
                     } else {
-                        final int edgeCapacity = this.transposedTaskGraph.get(this.titleMap.get(iFrom)).getEstimate();
+                        final int edgeCapacity = mainGraph.get(this.titleMap.get(iTo)).getEstimate();
 
                         final int edgeFlow = flow[iFrom][iTo];
                         assert (edgeFlow >= 0);
