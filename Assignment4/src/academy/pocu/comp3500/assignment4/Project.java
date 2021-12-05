@@ -85,7 +85,7 @@ public final class Project {
             while (!bfsQueue.isEmpty()) {
                 final WeightNode<GraphNode<Task>> weightNode = bfsQueue.poll();
 
-                final GraphNode<Task> node = weightNode.getData();
+                final GraphNode<Task> node = weightNode.getNode();
                 if (node.getEdges().size() == 0) {
                     max = Math.max(max, weightNode.getWeight());
                 }
