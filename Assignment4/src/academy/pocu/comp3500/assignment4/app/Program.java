@@ -11,6 +11,15 @@ public class Program {
 
     public static void main(String[] args) {
         {
+            Task[] tasks = createTasks3();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms");
+            assert (bonusCount2 == 3);
+        }
+
+        {
             checkNormalMaxFlow();
         }
 
@@ -72,6 +81,15 @@ public class Program {
 
             int bonusCount2 = project.findMaxBonusCount("ms2");
             assert (bonusCount2 == 7);
+        }
+
+        {
+            Task[] tasks = createTasks3();
+
+            Project project = new Project(tasks);
+
+            int bonusCount2 = project.findMaxBonusCount("ms");
+            assert (bonusCount2 == 3);
         }
     }
 
@@ -390,6 +408,18 @@ public class Program {
 
         return new Task[]{
                 a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2, ca, cb, cc
+        };
+    }
+
+    private static Task[] createTasks3() {
+        Task a = new Task("A", 3);
+        Task b = new Task("B", 2);
+        Task ms = new Task("ms", 3);
+
+        ms.addPredecessor(a, b);
+
+        return new Task[]{
+                a, b, ms,
         };
     }
 }
