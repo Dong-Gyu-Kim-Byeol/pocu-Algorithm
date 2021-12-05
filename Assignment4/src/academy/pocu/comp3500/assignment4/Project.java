@@ -133,8 +133,8 @@ public final class Project {
             this.graph.addTransposedNode(ghostData, ghostEdgeDataArray, ghostEdgeWeightArray);
         }
 
-        final int maxBonusCount = this.graph.maxFlowAndNodeCapacity(false, skinData, ghostData, false, Task::getEstimate);
-//        final int maxBonusCount = this.graph.maxFlowAndNodeCapacity(false, ghostData, skinData, true, Task::getEstimate);
+//        final int maxBonusCount = this.graph.maxFlowAndNodeCapacity(false, skinData, ghostData, false, Task::getEstimate);
+        final int maxBonusCount = this.graph.maxFlowAndNodeCapacity(true, ghostData, skinData, true, Task::getEstimate);
 
         this.graph.removeTransposedNode(ghostData);
 
