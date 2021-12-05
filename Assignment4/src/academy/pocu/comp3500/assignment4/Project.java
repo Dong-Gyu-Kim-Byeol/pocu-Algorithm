@@ -125,7 +125,7 @@ public final class Project {
             }
 
             final ArrayList<Integer> ghostEdgeWeightArray = new ArrayList<>(ghostEdgeDataArray.size());
-            for (final Task edgeData : ghostEdgeDataArray) {
+            for (int i = 0; i < ghostEdgeDataArray.size(); ++i) {
                 ghostEdgeWeightArray.add(leafCapacitySum);
             }
 
@@ -133,8 +133,8 @@ public final class Project {
             this.graph.addTransposedNode(ghostData, ghostEdgeDataArray, ghostEdgeWeightArray);
         }
 
-//        final int maxBonusCount = this.graph.maxFlowAndNodeCapacity(false, skinData, ghostData, false, Task::getEstimate);
-        final int maxBonusCount = this.graph.maxFlowAndNodeCapacity(true, ghostData, skinData, true, Task::getEstimate);
+        final int maxBonusCount = this.graph.maxFlowAndNodeCapacity(false, skinData, ghostData, false, Task::getEstimate);
+//        final int maxBonusCount = this.graph.maxFlowAndNodeCapacity(true, ghostData, skinData, true, Task::getEstimate);
 
         this.graph.removeTransposedNode(ghostData);
 
