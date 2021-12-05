@@ -78,10 +78,8 @@ public final class Graph<D> {
 
     public final void addNode(final D data,
                               final ArrayList<D> edgeDataArray,
-                              final ArrayList<Integer> edgeWeightArray,
-                              final ArrayList<Integer> transposedEdgeWeightArray) {
+                              final ArrayList<Integer> edgeWeightArray) {
 
-        assert (edgeDataArray.size() == transposedEdgeWeightArray.size());
         assert (edgeDataArray.size() == edgeWeightArray.size());
 
         assert (!this.indexMap.containsKey(data));
@@ -111,7 +109,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> transposedNode = this.transposedGraph.get(edgeDataArray.get(i));
 
-                transposedNode.addNode(new GraphEdge<>(transposedEdgeWeightArray.get(i), transposedNode, this.transposedGraph.get(data)));
+                transposedNode.addNode(new GraphEdge<>(edgeWeightArray.get(i), transposedNode, this.transposedGraph.get(data)));
             }
         }
     }
@@ -151,13 +149,11 @@ public final class Graph<D> {
 
     public final void addTransposedNode(final D transposedData,
                                         final ArrayList<D> transposedEdgeDataArray,
-                                        final ArrayList<Integer> transposedEdgeWeightArray,
-                                        final ArrayList<Integer> edgeWeightArray) {
+                                        final ArrayList<Integer> transposedEdgeWeightArray) {
 
         assert (this.transposedGraph != null);
 
         assert (transposedEdgeDataArray.size() == transposedEdgeWeightArray.size());
-        assert (transposedEdgeDataArray.size() == edgeWeightArray.size());
 
         assert (!this.indexMap.containsKey(transposedData));
         this.indexMap.put(transposedData, this.indexMap.size());
@@ -186,7 +182,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> node = this.graph.get(transposedEdgeDataArray.get(i));
 
-                node.addNode(new GraphEdge<>(edgeWeightArray.get(i), node, this.graph.get(transposedData)));
+                node.addNode(new GraphEdge<>(transposedEdgeWeightArray.get(i), node, this.graph.get(transposedData)));
             }
         }
     }
