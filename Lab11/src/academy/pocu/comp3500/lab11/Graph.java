@@ -78,10 +78,8 @@ public final class Graph<D> {
 
     public final void addNode(final D data,
                               final ArrayList<D> edgeDataArray,
-                              final ArrayList<Integer> edgeWeightArray,
-                              final ArrayList<Integer> transposedEdgeWeightArray) {
+                              final ArrayList<Integer> edgeWeightArray) {
 
-        assert (edgeDataArray.size() == transposedEdgeWeightArray.size());
         assert (edgeDataArray.size() == edgeWeightArray.size());
 
         assert (!this.indexMap.containsKey(data));
@@ -111,7 +109,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> transposedNode = this.transposedGraph.get(edgeDataArray.get(i));
 
-                transposedNode.addNode(new GraphEdge<>(transposedEdgeWeightArray.get(i), transposedNode, this.transposedGraph.get(data)));
+                transposedNode.addNode(new GraphEdge<>(edgeWeightArray.get(i), transposedNode, this.transposedGraph.get(data)));
             }
         }
     }
@@ -151,13 +149,11 @@ public final class Graph<D> {
 
     public final void addTransposedNode(final D transposedData,
                                         final ArrayList<D> transposedEdgeDataArray,
-                                        final ArrayList<Integer> transposedEdgeWeightArray,
-                                        final ArrayList<Integer> edgeWeightArray) {
+                                        final ArrayList<Integer> transposedEdgeWeightArray) {
 
         assert (this.transposedGraph != null);
 
         assert (transposedEdgeDataArray.size() == transposedEdgeWeightArray.size());
-        assert (transposedEdgeDataArray.size() == edgeWeightArray.size());
 
         assert (!this.indexMap.containsKey(transposedData));
         this.indexMap.put(transposedData, this.indexMap.size());
@@ -186,7 +182,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> node = this.graph.get(transposedEdgeDataArray.get(i));
 
-                node.addNode(new GraphEdge<>(edgeWeightArray.get(i), node, this.graph.get(transposedData)));
+                node.addNode(new GraphEdge<>(transposedEdgeWeightArray.get(i), node, this.graph.get(transposedData)));
             }
         }
     }
@@ -1050,18 +1046,20 @@ public final class Graph<D> {
                     preEdgeMap.put(nextIsTransposedFlow, nowIsTransposedFlow);
                 }
 
+                // check nodeFlow
                 final GraphNode<D> node = mainGraph.get(nodeData);
-                final int nodeFlow = nodeFlowArray[iNodeData];
-                final int nodeCap = nodeCapacityArray[iNodeData];
-                final int nodeRemain = nodeCap - nodeFlow;
+                {
+                    final int nodeFlow = nodeFlowArray[iNodeData];
+                    final int nodeCap = nodeCapacityArray[iNodeData];
+                    final int nodeRemain = nodeCap - nodeFlow;
 
-                assert (nodeFlow >= 0);
-                assert (nodeRemain >= 0);
+                    assert (nodeFlow >= 0);
+                    assert (nodeRemain >= 0);
 
-                if (nodeRemain <= 0 && !nowIsTransposedFlow.isTransposedEdge()) {
-                    continue;
+                    if (nodeRemain <= 0 && !nowIsTransposedFlow.isTransposedEdge()) {
+                        continue;
+                    }
                 }
-
                 for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                     final GraphNode<D> nextNode = nextEdge.getNode2();
                     final D nextData = nextNode.getData();
@@ -1096,7 +1094,27 @@ public final class Graph<D> {
                 break;
             }
 
-            int minRemainCapacity = Integer.MAX_VALUE;
+            int minRemainCapacity;
+            // check sink nodeFlow
+            {
+                assert (!lastEdge.isTransposedEdge());
+                assert (sink.equals(lastEdge.getEdge().getNode2().getData()));
+
+                final int iSink = this.indexMap.get(sink);
+
+                final int sinkFlow = nodeFlowArray[iSink];
+                final int sinkCap = nodeCapacityArray[iSink];
+                final int sinkRemain = sinkCap - sinkFlow;
+
+                assert (sinkFlow >= 0);
+                assert (sinkRemain >= 0);
+
+                if (sinkRemain <= 0) {
+                    return outTotalFlow;
+                }
+
+                minRemainCapacity = sinkRemain;
+            }
 
             for (IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
                 final GraphEdge<D> edge = isTransposedEdge.getEdge();
@@ -1159,6 +1177,14 @@ public final class Graph<D> {
                     nodeFlowArray[iFromData] += minRemainCapacity;
                     nodeFlowArray[iFromData] = Math.min(nodeCapacityArray[iFromData], nodeFlowArray[iFromData]);
                 }
+            }
+
+            {
+                assert (sink.equals(lastEdge.getEdge().getNode2().getData()));
+
+                final int iSink = this.indexMap.get(sink);
+                nodeFlowArray[iSink] += minRemainCapacity;
+                nodeFlowArray[iSink] = Math.min(nodeCapacityArray[iSink], nodeFlowArray[iSink]);
             }
 
             outTotalFlow += minRemainCapacity;
