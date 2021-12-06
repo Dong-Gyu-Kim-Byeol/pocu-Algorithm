@@ -1,6 +1,5 @@
 package academy.pocu.comp3500.assignment4;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -1262,11 +1261,11 @@ public final class Graph<D> {
         return minDistMap;
     }
 
-    // dijkstra - single source shortest path
+    // dijkstra - single source longest path
     public HashMap<GraphNode<D>, Integer> dijkstraMaxPath(final boolean isSkipScc,
-                                                   final D startData,
-                                                   final boolean isTransposedGraph,
-                                                   final HashMap<GraphNode<D>, GraphNode<D>> outPrevMap) {
+                                                          final D startData,
+                                                          final boolean isTransposedGraph,
+                                                          final HashMap<GraphNode<D>, GraphNode<D>> outPrevMap) {
         // O((N + E) * logN)
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
