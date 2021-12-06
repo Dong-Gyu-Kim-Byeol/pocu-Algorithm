@@ -1,14 +1,14 @@
 package academy.pocu.comp3500.lab11;
 
-public final class WeightNode<T> {
+public final class WeightNode<T> implements Comparable<WeightNode<T>> {
     private final int weight;
-    private final T data;
+    private final T node;
 
     // ---
 
-    public WeightNode(final int weight, final T data) {
+    public WeightNode(final int weight, final T node) {
         this.weight = weight;
-        this.data = data;
+        this.node = node;
     }
 
     // ---
@@ -17,7 +17,12 @@ public final class WeightNode<T> {
         return weight;
     }
 
-    public final T getData() {
-        return data;
+    public final T getNode() {
+        return node;
+    }
+
+    @Override
+    public final int compareTo(final WeightNode<T> o) {
+        return this.weight - o.weight;
     }
 }

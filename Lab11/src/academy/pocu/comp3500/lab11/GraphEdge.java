@@ -2,15 +2,15 @@ package academy.pocu.comp3500.lab11;
 
 public final class GraphEdge<T> {
     private final int weight;
-    private final GraphNode<T> node1;
-    private final GraphNode<T> node2;
+    private final GraphNode<T> from;
+    private final GraphNode<T> to;
 
     // ---
 
     public GraphEdge(final int weight, final GraphNode<T> from, final GraphNode<T> to) {
         this.weight = weight;
-        this.node1 = from;
-        this.node2 = to;
+        this.from = from;
+        this.to = to;
     }
 
     // ---
@@ -19,20 +19,20 @@ public final class GraphEdge<T> {
         return weight;
     }
 
-    public final GraphNode<T> getNode1() {
-        return node1;
+    public final GraphNode<T> getFrom() {
+        return from;
     }
 
-    public final GraphNode<T> getNode2() {
-        return node2;
+    public final GraphNode<T> getTo() {
+        return to;
     }
 
     @Override
     public final String toString() {
-        if (this.node1 == null) {
-            return String.format("from : null, to : [ %s ], weight : %d", node2, weight);
+        if (this.from == null) {
+            return String.format("from : null, to : [ %s ], weight : %d", to, weight);
         }
 
-        return String.format("from : [ %s ], to : [ %s ], weight : %d", node1, node2, weight);
+        return String.format("from : [ %s ], to : [ %s ], weight : %d", from, to, weight);
     }
 }

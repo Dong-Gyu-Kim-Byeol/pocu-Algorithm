@@ -1,8 +1,10 @@
 package academy.pocu.comp3500.lab11;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.function.Function;
 
 public final class Graph<D> {
@@ -122,7 +124,7 @@ public final class Graph<D> {
             final GraphNode<D> removeOriginNode = this.graph.get(removeData);
 
             for (final GraphEdge<D> fromOriginEdge : removeOriginNode.getEdges().values()) {
-                final D fromData = fromOriginEdge.getNode2().getData();
+                final D fromData = fromOriginEdge.getTo().getData();
                 assert (this.transposedGraph.containsKey(fromData));
 
                 final GraphNode<D> fromTransposedNode = this.transposedGraph.get(fromData);
@@ -197,7 +199,7 @@ public final class Graph<D> {
             final GraphNode<D> removeTransposedNode = this.transposedGraph.get(removeTransposedData);
 
             for (final GraphEdge<D> fromTransposedDataEdge : removeTransposedNode.getEdges().values()) {
-                final D fromData = fromTransposedDataEdge.getNode2().getData();
+                final D fromData = fromTransposedDataEdge.getTo().getData();
                 assert (this.graph.containsKey(fromData));
 
                 final GraphNode<D> from = this.graph.get(fromData);
@@ -274,17 +276,17 @@ public final class Graph<D> {
 
             for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                 if (isSkipScc) {
-                    if (this.dataScc.containsKey(nextEdge.getNode2().getData())) {
+                    if (this.dataScc.containsKey(nextEdge.getTo().getData())) {
                         continue;
                     }
                 }
 
-                if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
+                if (isDiscovered[this.indexMap.get(nextEdge.getTo().getData())]) {
                     continue;
                 }
 
-                isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
-                bfsQueue.addLast(nextEdge.getNode2());
+                isDiscovered[this.indexMap.get(nextEdge.getTo().getData())] = true;
+                bfsQueue.addLast(nextEdge.getTo());
             }
         }
     }
@@ -350,16 +352,16 @@ public final class Graph<D> {
 
         for (final GraphEdge<D> edge : startNode.getEdges().values()) {
             if (isSkipScc) {
-                if (this.dataScc.containsKey(edge.getNode2().getData())) {
+                if (this.dataScc.containsKey(edge.getTo().getData())) {
                     continue;
                 }
             }
 
-            if (isDiscovered[this.indexMap.get(edge.getNode2().getData())]) {
+            if (isDiscovered[this.indexMap.get(edge.getTo().getData())]) {
                 continue;
             }
 
-            dfsPostOrderReverseRecursive(isSkipScc, edge.getNode2().getData(), isTransposedGraph, isDiscovered, outPostOrderNodeReverseList);
+            dfsPostOrderReverseRecursive(isSkipScc, edge.getTo().getData(), isTransposedGraph, isDiscovered, outPostOrderNodeReverseList);
         }
 
         outPostOrderNodeReverseList.addFirst(startNode);
@@ -419,17 +421,17 @@ public final class Graph<D> {
 
             for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                 if (isSkipScc) {
-                    if (this.dataScc.containsKey(nextEdge.getNode2().getData())) {
+                    if (this.dataScc.containsKey(nextEdge.getTo().getData())) {
                         continue;
                     }
                 }
 
-                if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
+                if (isDiscovered[this.indexMap.get(nextEdge.getTo().getData())]) {
                     continue;
                 }
 
-                isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
-                dfsStack.addLast(nextEdge.getNode2());
+                isDiscovered[this.indexMap.get(nextEdge.getTo().getData())] = true;
+                dfsStack.addLast(nextEdge.getTo());
             }
         }
     }
@@ -462,9 +464,9 @@ public final class Graph<D> {
             final HashMap<D, ArrayList<Integer>> weightEdgeArrayMap = new HashMap<>(this.indexMap.size());
 
             for (final GraphEdge<D> edge : mst) {
-                final GraphNode<D> from = edge.getNode1();
+                final GraphNode<D> from = edge.getFrom();
                 final D fromPoint = from.getData();
-                final GraphNode<D> to = edge.getNode2();
+                final GraphNode<D> to = edge.getTo();
                 final D toPoint = to.getData();
 
                 final int weight = edge.getWeight();
@@ -577,11 +579,11 @@ public final class Graph<D> {
                 }
             }
 
-            if (isDiscovered[this.indexMap.get(edge.getNode2().getData())]) {
+            if (isDiscovered[this.indexMap.get(edge.getTo().getData())]) {
                 continue;
             }
 
-            dfsPreOrderAndAddReturnRecursive(isSkipScc, edge.getNode2().getData(), isTransposedGraph, isDiscovered, outDfsPreOrderAndAddReturnList);
+            dfsPreOrderAndAddReturnRecursive(isSkipScc, edge.getTo().getData(), isTransposedGraph, isDiscovered, outDfsPreOrderAndAddReturnList);
             outDfsPreOrderAndAddReturnList.add(startNode);
         }
     }
@@ -609,8 +611,8 @@ public final class Graph<D> {
         Sort.radixSort(edges, GraphEdge::getWeight);
 
         for (final GraphEdge<D> edge : edges) {
-            final GraphNode<D> n1 = edge.getNode1();
-            final GraphNode<D> n2 = edge.getNode2();
+            final GraphNode<D> n1 = edge.getFrom();
+            final GraphNode<D> n2 = edge.getTo();
 
             final GraphNode<D> root1 = set.find(n1);
             final GraphNode<D> root2 = set.find(n2);
@@ -713,12 +715,12 @@ public final class Graph<D> {
                     for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                         mainFlow.put(nextEdge, 0);
 
-                        if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
+                        if (isDiscovered[this.indexMap.get(nextEdge.getTo().getData())]) {
                             continue;
                         }
 
-                        isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
-                        bfsQueue.addLast(nextEdge.getNode2());
+                        isDiscovered[this.indexMap.get(nextEdge.getTo().getData())] = true;
+                        bfsQueue.addLast(nextEdge.getTo());
                     }
                 }
             }
@@ -746,12 +748,12 @@ public final class Graph<D> {
                     for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                         transposedFlow.put(nextEdge, 0);
 
-                        if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
+                        if (isDiscovered[this.indexMap.get(nextEdge.getTo().getData())]) {
                             continue;
                         }
 
-                        isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
-                        bfsQueue.addLast(nextEdge.getNode2());
+                        isDiscovered[this.indexMap.get(nextEdge.getTo().getData())] = true;
+                        bfsQueue.addLast(nextEdge.getTo());
                     }
                 }
             }
@@ -774,7 +776,7 @@ public final class Graph<D> {
             // bfs
             while (!bfsEdgeQueue.isEmpty()) {
                 final IsTransposedEdge<D> nowIsTransposedFlow = bfsEdgeQueue.poll();
-                final D nodeData = nowIsTransposedFlow.getEdge().getNode2().getData();
+                final D nodeData = nowIsTransposedFlow.getEdge().getTo().getData();
 
                 if (nodeData.equals(sink)) {
                     lastEdge = nowIsTransposedFlow;
@@ -783,7 +785,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> transposedNode = transposedGraph.get(nodeData);
                 for (final GraphEdge<D> nextTransposedEdge : transposedNode.getEdges().values()) {
-                    final GraphNode<D> nextTransposedNode = nextTransposedEdge.getNode2();
+                    final GraphNode<D> nextTransposedNode = nextTransposedEdge.getTo();
                     final D nextTransposedData = nextTransposedNode.getData();
                     final int iNextTransposedData = this.indexMap.get(nextTransposedData);
 
@@ -818,7 +820,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> node = mainGraph.get(nodeData);
                 for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
-                    final GraphNode<D> nextNode = nextEdge.getNode2();
+                    final GraphNode<D> nextNode = nextEdge.getTo();
                     final D nextData = nextNode.getData();
                     final int iNextData = this.indexMap.get(nextData);
 
@@ -860,7 +862,7 @@ public final class Graph<D> {
             int minRemainCapacity = Integer.MAX_VALUE;
 
 
-            for (IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
+            for (IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getFrom() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
                 final GraphEdge<D> edge = isTransposedEdge.getEdge();
 
                 if (isTransposedEdge.isTransposedEdge()) {
@@ -884,16 +886,16 @@ public final class Graph<D> {
                 }
             }
 
-            for (IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
+            for (IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getFrom() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
                 final GraphEdge<D> edge = isTransposedFlow.getEdge();
 
                 if (isTransposedFlow.isTransposedEdge()) {
                     transposedFlow.put(edge, transposedFlow.get(edge) + minRemainCapacity);
-                    final GraphEdge<D> mainEdge = mainGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
+                    final GraphEdge<D> mainEdge = mainGraph.get(edge.getTo().getData()).getEdges().get(edge.getFrom().getData());
                     mainFlow.put(mainEdge, mainFlow.get(mainEdge) - minRemainCapacity);
                 } else {
                     mainFlow.put(edge, mainFlow.get(edge) + minRemainCapacity);
-                    final GraphEdge<D> transposedEdge = transposedGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
+                    final GraphEdge<D> transposedEdge = transposedGraph.get(edge.getTo().getData()).getEdges().get(edge.getFrom().getData());
                     transposedFlow.put(transposedEdge, transposedFlow.get(transposedEdge) - minRemainCapacity);
                 }
             }
@@ -945,12 +947,12 @@ public final class Graph<D> {
                     for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                         mainFlow.put(nextEdge, 0);
 
-                        if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
+                        if (isDiscovered[this.indexMap.get(nextEdge.getTo().getData())]) {
                             continue;
                         }
 
-                        isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
-                        bfsQueue.addLast(nextEdge.getNode2());
+                        isDiscovered[this.indexMap.get(nextEdge.getTo().getData())] = true;
+                        bfsQueue.addLast(nextEdge.getTo());
                     }
                 }
             }
@@ -978,12 +980,12 @@ public final class Graph<D> {
                     for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                         transposedFlow.put(nextEdge, 0);
 
-                        if (isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())]) {
+                        if (isDiscovered[this.indexMap.get(nextEdge.getTo().getData())]) {
                             continue;
                         }
 
-                        isDiscovered[this.indexMap.get(nextEdge.getNode2().getData())] = true;
-                        bfsQueue.addLast(nextEdge.getNode2());
+                        isDiscovered[this.indexMap.get(nextEdge.getTo().getData())] = true;
+                        bfsQueue.addLast(nextEdge.getTo());
                     }
                 }
             }
@@ -1016,7 +1018,7 @@ public final class Graph<D> {
             // bfs
             while (!bfsEdgeQueue.isEmpty()) {
                 final IsTransposedEdge<D> nowIsTransposedFlow = bfsEdgeQueue.poll();
-                final D nodeData = nowIsTransposedFlow.getEdge().getNode2().getData();
+                final D nodeData = nowIsTransposedFlow.getEdge().getTo().getData();
                 final int iNodeData = this.indexMap.get(nodeData);
 
                 if (nodeData.equals(sink)) {
@@ -1026,7 +1028,7 @@ public final class Graph<D> {
 
                 final GraphNode<D> transposedNode = transposedGraph.get(nodeData);
                 for (final GraphEdge<D> nextTransposedEdge : transposedNode.getEdges().values()) {
-                    final GraphNode<D> nextTransposedNode = nextTransposedEdge.getNode2();
+                    final GraphNode<D> nextTransposedNode = nextTransposedEdge.getTo();
                     final D nextTransposedData = nextTransposedNode.getData();
 
                     assert (!nextTransposedData.equals(nodeData));
@@ -1061,7 +1063,7 @@ public final class Graph<D> {
                     }
                 }
                 for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
-                    final GraphNode<D> nextNode = nextEdge.getNode2();
+                    final GraphNode<D> nextNode = nextEdge.getTo();
                     final D nextData = nextNode.getData();
                     final int iNextData = this.indexMap.get(nextData);
 
@@ -1098,7 +1100,7 @@ public final class Graph<D> {
             // check sink nodeFlow
             {
                 assert (!lastEdge.isTransposedEdge());
-                assert (sink.equals(lastEdge.getEdge().getNode2().getData()));
+                assert (sink.equals(lastEdge.getEdge().getTo().getData()));
 
                 final int iSink = this.indexMap.get(sink);
 
@@ -1116,10 +1118,10 @@ public final class Graph<D> {
                 minRemainCapacity = sinkRemain;
             }
 
-            for (IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getNode1() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
+            for (IsTransposedEdge<D> isTransposedEdge = lastEdge; isTransposedEdge.getEdge().getFrom() != null; isTransposedEdge = preEdgeMap.get(isTransposedEdge)) {
                 final GraphEdge<D> edge = isTransposedEdge.getEdge();
 
-                final GraphNode<D> from = edge.getNode1();
+                final GraphNode<D> from = edge.getFrom();
                 final D fromData = from.getData();
                 final int iFromData = this.indexMap.get(fromData);
 
@@ -1156,20 +1158,20 @@ public final class Graph<D> {
                 }
             }
 
-            for (IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getNode1() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
+            for (IsTransposedEdge<D> isTransposedFlow = lastEdge; isTransposedFlow.getEdge().getFrom() != null; isTransposedFlow = preEdgeMap.get(isTransposedFlow)) {
                 final GraphEdge<D> edge = isTransposedFlow.getEdge();
 
-                final GraphNode<D> from = edge.getNode1();
+                final GraphNode<D> from = edge.getFrom();
                 final D fromData = from.getData();
                 final int iFromData = this.indexMap.get(fromData);
 
                 if (isTransposedFlow.isTransposedEdge()) {
                     transposedFlow.put(edge, transposedFlow.get(edge) + minRemainCapacity);
-                    final GraphEdge<D> mainEdge = mainGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
+                    final GraphEdge<D> mainEdge = mainGraph.get(edge.getTo().getData()).getEdges().get(edge.getFrom().getData());
                     mainFlow.put(mainEdge, mainFlow.get(mainEdge) - minRemainCapacity);
                 } else {
                     mainFlow.put(edge, mainFlow.get(edge) + minRemainCapacity);
-                    final GraphEdge<D> transposedEdge = transposedGraph.get(edge.getNode2().getData()).getEdges().get(edge.getNode1().getData());
+                    final GraphEdge<D> transposedEdge = transposedGraph.get(edge.getTo().getData()).getEdges().get(edge.getFrom().getData());
                     transposedFlow.put(transposedEdge, transposedFlow.get(transposedEdge) - minRemainCapacity);
                 }
 
@@ -1180,7 +1182,7 @@ public final class Graph<D> {
             }
 
             {
-                assert (sink.equals(lastEdge.getEdge().getNode2().getData()));
+                assert (sink.equals(lastEdge.getEdge().getTo().getData()));
 
                 final int iSink = this.indexMap.get(sink);
                 nodeFlowArray[iSink] += minRemainCapacity;
@@ -1191,6 +1193,138 @@ public final class Graph<D> {
         }
 
         return outTotalFlow;
+    }
+
+    // dijkstra - single source shortest path
+    public HashMap<GraphNode<D>, Integer> dijkstra(final boolean isSkipScc,
+                                                   final D startData,
+                                                   final boolean isTransposedGraph,
+                                                   final HashMap<GraphNode<D>, GraphNode<D>> outPrevMap) {
+        // O((N + E) * logN)
+
+        final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
+        final GraphNode<D> startNode = graph.get(startData);
+
+        final HashMap<GraphNode<D>, Integer> minDistMap = new HashMap<>(this.indexMap.size());
+        final int INF = Integer.MAX_VALUE;
+        for (final GraphNode<D> node : graph.values()) {
+            minDistMap.put(node, INF);
+        }
+
+        final PriorityQueue<WeightNode<GraphNode<D>>> open = new PriorityQueue<>();
+        {
+            minDistMap.put(startNode, 0);
+            outPrevMap.put(startNode, null);
+
+            WeightNode<GraphNode<D>> weightNode = new WeightNode<>(0, startNode);
+            open.add(weightNode);
+        }
+
+        while (!open.isEmpty()) {
+            final WeightNode<GraphNode<D>> weightNode = open.poll();
+            final GraphNode<D> node = weightNode.getNode();
+
+            final int minDist = minDistMap.get(node);
+            final int dist = weightNode.getWeight();
+
+            if (minDist < dist) {
+                continue;
+            }
+
+            for (final GraphEdge<D> edge : node.getEdges().values()) {
+                final GraphNode<D> next = edge.getTo();
+                final D nextData = next.getData();
+
+                if (isSkipScc) {
+                    if (this.dataScc.containsKey(nextData)) {
+                        continue;
+                    }
+                }
+
+                final int weight = edge.getWeight();
+                final int newDist = minDist + weight;
+
+                final int nextMinDist = minDistMap.get(next);
+
+                if (newDist >= nextMinDist) {
+                    continue;
+                }
+
+                minDistMap.put(next, newDist);
+                outPrevMap.put(next, node);
+
+                WeightNode<GraphNode<D>> newCandidate = new WeightNode<>(newDist, next);
+                open.add(newCandidate);
+            }
+        }
+
+        return minDistMap;
+    }
+
+    // dijkstra - single source longest path
+    public HashMap<GraphNode<D>, Integer> dijkstraMaxPath(final boolean isSkipScc,
+                                                          final D startData,
+                                                          final boolean isTransposedGraph,
+                                                          final HashMap<GraphNode<D>, GraphNode<D>> outPrevMap) {
+        // O((N + E) * logN)
+
+        final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
+        final GraphNode<D> startNode = graph.get(startData);
+
+        final HashMap<GraphNode<D>, Integer> maxDistMap = new HashMap<>(this.indexMap.size());
+        final int MINUS_ONE = -1;
+        for (final GraphNode<D> node : graph.values()) {
+            maxDistMap.put(node, MINUS_ONE);
+        }
+
+        final PriorityQueue<WeightNode<GraphNode<D>>> open = new PriorityQueue<>(Comparator.reverseOrder());
+        {
+            maxDistMap.put(startNode, 0);
+            outPrevMap.put(startNode, null);
+
+            WeightNode<GraphNode<D>> weightNode = new WeightNode<>(0, startNode);
+            open.add(weightNode);
+        }
+
+        while (!open.isEmpty()) {
+            final WeightNode<GraphNode<D>> weightNode = open.poll();
+            final GraphNode<D> node = weightNode.getNode();
+
+            final int maxDist = maxDistMap.get(node);
+            final int dist = weightNode.getWeight();
+
+            if (maxDist > dist) {
+                continue;
+            }
+
+            for (final GraphEdge<D> edge : node.getEdges().values()) {
+                final GraphNode<D> next = edge.getTo();
+                final D nextData = next.getData();
+
+                if (isSkipScc) {
+                    if (this.dataScc.containsKey(nextData)) {
+                        continue;
+                    }
+                }
+
+                final int weight = edge.getWeight();
+                final int newDist = maxDist + weight;
+
+                final int nextMaxDist = maxDistMap.get(next);
+
+                if (newDist <= nextMaxDist) {
+                    continue;
+                }
+
+                maxDistMap.put(next, newDist);
+                outPrevMap.put(next, node);
+
+                WeightNode<GraphNode<D>> newCandidate = new WeightNode<>(newDist, next);
+                open.add(newCandidate);
+            }
+        }
+
+        return maxDistMap;
     }
 
     // ---
