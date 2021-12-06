@@ -65,44 +65,60 @@ public final class Project {
         return manMonths;
     }
 
+//    public final int findMinDuration(final String task) {
+//        assert (this.taskDataMap.containsKey(task));
+//        final Task startData = this.taskDataMap.get(task);
+//
+//        int max = 0;
+//        {
+//            final HashMap<Task, Boolean> scc = this.graph.getDataScc();
+//            final HashMap<Task, GraphNode<Task>> graph = this.graph.getGraph();
+//
+//            final LinkedList<WeightNode<GraphNode<Task>>> bfsQueue = new LinkedList<>();
+//            {
+//                final GraphNode<Task> startNode = graph.get(startData);
+//                assert (!scc.containsKey(startNode.getData()));
+//
+//                bfsQueue.addLast(new WeightNode<>(startData.getEstimate(), startNode));
+//            }
+//
+//            while (!bfsQueue.isEmpty()) {
+//                final WeightNode<GraphNode<Task>> weightNode = bfsQueue.poll();
+//
+//                final GraphNode<Task> node = weightNode.getNode();
+//                if (node.getEdges().size() == 0) {
+//                    max = Math.max(max, weightNode.getWeight());
+//                }
+//
+//                for (final GraphEdge<Task> edge : node.getEdges().values()) {
+//                    final GraphNode<Task> nextNode = edge.getNode2();
+//                    final Task nextData = nextNode.getData();
+//
+//                    if (scc.containsKey(nextData)) {
+//                        continue;
+//                    }
+//
+//                    bfsQueue.addLast(new WeightNode<>(weightNode.getWeight() + nextData.getEstimate(), nextNode));
+//                }
+//            }
+//        }
+//
+//        return max;
+//    }
+
     public final int findMinDuration(final String task) {
         assert (this.taskDataMap.containsKey(task));
         final Task startData = this.taskDataMap.get(task);
 
+        final HashMap<GraphNode<Task>, GraphNode<Task>> prevMap = new HashMap<>(this.graph.nodeCount());
+        final HashMap<GraphNode<Task>, Integer> maxDistMap = this.graph.dijkstraMaxPath(true, startData, false, prevMap);
+
         int max = 0;
-        {
-            final HashMap<Task, Boolean> scc = this.graph.getDataScc();
-            final HashMap<Task, GraphNode<Task>> graph = this.graph.getGraph();
-
-            final LinkedList<WeightNode<GraphNode<Task>>> bfsQueue = new LinkedList<>();
-            {
-                final GraphNode<Task> startNode = graph.get(startData);
-                assert (!scc.containsKey(startNode.getData()));
-
-                bfsQueue.addLast(new WeightNode<>(startData.getEstimate(), startNode));
-            }
-
-            while (!bfsQueue.isEmpty()) {
-                final WeightNode<GraphNode<Task>> weightNode = bfsQueue.poll();
-
-                final GraphNode<Task> node = weightNode.getNode();
-                if (node.getEdges().size() == 0) {
-                    max = Math.max(max, weightNode.getWeight());
-                }
-
-                for (final GraphEdge<Task> edge : node.getEdges().values()) {
-                    final GraphNode<Task> nextNode = edge.getNode2();
-                    final Task nextData = nextNode.getData();
-
-                    if (scc.containsKey(nextData)) {
-                        continue;
-                    }
-
-                    bfsQueue.addLast(new WeightNode<>(weightNode.getWeight() + nextData.getEstimate(), nextNode));
-                }
-            }
+        for (final int dist : maxDistMap.values()) {
+            max = Math.max(dist, max);
         }
 
+        max += startData.getEstimate();
         return max;
     }
 

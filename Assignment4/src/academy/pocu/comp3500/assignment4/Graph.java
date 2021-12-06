@@ -1,5 +1,7 @@
 package academy.pocu.comp3500.assignment4;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -1221,7 +1223,6 @@ public final class Graph<D> {
 
         while (!open.isEmpty()) {
             final WeightNode<GraphNode<D>> weightNode = open.poll();
-
             final GraphNode<D> node = weightNode.getNode();
 
             final int minDist = minDistMap.get(node);
@@ -1259,6 +1260,72 @@ public final class Graph<D> {
         }
 
         return minDistMap;
+    }
+
+    // dijkstra - single source shortest path
+    public HashMap<GraphNode<D>, Integer> dijkstraMaxPath(final boolean isSkipScc,
+                                                   final D startData,
+                                                   final boolean isTransposedGraph,
+                                                   final HashMap<GraphNode<D>, GraphNode<D>> outPrevMap) {
+        // O((N + E) * logN)
+
+        final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
+        final GraphNode<D> startNode = graph.get(startData);
+
+        final HashMap<GraphNode<D>, Integer> maxDistMap = new HashMap<>(this.indexMap.size());
+        final int MINUS_ONE = -1;
+        for (final GraphNode<D> node : graph.values()) {
+            maxDistMap.put(node, MINUS_ONE);
+        }
+
+        final PriorityQueue<WeightNode<GraphNode<D>>> open = new PriorityQueue<>(Comparator.reverseOrder());
+        {
+            maxDistMap.put(startNode, 0);
+            outPrevMap.put(startNode, null);
+
+            WeightNode<GraphNode<D>> weightNode = new WeightNode<>(0, startNode);
+            open.add(weightNode);
+        }
+
+        while (!open.isEmpty()) {
+            final WeightNode<GraphNode<D>> weightNode = open.poll();
+            final GraphNode<D> node = weightNode.getNode();
+
+            final int maxDist = maxDistMap.get(node);
+            final int dist = weightNode.getWeight();
+
+            if (maxDist > dist) {
+                continue;
+            }
+
+            for (final GraphEdge<D> edge : node.getEdges().values()) {
+                final GraphNode<D> next = edge.getNode2();
+                final D nextData = next.getData();
+
+                if (isSkipScc) {
+                    if (this.dataScc.containsKey(nextData)) {
+                        continue;
+                    }
+                }
+
+                final int weight = edge.getWeight();
+                final int newDist = maxDist + weight;
+
+                final int nextMaxDist = maxDistMap.get(next);
+
+                if (newDist <= nextMaxDist) {
+                    continue;
+                }
+
+                maxDistMap.put(next, newDist);
+                outPrevMap.put(next, node);
+
+                WeightNode<GraphNode<D>> newCandidate = new WeightNode<>(newDist, next);
+                open.add(newCandidate);
+            }
+        }
+
+        return maxDistMap;
     }
 
     // ---
