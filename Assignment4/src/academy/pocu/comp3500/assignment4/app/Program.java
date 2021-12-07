@@ -1,6 +1,7 @@
 package academy.pocu.comp3500.assignment4.app;
 
 import academy.pocu.comp3500.assignment4.Graph;
+import academy.pocu.comp3500.assignment4.GraphNode;
 import academy.pocu.comp3500.assignment4.Project;
 import academy.pocu.comp3500.assignment4.project.Task;
 
@@ -10,6 +11,15 @@ import java.util.HashMap;
 public class Program {
 
     public static void main(String[] args) {
+        {
+            checkNormalMaxPath1();
+            checkNormalMaxPath2();
+        }
+
+        //
+        //
+        //
+
         {
             Task[] tasks = createTasksDefault();
 
@@ -485,5 +495,163 @@ public class Program {
         return new Task[]{
                 a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ms1, ms2, ca, cb, cc
         };
+    }
+
+    private static void checkNormalMaxPath1() {
+        Task a = new Task("A", -1);
+        Task b = new Task("B", -1);
+        Task c = new Task("C", -1);
+        Task d = new Task("D", -1);
+
+        a.addPredecessor(b, d);
+        final int[] aW = new int[]{2, 1};
+        final ArrayList<Integer> aEdgeWeightArray = new ArrayList<>(a.getPredecessors().size());
+        for (int i = 0; i < a.getPredecessors().size(); ++i) {
+            aEdgeWeightArray.add(aW[i]);
+        }
+
+        b.addPredecessor(c);
+        final int[] bW = new int[]{2};
+        final ArrayList<Integer> bEdgeWeightArray = new ArrayList<>(b.getPredecessors().size());
+        for (int i = 0; i < b.getPredecessors().size(); ++i) {
+            bEdgeWeightArray.add(bW[i]);
+        }
+
+        c.addPredecessor();
+        final int[] cW = new int[]{};
+        final ArrayList<Integer> cEdgeWeightArray = new ArrayList<>(c.getPredecessors().size());
+        for (int i = 0; i < c.getPredecessors().size(); ++i) {
+            cEdgeWeightArray.add(cW[i]);
+        }
+
+        d.addPredecessor(c);
+        final int[] dW = new int[]{4};
+        final ArrayList<Integer> dEdgeWeightArray = new ArrayList<>(d.getPredecessors().size());
+        for (int i = 0; i < d.getPredecessors().size(); ++i) {
+            dEdgeWeightArray.add(dW[i]);
+        }
+
+        Task[] tasks = new Task[]{
+                a, b, c, d,
+        };
+
+        // create graph
+
+        final ArrayList<Task> taskDataArray = new ArrayList<>(tasks.length);
+
+        // create taskDataArray
+        for (final Task task : tasks) {
+            taskDataArray.add(task);
+        }
+
+        final HashMap<Task, ArrayList<Task>> edgeArrayMap = new HashMap<>(tasks.length);
+        final HashMap<Task, ArrayList<Integer>> edgeWeightArrayMap = new HashMap<>(tasks.length);
+
+        for (final Task task : tasks) {
+            final ArrayList<Task> edgeArray = new ArrayList<>(task.getPredecessors().size());
+            edgeArrayMap.put(task, edgeArray);
+
+            if (task.equals(a)) {
+                edgeWeightArrayMap.put(task, aEdgeWeightArray);
+            } else if (task.equals(b)) {
+                edgeWeightArrayMap.put(task, bEdgeWeightArray);
+            } else if (task.equals(c)) {
+                edgeWeightArrayMap.put(task, cEdgeWeightArray);
+            } else if (task.equals(d)) {
+                edgeWeightArrayMap.put(task, dEdgeWeightArray);
+            } else {
+                edgeWeightArrayMap.put(task, new ArrayList<>());
+            }
+
+            for (final Task predecessor : task.getPredecessors()) {
+                edgeArray.add(predecessor);
+            }
+        }
+
+        final Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
+
+        final HashMap<GraphNode<Task>, GraphNode<Task>> prevMap = new HashMap<>(graph.nodeCount());
+        final HashMap<GraphNode<Task>, Integer> maxDistMap = graph.dijkstraMaxPath(false, a, false, prevMap);
+
+        int max = 0;
+        for (final int dist : maxDistMap.values()) {
+            max = Math.max(dist, max);
+        }
+
+        assert (max == 5);
+    }
+
+    private static void checkNormalMaxPath2() {
+        Task a = new Task("A", -1);
+        Task b = new Task("B", -1);
+        Task c = new Task("C", -1);
+
+        a.addPredecessor(b, c);
+        final int[] aW = new int[]{1, 1};
+        final ArrayList<Integer> aEdgeWeightArray = new ArrayList<>(a.getPredecessors().size());
+        for (int i = 0; i < a.getPredecessors().size(); ++i) {
+            aEdgeWeightArray.add(aW[i]);
+        }
+
+        b.addPredecessor();
+        final int[] bW = new int[]{};
+        final ArrayList<Integer> bEdgeWeightArray = new ArrayList<>(b.getPredecessors().size());
+        for (int i = 0; i < b.getPredecessors().size(); ++i) {
+            bEdgeWeightArray.add(bW[i]);
+        }
+
+        c.addPredecessor(b);
+        final int[] cW = new int[]{1};
+        final ArrayList<Integer> cEdgeWeightArray = new ArrayList<>(c.getPredecessors().size());
+        for (int i = 0; i < c.getPredecessors().size(); ++i) {
+            cEdgeWeightArray.add(cW[i]);
+        }
+
+        Task[] tasks = new Task[]{
+                a, b, c,
+        };
+
+        // create graph
+
+        final ArrayList<Task> taskDataArray = new ArrayList<>(tasks.length);
+
+        // create taskDataArray
+        for (final Task task : tasks) {
+            taskDataArray.add(task);
+        }
+
+        final HashMap<Task, ArrayList<Task>> edgeArrayMap = new HashMap<>(tasks.length);
+        final HashMap<Task, ArrayList<Integer>> edgeWeightArrayMap = new HashMap<>(tasks.length);
+
+        for (final Task task : tasks) {
+            final ArrayList<Task> edgeArray = new ArrayList<>(task.getPredecessors().size());
+            edgeArrayMap.put(task, edgeArray);
+
+            if (task.equals(a)) {
+                edgeWeightArrayMap.put(task, aEdgeWeightArray);
+            } else if (task.equals(b)) {
+                edgeWeightArrayMap.put(task, bEdgeWeightArray);
+            } else if (task.equals(c)) {
+                edgeWeightArrayMap.put(task, cEdgeWeightArray);
+            } else {
+                edgeWeightArrayMap.put(task, new ArrayList<>());
+            }
+
+            for (final Task predecessor : task.getPredecessors()) {
+                edgeArray.add(predecessor);
+            }
+        }
+
+        final Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
+
+        final HashMap<GraphNode<Task>, GraphNode<Task>> prevMap = new HashMap<>(graph.nodeCount());
+        final HashMap<GraphNode<Task>, Integer> maxDistMap = graph.dijkstraMaxPath(false, a, false, prevMap);
+
+        int max = 0;
+        for (final int dist : maxDistMap.values()) {
+            max = Math.max(dist, max);
+        }
+
+        assert (max == 2);
     }
 }
