@@ -52,75 +52,43 @@ public final class Project {
         assert (this.taskDataMap.containsKey(task));
         final Task taskNode = this.taskDataMap.get(task);
 
-        final LinkedList<GraphNode<Task>> searchNodes = new LinkedList<>();
+        final LinkedList<Task> searchNodes = new LinkedList<>();
         this.graph.bfs(true, taskNode, false, searchNodes);
 
         int manMonths = 0;
 
-        for (final GraphNode<Task> node : searchNodes) {
-            final Task data = node.getData();
+        for (final Task data : searchNodes) {
             manMonths += data.getEstimate();
         }
 
         return manMonths;
     }
 
-//    public final int findMinDuration(final String task) {
-//        assert (this.taskDataMap.containsKey(task));
-//        final Task startData = this.taskDataMap.get(task);
-//
-//        int max = 0;
-//        {
-//            final HashMap<Task, Boolean> scc = this.graph.getDataScc();
-//            final HashMap<Task, GraphNode<Task>> graph = this.graph.getGraph();
-//
-//            final LinkedList<WeightNode<GraphNode<Task>>> bfsQueue = new LinkedList<>();
-//            {
-//                final GraphNode<Task> startNode = graph.get(startData);
-//                assert (!scc.containsKey(startNode.getData()));
-//
-//                bfsQueue.addLast(new WeightNode<>(startData.getEstimate(), startNode));
-//            }
-//
-//            while (!bfsQueue.isEmpty()) {
-//                final WeightNode<GraphNode<Task>> weightNode = bfsQueue.poll();
-//
-//                final GraphNode<Task> node = weightNode.getNode();
-//                if (node.getEdges().size() == 0) {
-//                    max = Math.max(max, weightNode.getWeight());
-//                }
-//
-//                for (final GraphEdge<Task> edge : node.getEdges().values()) {
-//                    final GraphNode<Task> nextNode = edge.getNode2();
-//                    final Task nextData = nextNode.getData();
-//
-//                    if (scc.containsKey(nextData)) {
-//                        continue;
-//                    }
-//
-//                    bfsQueue.addLast(new WeightNode<>(weightNode.getWeight() + nextData.getEstimate(), nextNode));
-//                }
-//            }
-//        }
-//
-//        return max;
-//    }
-
     public final int findMinDuration(final String task) {
         assert (this.taskDataMap.containsKey(task));
         final Task startData = this.taskDataMap.get(task);
 
-        final HashMap<GraphNode<Task>, GraphNode<Task>> prevMap = new HashMap<>(this.graph.nodeCount());
-        final HashMap<GraphNode<Task>, Integer> maxDistMap = this.graph.dijkstraMaxPath(true, startData, false, prevMap);
-
-        int max = 0;
-        for (final int dist : maxDistMap.values()) {
-            max = Math.max(dist, max);
-        }
+        int max = this.graph.maxDistInDag(true, startData, false);
 
         max += startData.getEstimate();
         return max;
     }
+
+//    public final int findMinDuration(final String task) {
+//        assert (this.taskDataMap.containsKey(task));
+//        final Task startData = this.taskDataMap.get(task);
+//
+//        final HashMap<Task, Task> prevMap = new HashMap<>(this.graph.nodeCount());
+//        final HashMap<Task, Integer> maxDistMap = this.graph.dijkstraMaxPath(true, startData, false, prevMap);
+//
+//        int max = 0;
+//        for (final int dist : maxDistMap.values()) {
+//            max = Math.max(dist, max);
+//        }
+//
+//        max += startData.getEstimate();
+//        return max;
+//    }
 
     public final int findMaxBonusCount(final String task) {
         assert (this.taskDataMap.containsKey(task));
@@ -128,15 +96,16 @@ public final class Project {
 
         final Task ghostData;
         {
-            final LinkedList<GraphNode<Task>> searchNodes = new LinkedList<>();
+            final LinkedList<Task> searchNodes = new LinkedList<>();
             this.graph.bfs(true, skinData, false, searchNodes);
+            final HashMap<Task, GraphNode<Task>> mainGraph = this.graph.getGraph();
 
             int leafCapacitySum = 0;
             final ArrayList<Task> ghostEdgeDataArray = new ArrayList<>(searchNodes.size());
-            for (final GraphNode<Task> node : searchNodes) {
-                if (node.getEdges().size() == 0) {
-                    ghostEdgeDataArray.add(node.getData());
-                    leafCapacitySum += node.getData().getEstimate();
+            for (final Task data : searchNodes) {
+                if (mainGraph.get(data).getEdges().size() == 0) {
+                    ghostEdgeDataArray.add(data);
+                    leafCapacitySum += data.getEstimate();
                 }
             }
 

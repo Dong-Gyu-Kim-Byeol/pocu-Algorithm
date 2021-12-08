@@ -3,13 +3,14 @@ package academy.pocu.comp3500.assignment4;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.function.Function;
 
 public final class Graph<D> {
     private final HashMap<D, Integer> indexMap;
-    private HashMap<D, Boolean> dataScc;
+    private HashSet<D> dataScc;
 
     private final HashMap<D, GraphNode<D>> graph;
     private HashMap<D, GraphNode<D>> transposedGraph;
@@ -37,7 +38,7 @@ public final class Graph<D> {
         }
 
         if (useTransposedGraph) {
-            this.dataScc = new HashMap<>();
+            this.dataScc = new HashSet<>();
             setScc();
         }
     }
@@ -55,7 +56,7 @@ public final class Graph<D> {
         return indexMap;
     }
 
-    public final HashMap<D, Boolean> getDataScc() {
+    public final HashSet<D> getDataScc() {
         return dataScc;
     }
 
@@ -70,12 +71,7 @@ public final class Graph<D> {
     // setter
     public final void setScc() {
         this.dataScc.clear();
-        final LinkedList<GraphNode<D>> scc = new LinkedList<>();
-        kosarajuScc(scc);
-
-        for (final GraphNode<D> sccNode : scc) {
-            this.dataScc.put(sccNode.getData(), true);
-        }
+        kosarajuScc(this.dataScc);
     }
 
     public final void addNode(final D data,
@@ -225,7 +221,7 @@ public final class Graph<D> {
     // bfs
     public final void bfsGraph(final boolean isSkipScc,
                                final boolean isTransposedGraph,
-                               final LinkedList<GraphNode<D>> outBfsList) {
+                               final LinkedList<D> outBfsList) {
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
         final boolean[] isDiscovered = new boolean[this.indexMap.size()];
@@ -238,7 +234,7 @@ public final class Graph<D> {
     public final void bfs(final boolean isSkipScc,
                           final D startData,
                           final boolean isTransposedGraph,
-                          final LinkedList<GraphNode<D>> outBfsList) {
+                          final LinkedList<D> outBfsList) {
         final boolean[] isDiscovered = new boolean[this.indexMap.size()];
         this.bfs(isSkipScc, startData, isTransposedGraph, isDiscovered, outBfsList);
     }
@@ -247,7 +243,7 @@ public final class Graph<D> {
                           final D startData,
                           final boolean isTransposedGraph,
                           final boolean[] isDiscovered,
-                          final LinkedList<GraphNode<D>> outBfsList) {
+                          final LinkedList<D> outBfsList) {
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
         final GraphNode<D> startNode = graph.get(startData);
@@ -256,7 +252,7 @@ public final class Graph<D> {
 
         {
             if (isSkipScc) {
-                if (this.dataScc.containsKey(startNode.getData())) {
+                if (this.dataScc.contains(startNode.getData())) {
                     return;
                 }
             }
@@ -272,11 +268,11 @@ public final class Graph<D> {
         while (!bfsQueue.isEmpty()) {
             final GraphNode<D> node = bfsQueue.poll();
 
-            outBfsList.addFirst(node);
+            outBfsList.addFirst(node.getData());
 
             for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                 if (isSkipScc) {
-                    if (this.dataScc.containsKey(nextEdge.getTo().getData())) {
+                    if (this.dataScc.contains(nextEdge.getTo().getData())) {
                         continue;
                     }
                 }
@@ -294,7 +290,7 @@ public final class Graph<D> {
     // dfs
     public final void dfsGraphPostOrderReverse(final boolean isSkipScc,
                                                final boolean isTransposedGraph,
-                                               final LinkedList<GraphNode<D>> outPostOrderNodeReverseList) {
+                                               final LinkedList<D> outPostOrderNodeReverseList) {
         // O(n + e)
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
@@ -303,7 +299,7 @@ public final class Graph<D> {
 
         for (final GraphNode<D> node : graph.values()) {
             if (isSkipScc) {
-                if (this.dataScc.containsKey(node.getData())) {
+                if (this.dataScc.contains(node.getData())) {
                     continue;
                 }
             }
@@ -317,16 +313,20 @@ public final class Graph<D> {
     }
 
     public final void dfsListPostOrderReverse(final boolean isSkipScc,
-                                              final LinkedList<GraphNode<D>> orderedNodes,
+                                              final LinkedList<D> orderedNodes,
                                               final boolean isTransposedGraph,
-                                              final LinkedList<GraphNode<D>> outPostOrderNodeReverseList) {
+                                              final LinkedList<D> outPostOrderNodeReverseList) {
         // O(n + e)
+
+        final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
 
         final boolean[] isDiscovered = new boolean[this.indexMap.size()];
 
-        for (final GraphNode<D> node : orderedNodes) {
+        for (final D data : orderedNodes) {
+            final GraphNode<D> node = graph.get(data);
+
             if (isSkipScc) {
-                if (this.dataScc.containsKey(node.getData())) {
+                if (this.dataScc.contains(node.getData())) {
                     continue;
                 }
             }
@@ -343,7 +343,7 @@ public final class Graph<D> {
                                                    final D startData,
                                                    final boolean isTransposedGraph,
                                                    final boolean[] isDiscovered,
-                                                   final LinkedList<GraphNode<D>> outPostOrderNodeReverseList) {
+                                                   final LinkedList<D> outPostOrderNodeReverseList) {
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
         final GraphNode<D> startNode = graph.get(startData);
@@ -352,7 +352,7 @@ public final class Graph<D> {
 
         for (final GraphEdge<D> edge : startNode.getEdges().values()) {
             if (isSkipScc) {
-                if (this.dataScc.containsKey(edge.getTo().getData())) {
+                if (this.dataScc.contains(edge.getTo().getData())) {
                     continue;
                 }
             }
@@ -364,12 +364,12 @@ public final class Graph<D> {
             dfsPostOrderReverseRecursive(isSkipScc, edge.getTo().getData(), isTransposedGraph, isDiscovered, outPostOrderNodeReverseList);
         }
 
-        outPostOrderNodeReverseList.addFirst(startNode);
+        outPostOrderNodeReverseList.addFirst(startNode.getData());
     }
 
     public final void dfsGraph(final boolean isSkipScc,
                                final boolean isTransposedGraph,
-                               final LinkedList<GraphNode<D>> outDfsList) {
+                               final LinkedList<D> outDfsList) {
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
         final boolean[] isDiscovered = new boolean[this.indexMap.size()];
@@ -382,7 +382,7 @@ public final class Graph<D> {
     public final void dfs(final boolean isSkipScc,
                           final D startData,
                           final boolean isTransposedGraph,
-                          final LinkedList<GraphNode<D>> outDfsList) {
+                          final LinkedList<D> outDfsList) {
         final boolean[] isDiscovered = new boolean[this.indexMap.size()];
         this.dfs(isSkipScc, startData, isTransposedGraph, isDiscovered, outDfsList);
     }
@@ -391,7 +391,7 @@ public final class Graph<D> {
                           final D startData,
                           final boolean isTransposedGraph,
                           final boolean[] isDiscovered,
-                          final LinkedList<GraphNode<D>> outDfsList) {
+                          final LinkedList<D> outDfsList) {
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
         final GraphNode<D> startNode = graph.get(startData);
@@ -400,7 +400,7 @@ public final class Graph<D> {
 
         {
             if (isSkipScc) {
-                if (this.dataScc.containsKey(startNode.getData())) {
+                if (this.dataScc.contains(startNode.getData())) {
                     return;
                 }
             }
@@ -417,11 +417,11 @@ public final class Graph<D> {
             final GraphNode<D> node = dfsStack.getLast();
             dfsStack.removeLast();
 
-            outDfsList.addLast(node);
+            outDfsList.addLast(node.getData());
 
             for (final GraphEdge<D> nextEdge : node.getEdges().values()) {
                 if (isSkipScc) {
-                    if (this.dataScc.containsKey(nextEdge.getTo().getData())) {
+                    if (this.dataScc.contains(nextEdge.getTo().getData())) {
                         continue;
                     }
                 }
@@ -520,7 +520,7 @@ public final class Graph<D> {
             mstGraph = new Graph<>(false, dataArray, dataEdgeArrayMap, weightEdgeArrayMap);
         }// end create mst graph
 
-        final ArrayList<GraphNode<D>> outMstDfsPreOrderAndAddReturnList;
+        final ArrayList<D> outMstDfsPreOrderAndAddReturnList;
         {
             // mst 그래프 해밀턴 순회를 위한 dfs
             // O(n + n( = mst e))
@@ -537,18 +537,17 @@ public final class Graph<D> {
 
             final boolean[] isDiscovered = new boolean[this.indexMap.size()];
 
-            for (final GraphNode<D> mstNode : outMstDfsPreOrderAndAddReturnList) {
-                final D data = mstNode.getData();
-                assert (this.graph.containsKey(data));
+            for (final D mstData : outMstDfsPreOrderAndAddReturnList) {
+                assert (this.graph.containsKey(mstData));
 
-                final int iData = this.indexMap.get(data);
+                final int iData = this.indexMap.get(mstData);
                 if (isDiscovered[iData]) {
                     continue;
                 }
 
                 isDiscovered[iData] = true;
 
-                final GraphNode<D> node = this.graph.get(data);
+                final GraphNode<D> node = this.graph.get(mstData);
                 outTspList.add(node);
             }
 
@@ -563,18 +562,18 @@ public final class Graph<D> {
                                                        final D startData,
                                                        final boolean isTransposedGraph,
                                                        final boolean[] isDiscovered,
-                                                       final ArrayList<GraphNode<D>> outDfsPreOrderAndAddReturnList) {
+                                                       final ArrayList<D> outDfsPreOrderAndAddReturnList) {
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
         final GraphNode<D> startNode = graph.get(startData);
 
         isDiscovered[this.indexMap.get(startNode.getData())] = true;
 
-        outDfsPreOrderAndAddReturnList.add(startNode);
+        outDfsPreOrderAndAddReturnList.add(startNode.getData());
 
         for (final GraphEdge<D> edge : startNode.getEdges().values()) {
             if (isSkipScc) {
-                if (this.dataScc.containsKey(startNode.getData())) {
+                if (this.dataScc.contains(startNode.getData())) {
                     continue;
                 }
             }
@@ -584,7 +583,7 @@ public final class Graph<D> {
             }
 
             dfsPreOrderAndAddReturnRecursive(isSkipScc, edge.getTo().getData(), isTransposedGraph, isDiscovered, outDfsPreOrderAndAddReturnList);
-            outDfsPreOrderAndAddReturnList.add(startNode);
+            outDfsPreOrderAndAddReturnList.add(startNode.getData());
         }
     }
 
@@ -593,7 +592,7 @@ public final class Graph<D> {
         ArrayList<GraphEdge<D>> mst = new ArrayList<>(this.graph.size());
 
         ArrayList<GraphNode<D>> nodes = new ArrayList<>(this.graph.size());
-        ArrayList<GraphEdge<D>> edges = new ArrayList<>(this.graph.size() * this.graph.size());
+        ArrayList<GraphEdge<D>> edges = new ArrayList<>(this.graph.size() * (this.graph.size() - 1));
 
         // mst edge 준비
         // O(e)
@@ -627,33 +626,43 @@ public final class Graph<D> {
     }
 
     // topological sort
-    public final LinkedList<GraphNode<D>> topologicalSort(final boolean includeScc) {
-        // O(n + e) + O(n + e) + O(n + e)
+    public final LinkedList<D> topologicalSortDouble(final boolean includeScc,
+                                                     final boolean isTransposedGraph) {
+        // O(n + e) + O(n + e)
 
-        final LinkedList<GraphNode<D>> dfsPostOrderNodeReverseList = new LinkedList<>();
-        dfsGraphPostOrderReverse(false, false, dfsPostOrderNodeReverseList);
+        final LinkedList<D> dfsPostOrderNodeReverseList = new LinkedList<>();
+        dfsGraphPostOrderReverse(false, isTransposedGraph, dfsPostOrderNodeReverseList);
 
         // get sortedList
-        final LinkedList<GraphNode<D>> outSortedList = new LinkedList<>();
-        dfsListPostOrderReverse(!includeScc, dfsPostOrderNodeReverseList, false, outSortedList);
+        final LinkedList<D> outSortedList = new LinkedList<>();
+        dfsListPostOrderReverse(!includeScc, dfsPostOrderNodeReverseList, isTransposedGraph, outSortedList);
+
+        return outSortedList;
+    }
+
+    public final LinkedList<D> topologicalSort(final boolean includeScc,
+                                               final boolean isTransposedGraph) {
+        // O(n + e)
+
+        final LinkedList<D> outSortedList = new LinkedList<>();
+        dfsGraphPostOrderReverse(!includeScc, isTransposedGraph, outSortedList);
 
         return outSortedList;
     }
 
     // scc Kosaraju
-    public final void kosarajuScc(final LinkedList<GraphNode<D>> outScc) {
+    public final void kosarajuScc(final HashSet<D> outScc) {
         // O(n + e) + O(n + e)
 
-        final LinkedList<GraphNode<D>> dfsPostOrderNodeReverseList = new LinkedList<>();
+        final LinkedList<D> dfsPostOrderNodeReverseList = new LinkedList<>();
         dfsGraphPostOrderReverse(false, false, dfsPostOrderNodeReverseList);
 
         // get scc groups with size > 1
         {
             final boolean[] transposedIsDiscovered = new boolean[this.indexMap.size()];
-            final LinkedList<GraphNode<D>> scc = new LinkedList<>();
+            final LinkedList<D> scc = new LinkedList<>();
 
-            for (final GraphNode<D> node : dfsPostOrderNodeReverseList) {
-                final D data = node.getData();
+            for (final D data : dfsPostOrderNodeReverseList) {
                 final GraphNode<D> transposedNode = this.transposedGraph.get(data);
 
                 if (transposedIsDiscovered[this.indexMap.get(transposedNode.getData())]) {
@@ -665,8 +674,8 @@ public final class Graph<D> {
                 assert (scc.size() >= 1);
 
                 if (scc.size() > 1) {
-                    for (final GraphNode<D> skip : scc) {
-                        outScc.add(skip);
+                    for (final D skipData : scc) {
+                        outScc.add(skipData);
                     }
                 }
 
@@ -682,8 +691,8 @@ public final class Graph<D> {
                              final boolean mainIsTransposedGraph) {
 
         if (isSkipScc) {
-            assert (!this.dataScc.containsKey(source));
-            assert (!this.dataScc.containsKey(sink));
+            assert (!this.dataScc.contains(source));
+            assert (!this.dataScc.contains(sink));
         }
 
         int outTotalFlow = 0;
@@ -792,7 +801,7 @@ public final class Graph<D> {
                     assert (!nextTransposedData.equals(nodeData));
 
                     if (isSkipScc) {
-                        if (this.dataScc.containsKey(nextTransposedNode.getData())) {
+                        if (this.dataScc.contains(nextTransposedNode.getData())) {
                             continue;
                         }
                     }
@@ -827,7 +836,7 @@ public final class Graph<D> {
                     assert (!nextData.equals(nodeData));
 
                     if (isSkipScc) {
-                        if (this.dataScc.containsKey(nextData)) {
+                        if (this.dataScc.contains(nextData)) {
                             continue;
                         }
                     }
@@ -914,8 +923,8 @@ public final class Graph<D> {
                                             final Function<D, Integer> getNodeCapacity) {
 
         if (isSkipScc) {
-            assert (!this.dataScc.containsKey(source));
-            assert (!this.dataScc.containsKey(sink));
+            assert (!this.dataScc.contains(source));
+            assert (!this.dataScc.contains(sink));
         }
 
         int outTotalFlow = 0;
@@ -1196,25 +1205,25 @@ public final class Graph<D> {
     }
 
     // dijkstra - single source shortest path
-    public HashMap<GraphNode<D>, Integer> dijkstra(final boolean isSkipScc,
-                                                   final D startData,
-                                                   final boolean isTransposedGraph,
-                                                   final HashMap<GraphNode<D>, GraphNode<D>> outPrevMap) {
+    public HashMap<D, Integer> dijkstra(final boolean isSkipScc,
+                                        final D startData,
+                                        final boolean isTransposedGraph,
+                                        final HashMap<D, D> outPrevMap) {
         // O((N + E) * logN)
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
         final GraphNode<D> startNode = graph.get(startData);
 
-        final HashMap<GraphNode<D>, Integer> minDistMap = new HashMap<>(this.indexMap.size());
+        final HashMap<D, Integer> minDistMap = new HashMap<>(this.indexMap.size());
         final int INF = Integer.MAX_VALUE;
         for (final GraphNode<D> node : graph.values()) {
-            minDistMap.put(node, INF);
+            minDistMap.put(node.getData(), INF);
         }
 
         final PriorityQueue<WeightNode<GraphNode<D>>> open = new PriorityQueue<>();
         {
-            minDistMap.put(startNode, 0);
-            outPrevMap.put(startNode, null);
+            minDistMap.put(startNode.getData(), 0);
+            outPrevMap.put(startNode.getData(), null);
 
             WeightNode<GraphNode<D>> weightNode = new WeightNode<>(0, startNode);
             open.add(weightNode);
@@ -1224,7 +1233,7 @@ public final class Graph<D> {
             final WeightNode<GraphNode<D>> weightNode = open.poll();
             final GraphNode<D> node = weightNode.getNode();
 
-            final int minDist = minDistMap.get(node);
+            final int minDist = minDistMap.get(node.getData());
             final int dist = weightNode.getWeight();
 
             if (minDist < dist) {
@@ -1236,7 +1245,7 @@ public final class Graph<D> {
                 final D nextData = next.getData();
 
                 if (isSkipScc) {
-                    if (this.dataScc.containsKey(nextData)) {
+                    if (this.dataScc.contains(nextData)) {
                         continue;
                     }
                 }
@@ -1244,14 +1253,14 @@ public final class Graph<D> {
                 final int weight = edge.getWeight();
                 final int newDist = minDist + weight;
 
-                final int nextMinDist = minDistMap.get(next);
+                final int nextMinDist = minDistMap.get(next.getData());
 
                 if (newDist >= nextMinDist) {
                     continue;
                 }
 
-                minDistMap.put(next, newDist);
-                outPrevMap.put(next, node);
+                minDistMap.put(next.getData(), newDist);
+                outPrevMap.put(next.getData(), node.getData());
 
                 WeightNode<GraphNode<D>> newCandidate = new WeightNode<>(newDist, next);
                 open.add(newCandidate);
@@ -1262,25 +1271,25 @@ public final class Graph<D> {
     }
 
     // dijkstra - single source longest path
-    public HashMap<GraphNode<D>, Integer> dijkstraMaxPath(final boolean isSkipScc,
-                                                          final D startData,
-                                                          final boolean isTransposedGraph,
-                                                          final HashMap<GraphNode<D>, GraphNode<D>> outPrevMap) {
+    public HashMap<D, Integer> dijkstraMaxPath(final boolean isSkipScc,
+                                               final D startData,
+                                               final boolean isTransposedGraph,
+                                               final HashMap<D, D> outPrevMap) {
         // O((N + E) * logN)
 
         final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
         final GraphNode<D> startNode = graph.get(startData);
 
-        final HashMap<GraphNode<D>, Integer> maxDistMap = new HashMap<>(this.indexMap.size());
+        final HashMap<D, Integer> maxDistMap = new HashMap<>(this.indexMap.size());
         final int MINUS_ONE = -1;
         for (final GraphNode<D> node : graph.values()) {
-            maxDistMap.put(node, MINUS_ONE);
+            maxDistMap.put(node.getData(), MINUS_ONE);
         }
 
         final PriorityQueue<WeightNode<GraphNode<D>>> open = new PriorityQueue<>(Comparator.reverseOrder());
         {
-            maxDistMap.put(startNode, 0);
-            outPrevMap.put(startNode, null);
+            maxDistMap.put(startNode.getData(), 0);
+            outPrevMap.put(startNode.getData(), null);
 
             WeightNode<GraphNode<D>> weightNode = new WeightNode<>(0, startNode);
             open.add(weightNode);
@@ -1290,7 +1299,7 @@ public final class Graph<D> {
             final WeightNode<GraphNode<D>> weightNode = open.poll();
             final GraphNode<D> node = weightNode.getNode();
 
-            final int maxDist = maxDistMap.get(node);
+            final int maxDist = maxDistMap.get(node.getData());
             final int dist = weightNode.getWeight();
 
             if (maxDist > dist) {
@@ -1302,7 +1311,7 @@ public final class Graph<D> {
                 final D nextData = next.getData();
 
                 if (isSkipScc) {
-                    if (this.dataScc.containsKey(nextData)) {
+                    if (this.dataScc.contains(nextData)) {
                         continue;
                     }
                 }
@@ -1310,14 +1319,14 @@ public final class Graph<D> {
                 final int weight = edge.getWeight();
                 final int newDist = maxDist + weight;
 
-                final int nextMaxDist = maxDistMap.get(next);
+                final int nextMaxDist = maxDistMap.get(next.getData());
 
                 if (newDist <= nextMaxDist) {
                     continue;
                 }
 
-                maxDistMap.put(next, newDist);
-                outPrevMap.put(next, node);
+                maxDistMap.put(next.getData(), newDist);
+                outPrevMap.put(next.getData(), node.getData());
 
                 WeightNode<GraphNode<D>> newCandidate = new WeightNode<>(newDist, next);
                 open.add(newCandidate);
@@ -1325,6 +1334,50 @@ public final class Graph<D> {
         }
 
         return maxDistMap;
+    }
+
+    public final int maxDistInDag(final boolean isSkipScc,
+                                  final D startData,
+                                  final boolean isTransposedGraph) {
+
+        assert (this.indexMap.containsKey(startData));
+
+        final HashMap<D, GraphNode<D>> graph = isTransposedGraph ? this.transposedGraph : this.graph;
+        final GraphNode<D> startNode = graph.get(startData);
+
+        int max = 0;
+        {
+            final LinkedList<WeightNode<GraphEdge<D>>> bfsQueue = new LinkedList<>();
+            {
+                assert (!this.dataScc.contains(startNode.getData()));
+
+                bfsQueue.addLast(new WeightNode<>(0, new GraphEdge<>(0, null, startNode)));
+            }
+
+            while (!bfsQueue.isEmpty()) {
+                final WeightNode<GraphEdge<D>> weightEdge = bfsQueue.poll();
+
+                final GraphNode<D> node = weightEdge.getNode().getTo();
+                if (node.getEdges().size() == 0) {
+                    max = Math.max(max, weightEdge.getWeight());
+                }
+
+                for (final GraphEdge<D> edge : node.getEdges().values()) {
+                    final GraphNode<D> nextNode = edge.getTo();
+                    final D nextData = nextNode.getData();
+
+                    if (isSkipScc) {
+                        if (this.dataScc.contains(nextData)) {
+                            continue;
+                        }
+                    }
+
+                    bfsQueue.addLast(new WeightNode<>(weightEdge.getWeight() + edge.getWeight(), edge));
+                }
+            }
+        }
+
+        return max;
     }
 
     // ---

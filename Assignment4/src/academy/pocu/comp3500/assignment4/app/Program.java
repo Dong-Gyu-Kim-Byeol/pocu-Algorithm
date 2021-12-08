@@ -570,8 +570,8 @@ public class Program {
 
         final Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
 
-        final HashMap<GraphNode<Task>, GraphNode<Task>> prevMap = new HashMap<>(graph.nodeCount());
-        final HashMap<GraphNode<Task>, Integer> maxDistMap = graph.dijkstraMaxPath(false, a, false, prevMap);
+        final HashMap<Task, Task> prevMap = new HashMap<>(graph.nodeCount());
+        final HashMap<Task, Integer> maxDistMap = graph.dijkstraMaxPath(false, a, false, prevMap);
 
         int max = 0;
         for (final int dist : maxDistMap.values()) {
@@ -644,8 +644,8 @@ public class Program {
 
         final Graph<Task> graph = new Graph<>(true, taskDataArray, edgeArrayMap, edgeWeightArrayMap);
 
-        final HashMap<GraphNode<Task>, GraphNode<Task>> prevMap = new HashMap<>(graph.nodeCount());
-        final HashMap<GraphNode<Task>, Integer> maxDistMap = graph.dijkstraMaxPath(false, a, false, prevMap);
+        final HashMap<Task, Task> prevMap = new HashMap<>(graph.nodeCount());
+        final HashMap<Task, Integer> maxDistMap = graph.dijkstraMaxPath(false, a, false, prevMap);
 
         int max = 0;
         for (final int dist : maxDistMap.values()) {
