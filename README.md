@@ -1,5 +1,6 @@
 # pocu Algorithm
    
+https://pocu.academy/ko/Courses/COMP3500   
 2021년 9월 ~ 12월   
    
 과제(Assignment)가 실습(Lab) 보다 난이도가 높은 학습 과제 입니다.   
